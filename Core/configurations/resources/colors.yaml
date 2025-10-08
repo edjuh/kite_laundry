@@ -1,0 +1,23 @@
+palette:
+  DPIC031: {name: White, hex: "#FFFFFF"}
+  DPIC032: {name: Light Grey, hex: "#C0C0C0"}
+  DPIC033: {name: Dark Grey, hex: "#333333"}
+  DPIC034: {name: Black, hex: "#000000"}
+  DPIC036: {name: Yellow, hex: "#FFFF00"}
+  DPIC038: {name: Gold, hex: "#FFD700"}
+  DPIC039: {name: Orange, hex: "#FF4500"}
+  DPIC040: {name: Red, hex: "#FF0000"}
+  DPIC052: {name: Purple, hex: "#FF00FF"}
+  DPIC045: {name: Sky Blue, hex: "#87CEEB"}
+  DPIC046: {name: Royal Blue, hex: "#0000FF"}
+  DPIC047: {name: Midnight Blue, hex: "#191970"}
+  DPIC049: {name: Teal, hex: "#008080"}
+  DPIC055: {name: Forest Green, hex: "#228B22"}
+  DPIC057: {name: Fluor Yellow, hex: "#FFFF00"}
+  DPIC058: {name: Fluor Green, hex: "#90EE90"}
+  DPIC059: {name: Fluor Pink, hex: "#FF69B4"}
+  DPIC060: {name: Fluor Orange, hex: "#FF8C00"}
+tips:
+  - Choose fluorescent for visibility in low light.
+  - Match colors for alternating patterns to enhance spin effects.
+

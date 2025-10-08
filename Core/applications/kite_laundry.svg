@@ -1,0 +1,33 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ground line -->
+  <line x1="50" y1="350" x2="350" y2="350" stroke="black" stroke-width="2"/>
+  
+  <!-- Stake (vertical line with base) -->
+  <line x1="100" y1="350" x2="100" y2="320" stroke="black" stroke-width="3"/>
+  <circle cx="100" cy="355" r="5" fill="black"/>
+  
+  <!-- Kite line -->
+  <line x1="100" y1="320" x2="250" y2="100" stroke="black" stroke-width="1.5"/>
+  
+  <!-- Eddy kite (diamond shape) -->
+  <g transform="translate(250, 100)">
+    <!-- Diamond kite -->
+    <path d="M0,-30 L30,0 L0,30 L-30,0 Z" fill="none" stroke="black" stroke-width="2"/>
+    <!-- Cross braces -->
+    <line x1="-30" y1="0" x2="30" y2="0" stroke="black" stroke-width="1"/>
+    <line x1="0" y1="-30" x2="0" y2="30" stroke="black" stroke-width="1"/>
+    <!-- Bridle -->
+    <line x1="0" y1="0" x2="0" y2="20" stroke="black" stroke-width="1"/>
+    <!-- Flowing tail (curved with wind effect) -->
+    <path d="M0,20 Q-15,40 0,60 Q15,80 0,100 Q-15,120 0,140" 
+          fill="none" stroke="black" stroke-width="1.5"/>
+    <!-- Tail decorations -->
+    <circle cx="0" cy="40" r="3" fill="black"/>
+    <circle cx="0" cy="60" r="3" fill="black"/>
+    <circle cx="0" cy="80" r="3" fill="black"/>
+    <circle cx="0" cy="100" r="3" fill="black"/>
+    <circle cx="0" cy="120" r="3" fill="black"/>
+    <circle cx="0" cy="140" r="3" fill="black"/>
+  </g>
+</svg>
+
