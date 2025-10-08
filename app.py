@@ -7,11 +7,75 @@ import os
 import sys
 import yaml
 
+# Add this import at the top
+from Core.applications.article_generator import generate_article
+
+# Update the generate function to use the new generator
+@app.route('/generate', methods=['GET', 'POST'])
+def generate():
+    """Generate production plan from existing YAML"""
+    if request.method == 'POST':
+        # Get selected design from form
+        design_name = request.form['design']
+        
+        # Find the corresponding filename
+        design_filename = None
+        try:
+            # Get all designs
+            all_designs = scan_projects_directory()
+            
+            # Find the design with the matching name
+            for design in all_designs:
+                if design['name'] == design_name:
+                    design_filename = design['filename']
+                    break
+        except:
+            pass
+        
+        if not design_filename:
+            return f"Design {design_name} not found", 404
+        
+        try:
+            # Get the project path
+            project_path = os.path.join('projects', os.path.dirname(design_filename))
+            
+            # Generate article based on design type
+            if 'tube' in design_filename:
+                html_content = generate_article(project_path)
+            else:
+                # Use the original generator for other designs
+                with open(os.path.join('projects', design_filename), 'r') as f:
+                    design_data = yaml.safe_load(f)
+                html_content = generate_production_article(design_data)
+            
+            # Create output directory if it doesn't exist
+            os.makedirs('output', exist_ok=True)
+            
+            # Save production article to output directory
+            output_filename = f"output/{os.path.splitext(os.path.basename(design_filename))[0]}_production.html"
+            with open(output_filename, 'w') as f:
+                f.write(html_content)
+            
+            # Return the generated HTML
+            return render_template('result.html', content=html_content, design_name=design_name)
+            
+        except FileNotFoundError:
+            return f"Design file {design_filename} not found", 404
+        except Exception as e:
+            return f"Error loading design: {str(e)}", 500
+    
+    # For GET request, show list of available designs
+    try:
+        designs = scan_projects_directory()
+    except:
+        designs = []
+    
+    return render_template('generate.html', designs=designs)
+
 # Add Core to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'Core'))
 
 from applications.generator import generate_production_article
-from Core.web.article_viewer import article_bp
 from flask import Flask, render_template, request, redirect, url_for
 
 # Configure Flask to look in Core/web for templates and static files
@@ -19,8 +83,12 @@ app = Flask(__name__,
            template_folder='Core/web',
            static_folder='Core/web/static')
 
-# Register article viewer blueprint
-app.register_blueprint(article_bp, url_prefix='/article')
+# Import and register the article viewer blueprint
+try:
+    from Core.web.article_viewer import article_bp
+    app.register_blueprint(article_bp, url_prefix='/article')
+except ImportError:
+    print("Warning: Could not import article viewer blueprint")
 
 def scan_projects_directory():
     """Scan the projects directory for all available designs"""
@@ -44,33 +112,37 @@ def scan_projects_directory():
                         try:
                             with open(yaml_file, 'r') as f:
                                 data = yaml.safe_load(f)
-                                name = data.get('name', animal_dir) if data else animal_dir
+                                name = data.get('name', animal_dir.capitalize()) if data else animal_dir.capitalize()
+                                # Skip config files
+                                if not yaml_file.endswith('config.yaml'):
+                                    designs.append({
+                                        'filename': os.path.join(base_dir, sub_dir, animal_dir, f'{animal_dir}.yaml'),
+                                        'name': name,
+                                        'complexity': data.get('complexity', 'Unknown') if data else 'Unknown',
+                                        'category': sub_dir.replace('_', ' ').title(),
+                                        'subcategory': animal_dir.replace('_', ' ').title()
+                                    })
+                        except:
+                            # Skip config files
+                            if not yaml_file.endswith('config.yaml'):
                                 designs.append({
                                     'filename': os.path.join(base_dir, sub_dir, animal_dir, f'{animal_dir}.yaml'),
-                                    'name': name,
-                                    'complexity': data.get('complexity', 'Unknown') if data else 'Unknown',
+                                    'name': animal_dir.capitalize(),
+                                    'complexity': 'Unknown',
                                     'category': sub_dir.replace('_', ' ').title(),
                                     'subcategory': animal_dir.replace('_', ' ').title()
                                 })
-                        except:
-                            designs.append({
-                                'filename': os.path.join(base_dir, sub_dir, animal_dir, f'{animal_dir}.yaml'),
-                                'name': animal_dir,
-                                'complexity': 'Unknown',
-                                'category': sub_dir.replace('_', ' ').title(),
-                                'subcategory': animal_dir.replace('_', ' ').title()
-                            })
             else:
                 # Handle tube and windsock directories
                 dir_path = os.path.join('projects', base_dir, sub_dir)
                 if os.path.exists(dir_path):
                     for file in os.listdir(dir_path):
-                        if file.endswith('.yaml'):
+                        if file.endswith('.yaml') and not file.startswith('config'):
                             file_path = os.path.join(dir_path, file)
                             try:
                                 with open(file_path, 'r') as f:
                                     data = yaml.safe_load(f)
-                                    name = data.get('name', os.path.splitext(file)[0]) if data else os.path.splitext(file)[0]
+                                    name = data.get('name', os.path.splitext(file)[0].capitalize()) if data else os.path.splitext(file)[0].capitalize()
                                     designs.append({
                                         'filename': os.path.join(base_dir, sub_dir, file),
                                         'name': name,
@@ -81,7 +153,7 @@ def scan_projects_directory():
                             except:
                                 designs.append({
                                     'filename': os.path.join(base_dir, sub_dir, file),
-                                    'name': os.path.splitext(file)[0],
+                                    'name': os.path.splitext(file)[0].capitalize(),
                                     'complexity': 'Unknown',
                                     'category': sub_dir.replace('_', ' ').title(),
                                     'subcategory': 'N/A'
@@ -91,12 +163,12 @@ def scan_projects_directory():
     one_line_kites_path = os.path.join('projects', 'one_line_kites')
     if os.path.exists(one_line_kites_path):
         for item in os.listdir(one_line_kites_path):
-            if item.endswith('.yaml'):
+            if item.endswith('.yaml') and not item.startswith('config'):
                 file_path = os.path.join(one_line_kites_path, item)
                 try:
                     with open(file_path, 'r') as f:
                         data = yaml.safe_load(f)
-                        name = data.get('name', os.path.splitext(item)[0]) if data else os.path.splitext(item)[0]
+                        name = data.get('name', os.path.splitext(item)[0].capitalize()) if data else os.path.splitext(item)[0].capitalize()
                         designs.append({
                             'filename': os.path.join('one_line_kites', item),
                             'name': name,
@@ -107,7 +179,7 @@ def scan_projects_directory():
                 except:
                     designs.append({
                         'filename': os.path.join('one_line_kites', item),
-                        'name': os.path.splitext(item)[0],
+                        'name': os.path.splitext(item)[0].capitalize(),
                         'complexity': 'Unknown',
                         'category': 'One Line Kites',
                         'subcategory': 'N/A'
