@@ -9,11 +9,17 @@
   <!-- Simple kite line (will be adjusted) -->
   <line x1="50" y1="160" x2="200" y2="60" stroke="black" stroke-width="1.5" id="kite-line"/>
   
-  <!-- Simple kite (La Linea style) - position will be adjusted -->
-  <g transform="translate(200, 60)" id="kite">
-    <!-- Diamond kite -->
-    <path d="M0,-20 L20,0 L0,20 L-20,0 Z" fill="none" stroke="black" stroke-width="2"/>
-  </g>
+<!-- Adjust the y position based on difficulty: lower difficulty = higher kite -->
+<g transform="translate(100, {30 + (5 - difficulty) * 15})">
+    <!-- Flag pole -->
+    <line x1="0" y1="-15" x2="0" y2="25" stroke="#333" stroke-width="2"/>
+    
+    <!-- Flag -->
+    <path d="M 0 -15 L 15 -10 L 15 5 L 0 10 Z" fill="white" stroke="#333" stroke-width="1"/>
+    
+    <!-- Flag attachment to pole -->
+    <circle cx="0" cy="-15" r="2" fill="#333"/>
+</g>
   
   <!-- Simple title -->
   <text x="150" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="black">Kite Laundry</text>

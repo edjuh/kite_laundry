@@ -4,6 +4,8 @@
 
 A Python environment for designing and creating decorative inflatables (kite-laundry) to add to kite lines for visual enhancement and fun.
 
+“This repository is under active development. The shape configurators are being refactored; example configs and updated documentation will follow.”
+
 ## What is Kite-Laundry?
 
 Kite-laundry refers to decorative inflatables that are added to kite lines, transforming ordinary kite flying into a vibrant, artistic experience. These colorful decorations spin and dance in the wind, creating visual interest and personality for your kite.

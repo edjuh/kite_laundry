@@ -1,5 +1,8 @@
 name: Tube
 complexity: 1
+base_length: 1000
+geometry:
+  type: pipe
 parameters:
   diameter: 50
   length: 10000
@@ -20,9 +23,15 @@ parameters:
 description: A simple tube tail for kites
 author: Unknown
 version: 1.0
+references:
+  - url: "https://www.kiteplans.org/planos/tubetail/tubetail.html"
+    title: "Tube Tail Design"
+    description: "Basic tube tail construction"
+  - url: "https://www.drachenbernhard.de/akt_work_kleiner_papagei.html"
+    title: "Kite Decoration Techniques"
+    description: "Advanced attachment methods"
 search_terms:
   - "kite tube tail"
   - "line laundry tube"
   - "kite decoration tube"
   - "kite tail sewing"
-
