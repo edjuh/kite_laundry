@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ project_name }} - Kite Laundry Design</title>
+    <link rel="stylesheet" href="/static/css/article.css">
+</head>
+<body>
+    <div class="article-container">
+        <header>
+            <h1>{{ project_name }}</h1>
+            <div class="article-meta">
+                <span class="designer">Designer: {{ designer }}</span>
+                <span class="difficulty">Difficulty: {{ difficulty }}</span>
+            </div>
+        </header>
+        
+        <section class="design-specs">
+            <h2>Design Specifications</h2>
+            {% include 'specs_table.html' %}
+        </section>
+        
+        <section class="pattern-viewer">
+            <h2>Pattern</h2>
+            <div class="pattern-svg">
+                <!-- SVG pattern will be inserted here -->
+            </div>
+            <a href="/download/{{ project_name }}/{{ project_name }}_pattern.pdf" 
+               class="download-btn" download>
+                Download PDF Pattern
+            </a>
+        </section>
+        
+        <section class="instructions">
+            <h2>Construction Instructions</h2>
+            {% for step in instructions %}
+                <div class="instruction-step">
+                    <div class="step-diagram">
+                        <!-- Step diagram will be inserted here -->
+                    </div>
+                    <div class="step-text">
+                        {{ step.text }}
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+        
+        <section class="aerodynamics">
+            <h2>Aerodynamics</h2>
+            <div class="flow-diagram">
+                <!-- Flow visualization will be inserted here -->
+            </div>
+            <div class="analysis">
+                {{ aerodynamic_analysis }}
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+
