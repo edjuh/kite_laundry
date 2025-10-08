@@ -50,25 +50,29 @@ def generate_tube_pattern(parameters):
     pattern_width = circumference + (2 * seam_allowance)
     pattern_height = length + (2 * seam_allowance)
     
-    # Convert to more user-friendly units
+    # Convert to user-friendly units
     material_area_cm2 = (pattern_width * pattern_height) / 100
     material_area_m2 = material_area_cm2 / 10000
     
-    # Create pattern pieces
+    # Create pattern pieces with better naming
     pieces = []
     
-    # Main tube piece
+    # Main tube piece (A)
     main_piece = {
-        'name': 'tube_body',
+        'name': 'A',
+        'description': 'Main tube body',
         'shape': 'rectangle',
-        'width': round(pattern_width, 1),
-        'height': round(pattern_height, 1),
-        'seam_allowance': seam_allowance,
-        'description': 'Main tube body'
+        'width_mm': round(pattern_width, 1),
+        'height_mm': round(pattern_height, 1),
+        'width_cm': round(pattern_width / 10, 1),
+        'height_cm': round(pattern_height / 10, 1),
+        'width_m': round(pattern_width / 1000, 2),
+        'height_m': round(pattern_height / 1000, 2),
+        'seam_allowance': seam_allowance
     }
     pieces.append(main_piece)
     
-    # Add reinforcement pieces at attachment points
+    # Add reinforcement pieces with better naming
     attachment_points = parameters.get('attachment_points', [])
     for i, point in enumerate(attachment_points):
         position_str = point.get('position', 0)
@@ -83,27 +87,36 @@ def generate_tube_pattern(parameters):
         # Calculate position on the pattern
         y_position = (position * pattern_height) - (seam_allowance/2)
         
-        # Create reinforcement piece
+        # Create reinforcement piece with letter designation
+        letter = chr(66 + i)  # B, C, D, etc.
         if reinforcement_type == 'carabiner':
-            # Carabiner reinforcement - a small rectangle
             reinforcement = {
-                'name': f'carabiner_reinforcement_{i}',
+                'name': letter,
+                'description': f'Reinforcement ({position*100}%)',
                 'shape': 'rectangle',
-                'width': round(diameter + (2 * seam_allowance), 1),
-                'height': round(seam_allowance * 2, 1),
+                'width_mm': round(diameter + (2 * seam_allowance), 1),
+                'height_mm': round(seam_allowance * 2, 1),
+                'width_cm': round((diameter + (2 * seam_allowance)) / 10, 1),
+                'height_cm': round((seam_allowance * 2) / 10, 1),
                 'position': {'x': 0, 'y': round(y_position, 1)},
-                'description': f'Carabiner reinforcement at {position*100}%'
+                'position_percent': position * 100
             }
             pieces.append(reinforcement)
     
     return {
         'pieces': pieces,
         'total_material': {
-            'width': round(pattern_width, 1),
-            'height': round(pattern_height, 1),
+            'width_mm': round(pattern_width, 1),
+            'height_mm': round(pattern_height, 1),
+            'width_cm': round(pattern_width / 10, 1),
+            'height_cm': round(pattern_height / 10, 1),
+            'width_m': round(pattern_width / 1000, 2),
+            'height_m': round(pattern_height / 1000, 2),
             'area_cm2': round(material_area_cm2, 1),
             'area_m2': round(material_area_m2, 4),
-            'circumference': round(circumference, 1)
+            'area_m': round(material_area_m2, 2),
+            'circumference_mm': round(circumference, 1),
+            'circumference_cm': round(circumference / 10, 1)
         }
     }
 
@@ -192,12 +205,42 @@ def generate_tube_instructions(parameters):
 3. Test fly with a kite in light winds
 
 ## Flying Tips
-- The tube should be light enough to fly in light winds (0-5 mph)
+- The tube should hang vertically from the kite line
 - For stronger winds, consider using lighter fabric or reducing the length
 - The length can be adjusted based on your preference and wind conditions
 - Multiple tubes can be attached to the same line for more visual impact
 - Attach the tube to the kite line using the carabiners at the marked positions
+- Tube tails create a flowing, ribbon-like effect that adds color and movement to your kite
 """
     
     return instructions
+
+def perform_web_search(search_terms):
+    """
+    Simulate web search functionality (in real implementation, would use search API)
+    
+    Args:
+        search_terms (list): List of search terms
+    
+    Returns:
+        list: List of search results
+    """
+    # This is a simulation - in a real implementation, you'd use a search API
+    simulated_results = {
+        "kite tube tail": [
+            {"title": "Tube Tail Design Guide", "url": "https://example.com/tube-guide", "description": "Comprehensive guide to making tube tails"},
+            {"title": "Kite Line Laundry", "url": "https://example.com/line-laundry", "description": "Various types of kite decorations"}
+        ],
+        "line laundry tube": [
+            {"title": "Line Laundry Techniques", "url": "https://example.com/line-laundry-techniques", "description": "Advanced techniques for line laundry"},
+            {"title": "Tube Tail Patterns", "url": "https://example.com/tube-patterns", "description": "Free patterns for tube tails"}
+        ]
+    }
+    
+    results = []
+    for term in search_terms:
+        if term in simulated_results:
+            results.extend(simulated_results[term])
+    
+    return results
 
