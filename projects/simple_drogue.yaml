@@ -1,0 +1,21 @@
+name: "Simple drogue"
+complexity: 1
+base_length: 5000
+geometry:
+  type: "cone"
+parameters:
+  diameter: 600
+  length: 1000
+  num_gores: 8
+materials:
+  - item: "Ripstop nylon"
+    qty: "≈ 0.3 m²"
+  - item: "Polyester thread"
+    qty: "small spool"
+colors:
+  - "DPIC039"  # Orange
+  - "DPIC034"  # Black
+description: "Basic ribbon tail for stabilization and decoration"
+author: "Kite Builder"
+version: "1.0"
+

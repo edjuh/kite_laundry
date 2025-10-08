@@ -1,0 +1,33 @@
+name: "Easy Bol"
+complexity: 3.0
+base_length: 1000.0
+geometry:
+  type: "bol"
+parameters:
+  diameter: 1000.0
+  num_gores: 8
+materials:
+  - item: "Ripstop nylon icarex"
+    qty: "≈ 1.0 m²"
+  - item: "Polyester thread"
+    qty: "small spool"
+  - item: "Dyneema cord"
+    qty: "2 * (diam * 0.65) mm"
+  - item: "Webbing loops"
+    qty: "4 pcs, 50 mm"
+colors:
+  - "DPIC039"  # Orange
+  - "DPIC034"  # Black
+description: "Rotating rotor kite by Roberto Vañacek (2007). Alternating gores for spinning effect in Beaufort 2-5 winds."
+author: "Roberto Vañacek"
+version: 1.0
+sewing_notes:
+  - "Align bias on mirrored gores for even stretch."
+  - "Use walking foot; tension 8/10."
+assembly_notes:
+  - "Cut 8 triangles: base (π * diam)/8 mm, height diam/2 mm + seams."
+  - "Sew into cone; mark angles on base."
+wind_rating:
+  min_beaufort: 2
+  max_beaufort: 5
+
