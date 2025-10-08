@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tube Tail Designer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .form-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 200px; padding: 8px; }
+        .error { color: red; margin-top: 5px; }
+        .result { margin-top: 30px; padding: 20px; background-color: #f9f9f9; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Tube Tail Designer</h1>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label for="diameter">Diameter (mm):</label>
+            <input type="number" id="diameter" name="diameter" value="50" min="10" max="200" required>
+            <span class="error" id="diameter-error"></span>
+        </div>
+        
+        <div class="form-group">
+            <label for="length">Length (mm):</label>
+            <input type="number" id="length" name="length" value="10000" min="100" max="50000" required>
+            <span class="error" id="length-error"></span>
+        </div>
+        
+        <div class="form-group">
+            <label for="color">Color:</label>
+            <select id="color" name="color">
+                <option value="single">Single Color</option>
+                <option value="multicolor">Multi-color</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="material">Material:</label>
+            <select id="material" name="material">
+                <option value="ripstop">Ripstop Nylon</option>
+                <option value="polyester">Polyester</option>
+                <option value="cotton">Cotton</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="weight">Weight (g/m²):</label>
+            <input type="number" id="weight" name="weight" value="30" min="10" max="200" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="seam_allowance">Seam Allowance (mm):</label>
+            <input type="number" id="seam_allowance" name="seam_allowance" value="10" min="5" max="30" required>
+        </div>
+        
+        <button type="submit">Generate Pattern</button>
+    </form>
+    
+    {% if result %}
+    <div class="result">
+        <h2>Pattern Results</h2>
+        {{ result|safe }}
+    </div>
+    {% endif %}
+</body>
+</html>
+

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Material Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .calculator { background: #f9f9f9; padding: 20px; border-radius: 8px; }
+        .result { background: #e8f4f8; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .material-list { background: white; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .cost-estimator { background: #f0f8ff; padding: 15px; margin: 20px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Material Calculator</h1>
+    
+    <div class="calculator">
+        <h2>Calculate Materials Needed</h2>
+        
+        <div class="form-group">
+            <label for="diameter">Diameter (mm):</label>
+            <input type="number" id="diameter" value="50" onchange="calculateMaterials()">
+        </div>
+        
+        <div class="form-group">
+            <label for="length">Length (mm):</label>
+            <input type="number" id="length" value="10000" onchange="calculateMaterials()">
+        </div>
+        
+        <div class="form-group">
+            <label for="material">Material:</label>
+            <select id="material" onchange="calculateMaterials()">
+                <option value="ripstop">Ripstop Nylon ($15/m²)</option>
+                <option value="polyester">Polyester ($12/m²)</option>
+                <option value="cotton">Cotton ($8/m²)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="seam_allowance">Seam Allowance (mm):</label>
+            <input type="number" id="seam_allowance" value="10" onchange="calculateMaterials()">
+        </div>
+    </div>
+    
+    <div id="results" style="display: none;">
+        <div class="result">
+            <h3>Pattern Dimensions</h3>
+            <p><strong>Circumference:</strong> <span id="circumference"></span>mm</p>
+            <p><strong>Pattern Width:</strong> <span id="pattern_width"></span>mm</p>
+            <p><strong>Pattern Height:</strong> <span id="pattern_height"></span>mm</p>
+            <p><strong>Total Area:</strong> <span id="total_area"></span>m²</p>
+        </div>
+        
+        <div class="material-list">
+            <h3>Shopping List</h3>
+            <ul id="shopping_list"></ul>
+        </div>
+        
+        <div class="cost-estimator">
+            <h3>Cost Estimation</h3>
+            <p><strong>Material Cost:</strong> $<span id="material_cost"></span></p>
+            <p><strong>Additional Supplies:</strong> $<span id="additional_supplies"></span></p>
+            <p><strong>Total Estimated Cost:</strong> $<span id="total_cost"></span></p>
+        </div>
+    </div>
+    
+    <script>
+        function calculateMaterials() {
+            const diameter = parseFloat(document.getElementById('diameter').value);
+            const length = parseFloat(document.getElementById('length').value);
+            const seam_allowance = parseFloat(document.getElementById('seam_allowance').value);
+            const material = document.getElementById('material').value;
+            
+            // Calculate dimensions
+            const circumference = Math.PI * diameter;
+            const pattern_width = circumference + (2 * seam_allowance);
+            const pattern_height = length + (2 * seam_allowance);
+            const total_area = (pattern_width * pattern_height) / 1000000; // Convert to m²
+            
+            // Material prices
+            const prices = {
+                'ripstop': 15,
+                'polyester': 12,
+                'cotton': 8
+            };
+            
+            const material_cost = total_area * prices[material];
+            const additional_supplies = 5; // Carabiners, thread, etc.
+            const total_cost = material_cost + additional_supplies;
+            
+            // Update display
+            document.getElementById('circumference').textContent = circumference.toFixed(1);
+            document.getElementById('pattern_width').textContent = pattern_width.toFixed(1);
+            document.getElementById('pattern_height').textContent = pattern_height.toFixed(1);
+            document.getElementById('total_area').textContent = total_area.toFixed(4);
+            
+            // Shopping list
+            const shopping_list = document.getElementById('shopping_list');
+            shopping_list.innerHTML = `
+                <li>${total_area.toFixed(2)}m² of ${material}</li>
+                <li>2 carabiners</li>
+                <li>Matching thread</li>
+                <li>Sewing needles</li>
+            `;
+            
+            // Cost estimation
+            document.getElementById('material_cost').textContent = material_cost.toFixed(2);
+            document.getElementById('additional_supplies').textContent = additional_supplies.toFixed(2);
+            document.getElementById('total_cost').textContent = total_cost.toFixed(2);
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+        
+        // Calculate on load
+        calculateMaterials();
+    </script>
+</body>
+</html>
