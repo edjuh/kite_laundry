@@ -7,71 +7,6 @@ import os
 import sys
 import yaml
 
-# Add this import at the top
-from Core.applications.article_generator import generate_article
-
-# Update the generate function to use the new generator
-@app.route('/generate', methods=['GET', 'POST'])
-def generate():
-    """Generate production plan from existing YAML"""
-    if request.method == 'POST':
-        # Get selected design from form
-        design_name = request.form['design']
-        
-        # Find the corresponding filename
-        design_filename = None
-        try:
-            # Get all designs
-            all_designs = scan_projects_directory()
-            
-            # Find the design with the matching name
-            for design in all_designs:
-                if design['name'] == design_name:
-                    design_filename = design['filename']
-                    break
-        except:
-            pass
-        
-        if not design_filename:
-            return f"Design {design_name} not found", 404
-        
-        try:
-            # Get the project path
-            project_path = os.path.join('projects', os.path.dirname(design_filename))
-            
-            # Generate article based on design type
-            if 'tube' in design_filename:
-                html_content = generate_article(project_path)
-            else:
-                # Use the original generator for other designs
-                with open(os.path.join('projects', design_filename), 'r') as f:
-                    design_data = yaml.safe_load(f)
-                html_content = generate_production_article(design_data)
-            
-            # Create output directory if it doesn't exist
-            os.makedirs('output', exist_ok=True)
-            
-            # Save production article to output directory
-            output_filename = f"output/{os.path.splitext(os.path.basename(design_filename))[0]}_production.html"
-            with open(output_filename, 'w') as f:
-                f.write(html_content)
-            
-            # Return the generated HTML
-            return render_template('result.html', content=html_content, design_name=design_name)
-            
-        except FileNotFoundError:
-            return f"Design file {design_filename} not found", 404
-        except Exception as e:
-            return f"Error loading design: {str(e)}", 500
-    
-    # For GET request, show list of available designs
-    try:
-        designs = scan_projects_directory()
-    except:
-        designs = []
-    
-    return render_template('generate.html', designs=designs)
-
 # Add Core to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'Core'))
 
@@ -89,6 +24,13 @@ try:
     app.register_blueprint(article_bp, url_prefix='/article')
 except ImportError:
     print("Warning: Could not import article viewer blueprint")
+
+# Import the new article generator
+try:
+    from Core.applications.article_generator import generate_article
+except ImportError:
+    print("Warning: Could not import article generator")
+    generate_article = None
 
 def scan_projects_directory():
     """Scan the projects directory for all available designs"""
@@ -217,12 +159,17 @@ def generate():
             return f"Design {design_name} not found", 404
         
         try:
-            # Load the YAML file directly
-            with open(os.path.join('projects', design_filename), 'r') as f:
-                design_data = yaml.safe_load(f)
+            # Get the project path
+            project_path = os.path.join('projects', os.path.dirname(design_filename))
             
-            # Generate production article - returns HTML string
-            html_content = generate_production_article(design_data)
+            # Generate article based on design type
+            if 'tube' in design_filename and generate_article:
+                html_content = generate_article(project_path)
+            else:
+                # Use the original generator for other designs
+                with open(os.path.join('projects', design_filename), 'r') as f:
+                    design_data = yaml.safe_load(f)
+                html_content = generate_production_article(design_data)
             
             # Create output directory if it doesn't exist
             os.makedirs('output', exist_ok=True)

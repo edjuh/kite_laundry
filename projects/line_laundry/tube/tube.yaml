@@ -1,0 +1,28 @@
+name: Tube
+complexity: 1
+parameters:
+  diameter: 50
+  length: 10000
+  color: single
+  material: ripstop
+  weight: 30g/m²
+  seam_allowance: 10
+  attachment_points:
+    - position: 25%
+      type: carabiner
+    - position: 75%
+      type: carabiner
+  reinforcements:
+    - position: 25%
+      type: double_layer
+    - position: 75%
+      type: double_layer
+description: A simple tube tail for kites
+author: Unknown
+version: 1.0
+search_terms:
+  - "kite tube tail"
+  - "line laundry tube"
+  - "kite decoration tube"
+  - "kite tail sewing"
+
