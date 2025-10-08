@@ -1,0 +1,16 @@
+# Core/configurations/resources/inflatables/schema.yaml
+inflatable_laundry:
+  name: string
+  shape: enum(["tube", "windsock", "sphere", "animal"])
+  dimensions:
+    length: float  # cm
+    diameter: float  # cm
+    # shape-specific dimensions
+  material: string  # reference to material config
+  attachment:
+    position: float  # distance from kite (m)
+    carabiner_type: string
+  aerodynamics:
+    drag_coefficient: float
+    reference_area: float  # m²
+
