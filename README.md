@@ -91,18 +91,16 @@ The script generates a comprehensive HTML webpage containing:
 ```
 kite_laundry/
 │
-├── src/                # Source code
+├── Core/                # Source code
 │   ├── __init__.py
 │   ├── generator.py    # Design generation logic
 │   ├── template.py     # Template creation functions
 │   └── webpage.py      # HTML generation
 │
-├── configs/            # YAML configuration files
+├── projects/            # YAML configuration files
 │   └── example_design.yaml
 │
 ├── output/             # Generated output directory
-│
-├── tests/              # Unit tests
 │
 └── docs/               # Documentation
 ```
