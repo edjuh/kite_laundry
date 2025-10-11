@@ -13,4 +13,3 @@ inflatable_laundry:
   aerodynamics:
     drag_coefficient: float
     reference_area: float  # m²
-

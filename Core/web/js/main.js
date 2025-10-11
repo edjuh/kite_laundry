@@ -2,7 +2,7 @@ function downloadArticle() {
     // Create a temporary div with the article content
     const articleContent = document.querySelector('.article-content').innerHTML;
     const printWindow = window.open('', '_blank');
-    
+
     printWindow.document.write(`
         <!DOCTYPE html>
         <html>
@@ -30,12 +30,11 @@ function downloadArticle() {
         </body>
         </html>
     `);
-    
+
     printWindow.document.close();
-    
+
     // Wait for content to load, then save as PDF
     printWindow.onload = function() {
         printWindow.print();
     };
 }
-

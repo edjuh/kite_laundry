@@ -1,0 +1,15 @@
+# pyproject.toml
+[project]
+name = "kite_laundry"
+version = "0.1.0"
+dependencies = [
+    "PyYAML>=5.3",
+    "svgwrite>=1.4",
+    "Jinja2>=3.1",
+    "jsonschema>=4.4",
+    "weasyprint>=53.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kite_laundry*"]

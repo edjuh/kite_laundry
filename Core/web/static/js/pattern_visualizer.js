@@ -5,14 +5,14 @@ class PatternVisualizer {
         this.scale = 0.1; // Scale down for display
         this.init();
     }
-    
+
     init() {
         this.container.innerHTML = '';
         const svg = this.createSVG();
         this.container.appendChild(svg);
         this.drawPattern();
     }
-    
+
     createSVG() {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '800');
@@ -21,10 +21,10 @@ class PatternVisualizer {
         svg.style.border = '1px solid #ccc';
         return svg;
     }
-    
+
     drawPattern() {
         const svg = this.container.querySelector('svg');
-        
+
         // Draw main tube body
         const mainPiece = this.pattern.pieces[0];
         const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -36,7 +36,7 @@ class PatternVisualizer {
         rect.setAttribute('stroke', '#333');
         rect.setAttribute('stroke-width', '2');
         svg.appendChild(rect);
-        
+
         // Add labels
         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         label.setAttribute('x', 50 + (mainPiece.width * this.scale) / 2);
@@ -44,7 +44,7 @@ class PatternVisualizer {
         label.setAttribute('text-anchor', 'middle');
         label.textContent = 'Main Tube Body';
         svg.appendChild(label);
-        
+
         // Draw reinforcement pieces
         this.pattern.pieces.slice(1).forEach((piece, index) => {
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -56,7 +56,7 @@ class PatternVisualizer {
             rect.setAttribute('stroke', '#333');
             rect.setAttribute('stroke-width', '2');
             svg.appendChild(rect);
-            
+
             const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             label.setAttribute('x', 50 + (index * 200) + (piece.width * this.scale) / 2);
             label.setAttribute('y', 50 + piece.position.y * this.scale - 10);
@@ -64,14 +64,14 @@ class PatternVisualizer {
             label.textContent = `Reinforcement ${index + 1}`;
             svg.appendChild(label);
         });
-        
+
         // Add dimensions
         this.addDimensions(svg);
     }
-    
+
     addDimensions(svg) {
         const mainPiece = this.pattern.pieces[0];
-        
+
         // Width dimension
         const widthLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         widthLine.setAttribute('x1', '50');
@@ -81,7 +81,7 @@ class PatternVisualizer {
         widthLine.setAttribute('stroke', '#666');
         widthLine.setAttribute('stroke-width', '1');
         svg.appendChild(widthLine);
-        
+
         const widthText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         widthText.setAttribute('x', 50 + (mainPiece.width * this.scale) / 2);
         widthText.setAttribute('y', 50 + mainPiece.height * this.scale + 35);

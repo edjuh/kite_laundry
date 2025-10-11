@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kite Laundry Builder Application Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        .architecture { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .box { border: 1px solid #ddd; padding: 15px; margin: 10px; background: white; }
+        .component { background: #e8f4f8; padding: 10px; margin: 5px 0; border-left: 4px solid #3498db; }
+        .file-tree { background: #2c3e50; color: white; padding: 15px; border-radius: 5px; font-family: monospace; }
+        .code { background: #f1f1f1; padding: 10px; border-left: 4px solid #27ae60; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Kite Laundry Builder Application Guide 🛠️</h1>
+
+    <h2>Application Overview</h2>
+    <p>The Kite Laundry Builder is a Flask-based web application that generates custom kite laundry designs, patterns, and construction instructions.</p>
+
+    <div class="component">
+        <h3>Purpose</h3>
+        <ul>
+            <li><strong>Design Creation</strong>: Interactive forms for custom laundry designs</li>
+            <li><strong>Pattern Generation</strong>: Mathematical pattern calculations</li>
+            <li><strong>Instruction Generation</strong>: Step-by-step construction guides</li>
+            <li><strong>Material Calculation</strong>: Fabric and resource requirements</li>
+        </ul>
+    </div>
+
+    <h2>Architecture Diagram</h2>
+    <div class="architecture">
+        <div style="text-align: center; margin: 20px 0;">
+            <div style="border: 2px solid #333; padding: 15px; margin: 10px; background: #e3f2fd;">
+                <strong>Web Interface (Flask)</strong>
+                <div style="display: flex; justify-content: space-around; margin: 15px 0;">
+                    <div class="box">Forms<br>(HTML/CSS)</div>
+                    <div class="box">Templates<br>(Jinja2)</div>
+                    <div class="box">Static Assets<br>(CSS/JS/Images)</div>
+                </div>
+            </div>
+
+            <div style="margin: 10px;">↓</div>
+
+            <div style="border: 2px solid #333; padding: 15px; margin: 10px; background: #f3e5f5;">
+                <strong>Application Logic</strong>
+                <div style="display: flex; justify-content: space-around; margin: 15px 0;">
+                    <div class="box">Routes<br>(app.py)</div>
+                    <div class="box">Generators<br>(Patterns)</div>
+                    <div class="box">Validators<br>(Parameters)</div>
+                </div>
+            </div>
+
+            <div style="margin: 10px;">↓</div>
+
+            <div style="border: 2px solid #333; padding: 15px; margin: 10px; background: #e8f5e8;">
+                <strong>Pattern Generators</strong>
+                <div style="display: flex; justify-content: space-around; margin: 15px 0; flex-wrap: wrap;">
+                    <div class="box">Tubes<br>(Cylinder)</div>
+                    <div class="box">Cones<br>(Drogue)</div>
+                    <div class="box">Bols<br>(Rotors)</div>
+                    <div class="box">Flags<br>(Rectangle)</div>
+                    <div class="box">Banners<br>(Long)</div>
+                    <div class="box">Templates<br>(SVG/PDF)</div>
+                </div>
+            </div>
+
+            <div style="margin: 10px;">↓</div>
+
+            <div style="border: 2px solid #333; padding: 15px; margin: 10px; background: #fff3e0;">
+                <strong>Output Systems</strong>
+                <div style="display: flex; justify-content: space-around; margin: 15px 0;">
+                    <div class="box">Patterns<br>(SVG/PDF)</div>
+                    <div class="box">Instructions<br>(Markdown)</div>
+                    <div class="box">Material Lists<br>(Calculations)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>Data Flow</h2>
+    <div class="component">
+        <h3>1. User Input Phase</h3>
+        <p>User → Web Form → Parameter Validation → Geometry Selection</p>
+
+        <h3>2. Processing Phase</h3>
+        <p>Valid Parameters → Pattern Generator → Mathematical Calculations → Template Creation</p>
+
+        <h3>3. Output Phase</h3>
+        <p>Generated Pattern → Instruction Assembly → Web Display → Download Options</p>
+    </div>
+
+    <h2>Core Components</h2>
+
+    <div class="component">
+        <h3>Flask Application (app.py)</h3>
+        <ul>
+            <li><strong>Routes</strong>: Handles web requests and form submissions</li>
+            <li><strong>Templates</strong>: Renders HTML pages with dynamic content</li>
+            <li><strong>Static Files</strong>: CSS, JavaScript, and images</li>
+        </ul>
+    </div>
+
+    <div class="component">
+        <h3>Pattern Generators (Core/pattern_generators/)</h3>
+        <ul>
+            <li><strong>Tube Generator</strong>: Cylindrical patterns</li>
+            <li><strong>Cone Generator</strong>: Conical drogue patterns</li>
+            <li><strong>Bol Generator</strong>: Rotor cylinder patterns</li>
+            <li><strong>Flag Generator</strong>: Rectangular flags</li>
+            <li><strong>Banner Generator</strong>: Long horizontal banners</li>
+        </ul>
+    </div>
+
+    <h2>File Structure</h2>
+    <div class="file-tree">
+        kite_laundry/<br>
+        ├── app.py                          # Main Flask application<br>
+        ├── run.sh                          # Startup script<br>
+        ├── requirements.txt                # Python dependencies<br>
+        │<br>
+        ├── Core/                           # Core application logic<br>
+        │   ├── applications/               # Application modules<br>
+        │   ├── pattern_generators/         # Pattern generation<br>
+        │   ├── pattern_templates/          # SVG template generation<br>
+        │   ├── configurations/             # Configuration files<br>
+        │   └── web/                        # Web interface components<br>
+        │       ├── templates/              # HTML templates<br>
+        │       └── static/                 # CSS/JS assets<br>
+        │<br>
+        ├── projects/                       # Project definitions<br>
+        │   ├── line_laundry/               # Laundry projects<br>
+        │   └── one_line_kites/             # Kite projects<br>
+        │<br>
+        ├── documentation/                  # Documentation<br>
+        └── output/                         # Generated files
+    </div>
+
+    <h2>Usage Workflow</h2>
+    <div class="component">
+        <h3>1. Start Application</h3>
+        <div class="code">./run.sh</div>
+        <p>Access at: http://127.0.0.1:5001</p>
+
+        <h3>2. Design Creation</h3>
+        <ol>
+            <li>Select geometry type</li>
+            <li>Enter dimensions and parameters</li>
+            <li>Choose colors and materials</li>
+            <li>Submit form for processing</li>
+        </ol>
+    </div>
+
+    <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+        <p><strong>For development questions, refer to the code comments and modular structure.</strong></p>
+    </div>
+</body>
+</html>

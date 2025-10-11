@@ -2,59 +2,174 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ project_name }} - Kite Laundry Design</title>
-    <link rel="stylesheet" href="/static/css/article.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ params.name }} - Production Guide</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="article-container">
+    <div class="container">
         <header>
-            <h1>{{ project_name }}</h1>
-            <div class="article-meta">
-                <span class="designer">Designer: {{ designer }}</span>
-                <span class="difficulty">Difficulty: {{ difficulty }}</span>
-            </div>
+            <h1>{{ params.name }}</h1>
+            <p>Complete instructions for building your kite laundry</p>
         </header>
-        
-        <section class="design-specs">
-            <h2>Design Specifications</h2>
-            {% include 'specs_table.html' %}
-        </section>
-        
-        <section class="pattern-viewer">
-            <h2>Pattern</h2>
-            <div class="pattern-svg">
-                <!-- SVG pattern will be inserted here -->
+
+        <main>
+            <!-- Difficulty Meter Section -->
+            <div class="difficulty-meter">
+              <h3>Project Difficulty</h3>
+              <div class="meter-container">
+                <div class="meter-wrapper">
+                  <img src="/static/svg/kite_meter.svg" alt="Difficulty Meter" class="difficulty-svg">
+                  <style>
+                    #difficulty-pointer {
+                      transform: translateY({{ pointer_position }}px);
+                      transform-origin: 12px 25px;
+                    }
+
+                    /* Kite position based on difficulty */
+                    #kite {
+                      transform: translate(200px, {{ kite_y_position }}px);
+                    }
+
+                    /* Kite line adjusts to kite position */
+                    #kite-line {
+                      x2: 200px;
+                      y2: {{ kite_y_position }}px;
+                    }
+                  </style>
+                </div>
+                <div class="difficulty-info">
+                  <p><strong>Complexity:</strong> {{ params.complexity }}</p>
+                  <p><strong>Time:</strong> {% if params.complexity <= 2 %}Easy{% elif params.complexity <= 3 %}Medium{% elif params.complexity <= 4 %}Hard{% else %}Expert{% endif %}</p>
+                  <p><strong>Skill:</strong> {% if params.complexity <= 2 %}Beginner{% elif params.complexity <= 3 %}Intermediate{% elif params.complexity <= 4 %}Advanced{% else %}Master{% endif %}</p>
+                </div>
+              </div>
             </div>
-            <a href="/download/{{ project_name }}/{{ project_name }}_pattern.pdf" 
-               class="download-btn" download>
-                Download PDF Pattern
-            </a>
-        </section>
-        
-        <section class="instructions">
-            <h2>Construction Instructions</h2>
-            {% for step in instructions %}
-                <div class="instruction-step">
-                    <div class="step-diagram">
-                        <!-- Step diagram will be inserted here -->
-                    </div>
-                    <div class="step-text">
-                        {{ step.text }}
+
+            <!-- Design Information -->
+            <div class="material-info">
+                <h2>Design Information</h2>
+                <p><strong>Complexity:</strong> {{ params.complexity }}</p>
+                <p><strong>Geometry:</strong> {{ params.geometry.type }}</p>
+                {% if params.base_length is defined %}
+                <p><strong>Base Length:</strong> {{ params.base_length }} mm</p>
+                {% endif %}
+            </div>
+
+            <!-- Parameters -->
+            <div class="dimensions">
+                <div class="dimension-box">
+                    <h3>Parameters</h3>
+                    {% if params.parameters.diameter is defined %}
+                    <p><strong>Diameter:</strong> {{ params.parameters.diameter }} mm</p>
+                    {% endif %}
+                    {% if params.parameters.length is defined %}
+                    <p><strong>Length:</strong> {{ params.parameters.length }} mm</p>
+                    {% endif %}
+                    {% if params.parameters.depth is defined %}
+                    <p><strong>Depth:</strong> {{ params.parameters.depth }} mm</p>
+                    {% endif %}
+                    {% if params.parameters.num_gores is defined %}
+                    <p><strong>Number of Gores:</strong> {{ params.parameters.num_gores }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Materials -->
+                <div class="dimension-box">
+                    <h3>Materials</h3>
+                    <div class="materials-list">
+                        {% for material in params.materials %}
+                        <div class="material-item">
+                            <strong>{{ material.item }}</strong>: {{ material.qty }}
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
-            {% endfor %}
-        </section>
-        
-        <section class="aerodynamics">
-            <h2>Aerodynamics</h2>
-            <div class="flow-diagram">
-                <!-- Flow visualization will be inserted here -->
             </div>
-            <div class="analysis">
-                {{ aerodynamic_analysis }}
+
+            <!-- Color Palette -->
+            {% if params.color_info is defined %}
+            <div class="color-palette">
+                <h3>Color Palette</h3>
+                <div class="color-grid">
+                    {% for color in params.color_info %}
+                    <div class="color-item" style="background-color: {{ color.hex }}" title="{{ color.name }} ({{ color.code }})">
+                        {{ color.code }}
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-        </section>
+            {% endif %}
+
+            {% if resources.colors.tips is defined %}
+            <div class="color-tips">
+                <h3>Color Tips</h3>
+                <ul>
+                    {% for tip in resources.colors.tips %}
+                    <li>{{ tip }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Material Properties -->
+            <div class="material-properties">
+                <h3>Material Properties</h3>
+                {% for material in params.materials %}
+                {% if material.item in resources.materials.materials %}
+                <div class="material-prop">
+                    <h4>{{ material.item }}</h4>
+                    <p><strong>Weight:</strong> {{ resources.materials.materials[material.item].weight }}</p>
+                    <p><strong>Properties:</strong></p>
+                    <ul>
+                        {% for prop in resources.materials.materials[material.item].properties %}
+                        <li>{{ prop }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Production Instructions -->
+            <div class="instructions">
+                <h2>Production Instructions</h2>
+
+                <div class="step">
+                    <h3>Step 1: Prepare Materials</h3>
+                    <p>Gather all materials listed above. Cut your ripstop nylon according to the pattern based on the geometry type ({{ params.geometry.type }}).</p>
+                </div>
+
+                <div class="step">
+                    <h3>Step 2: Assembly</h3>
+                    <p>Sew the pieces together according to the pattern. Use a 1cm seam allowance throughout. Reinforce all stress points with additional stitching.</p>
+                </div>
+
+                <div class="step">
+                    <h3>Step 3: Attach Bridle</h3>
+                    <p>Attach the bridle to the top of the drogue using a reinforced ring. The bridle should be approximately 15cm in length.</p>
+                </div>
+
+                <div class="step">
+                    <h3>Step 4: Final Inspection</h3>
+                    <p>Check all seams and connections for strength. Ensure the drogue can spin freely when attached to a kite line.</p>
+                </div>
+            </div>
+
+            <!-- Usage Instructions -->
+            <div class="usage">
+                <h2>Usage Instructions</h3>
+                <p>Attach the drogue to your kite line using the provided ring. The drogue should hang horizontally to the line for optimal spinning effect in the wind.</p>
+                <p><strong>Description:</strong> {{ params.description }}</p>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p><strong>Author:</strong> {{ params.author }} | <strong>Version:</strong> {{ params.version }}</p>
+            </div>
+        </main>
     </div>
+
+    <script src="/static/js/main.js"></script>
 </body>
 </html>
-

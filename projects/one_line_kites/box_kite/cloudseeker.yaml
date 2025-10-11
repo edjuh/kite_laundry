@@ -1,0 +1,23 @@
+metadata:
+  name: Cloud Seeker Kite
+  description: >
+    The Cloud Seeker (Wolkenjäger) is a stub‑wing box kite that is
+    simple to build and flies well in moderate winds.  See the
+    description below for dimensions and construction steps.
+  author: Werner Backes
+  version: 1.0
+  slug: cloud-seeker   # URL‑friendly ID, e.g. cloud-seeker.html
+geometry:
+  # … all the geometry keys your generator already knows …
+materials:
+  fabric: "2 m ripstop nylon (white base, blue accents)"
+  spars: "4 m bamboo dowels (6 mm for longerons; 4 mm for cross‑spars)"
+  line: "50 lb Dacron (bridle and guy lines)"
+  other: "reinforcing tape, hot knife, scissors, thread, rubber bands"
+steps: |
+  1. Cut panels… (paste the text you already have)
+  2. Sew cells…
+  3. Assemble frame…
+  4. Attach sails…
+  5. Bridle & finish…
+  6. Fly tips

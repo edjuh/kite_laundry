@@ -1,13 +1,9 @@
 #!/bin/bash
-
-# Get the directory where the script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
 cd "$SCRIPT_DIR"
 
 echo "Setting up Kite Laundry Builder..."
 
-# Check if virtual environment exists
 if [ ! -d "venv" ]; then
     echo "Creating virtual environment..."
     python3 -m venv venv
@@ -19,6 +15,5 @@ else
     source venv/bin/activate
 fi
 
-echo "Starting the application..."
+echo "Starting the application on http://127.0.0.1:5001"
 python app.py
-

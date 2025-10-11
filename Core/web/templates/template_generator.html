@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pattern Template Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            width: 300px;
+            padding: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pattern Template Generator</h1>
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="design">Select Design:</label>
+            <select id="design" name="design" required>
+                <option value="">Choose a design...</option>
+                {% for design in designs %}
+                <option value="{{ design.name }}">{{ design.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit">Generate Pattern Template</button>
+    </form>
+</body>
+</html>

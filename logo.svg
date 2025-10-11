@@ -1,0 +1,27 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#f0f8ff" stroke="#4169e1" stroke-width="2"/>
+
+  <!-- Kite shape -->
+  <path d="M100 40 L140 100 L100 160 L60 100 Z" fill="#ff6b6b" stroke="#333" stroke-width="2"/>
+
+  <!-- Kite cross -->
+  <line x1="100" y1="40" x2="100" y2="160" stroke="#333" stroke-width="2"/>
+  <line x1="60" y1="100" x2="140" y2="100" stroke="#333" stroke-width="2"/>
+
+  <!-- Kite tail (line laundry) -->
+  <line x1="100" y1="160" x2="100" y2="180" stroke="#333" stroke-width="2"/>
+
+  <!-- Tube tail -->
+  <rect x="90" y="180" width="20" height="30" fill="#4ecdc4" stroke="#333" stroke-width="1" rx="10"/>
+
+  <!-- Windsock tail -->
+  <g transform="translate(130, 190)">
+    <rect x="0" y="0" width="8" height="20" fill="#ffe66d" stroke="#333" stroke-width="1"/>
+    <rect x="6" y="3" width="8" height="14" fill="#ffe66d" stroke="#333" stroke-width="1"/>
+    <rect x="12" y="6" width="8" height="8" fill="#ffe66d" stroke="#333" stroke-width="1"/>
+  </g>
+
+  <!-- Text -->
+  <text x="100" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">Kite Laundry</text>
+</svg>
