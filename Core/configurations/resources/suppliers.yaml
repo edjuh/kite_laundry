@@ -1,0 +1,109 @@
+suppliers:
+  ripstop_nylon:
+    - name: "De Paddestoel"
+      url: "https://www.depaddestoel.nl/"
+      regions: ["Netherlands", "Europe"]
+      currency: "EUR"
+      notes: "High-quality ripstop for kites; browse categories for colors and bulk."
+    - name: "Wepa Flyer"
+      url: "https://www.wepaflyer.com/"
+      regions: ["Netherlands", "Belgium", "Europe"]
+      currency: "EUR"
+      notes: "Ripstop in fun products section; 60+ years for best prices."
+    - name: "RipstopByTheRoll"
+      url: "https://ripstopbytheroll.com"
+      regions: ["USA", "International"]
+      currency: "USD"
+      notes: "Wide color selection, bulk options."
+    - name: "KiteBuilder"
+      url: "https://kitebuilder.com"
+      regions: ["USA"]
+      currency: "USD"
+      notes: "Specialty kite fabrics."
+  tyvek:
+    - name: "Wepa Flyer"
+      url: "https://www.wepaflyer.com/tyvek-kopen"
+      regions: ["Netherlands", "Belgium", "Europe"]
+      currency: "EUR"
+      notes: "Dedicated Tyvek for kites; fast NL/BE shipping."
+    - name: "De Paddestoel"
+      url: "https://www.depaddestoel.nl/"
+      regions: ["Netherlands", "Europe"]
+      currency: "EUR"
+      notes: "Tyvek sheets in materials category."
+    - name: "DuPont Tyvek Suppliers"
+      url: "https://www.dupont.com/products/tyvek.html"
+      regions: ["Global"]
+      currency: "USD"
+      notes: "Official source; check for printable grades."
+    - name: "Amazon"
+      url: "https://www.amazon.nl/s?k=tyvek+sheets"
+      regions: ["Netherlands", "Europe", "Global"]
+      currency: "EUR"
+      notes: "Affordable sheets for small projects, available in NL."
+  rope:
+    - name: "Wepa Flyer"
+      url: "https://www.wepaflyer.com/"
+      regions: ["Netherlands", "Belgium", "Europe"]
+      currency: "EUR"
+      notes: "Stocks braided lines for powerkites and trainers; custom advice available."
+    - name: "De Paddestoel"
+      url: "https://www.depaddestoel.nl/"
+      regions: ["Netherlands", "Europe"]
+      currency: "EUR"
+      notes: "Kite line accessories in shop categories."
+    - name: "KiteLine"
+      url: "https://kiteline.com"
+      regions: ["USA"]
+      currency: "USD"
+      notes: "Dyneema and polyester lines."
+    - name: "Paracord Planet"
+      url: "https://www.paracordplanet.com"
+      regions: ["USA", "International"]
+      currency: "USD"
+      notes: "Braided ropes in various strengths."
+  fiberglass_rods:
+    - name: "De Paddestoel"
+      url: "https://www.depaddestoel.nl/"
+      regions: ["Netherlands", "Europe"]
+      currency: "EUR"
+      notes: "Fiberglass for kite frames; check accessories."
+    - name: "Wepa Flyer"
+      url: "https://www.wepaflyer.com/"
+      regions: ["Netherlands", "Belgium", "Europe"]
+      currency: "EUR"
+      notes: "Rods for trainer/powerkites; custom advice."
+    - name: "Goodwinds"
+      url: "https://goodwinds.com"
+      regions: ["USA"]
+      currency: "USD"
+      notes: "Kite spars and rods."
+    - name: "Into The Wind"
+      url: "https://intothewind.com"
+      regions: ["USA"]
+      currency: "USD"
+      notes: "Fiberglass and carbon options."
+  carbon_rods:
+    - name: "Wepa Flyer"
+      url: "https://www.wepaflyer.com/"
+      regions: ["Netherlands", "Belgium", "Europe"]
+      currency: "EUR"
+      notes: "Carbon spars for sport kites; sale items possible."
+    - name: "De Paddestoel"
+      url: "https://www.depaddestoel.nl/"
+      regions: ["Netherlands", "Europe"]
+      currency: "EUR"
+      notes: "Carbon options in shop."
+    - name: "Goodwinds"
+      url: "https://goodwinds.com"
+      regions: ["USA"]
+      currency: "USD"
+      notes: "High-quality carbon fiber spars."
+    - name: "Carbon Fiber Store"
+      url: "https://www.carbonfiberstore.com"
+      regions: ["USA", "International"]
+      currency: "USD"
+      notes: "Custom lengths available."
+article_notes:
+  - "Prioritize local EU suppliers like Wepa Flyer for fast delivery and EUR pricing."
+  - "Contact for custom quotes—e.g., Wepa's 60+ years expertise."

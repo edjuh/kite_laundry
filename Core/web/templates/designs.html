@@ -2,35 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Existing Designs</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Kite Laundry Designs</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #4CAF50; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 10px 0; }
+        a { color: #1E90FF; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Existing Designs</h1>
-            <p>Browse through your available designs</p>
-        </header>
-
-        <main>
-            {% if designs %}
-                <div class="designs-grid">
-                    {% for design in designs %}
-                    <div class="design-card">
-                        <h3>{{ design.name }}</h3>
-                        <p>Complexity: {{ design.complexity }}</p>
-                        <a href="/generate" class="btn">Generate Plan</a>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="no-designs">
-                    <p>No designs found. Please add YAML files to the projects directory.</p>
-                    <a href="/generate" class="btn">Generate from Available</a>
-                </div>
-            {% endif %}
-        </main>
-    </div>
+    <h1>Kite Laundry Designs</h1>
+    {% if designs %}
+        <ul>
+            {% for design in designs %}
+                <li>
+                    <a href="{{ url_for('generate', path=design.full_path) }}">{{ design.name }}</a>
+                    ({{ design.path }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No designs found in projects/ directory.</p>
+    {% endif %}
+    <p><a href="https://github.com/edjuh/kite_laundry">Back to Kite Laundry Project</a></p>
 </body>
 </html>

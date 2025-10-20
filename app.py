@@ -1,90 +1,60 @@
-from flask import Flask, render_template, request
-import os
+from flask import Flask, render_template, request, redirect, url_for
+from pathlib import Path
 import yaml
-from Core.applications.article_generator import generate_production_article
-from Core.applications.base import normalize_project_dict
+from Core.applications.article_generator import generate_article
 
 app = Flask(__name__)
+PROJECTS_DIR = Path("projects")
+
+def get_yaml_designs():
+    designs = []
+    for yaml_file in PROJECTS_DIR.rglob("*.yaml"):
+        try:
+            with open(yaml_file, "r") as f:
+                config = yaml.safe_load(f)
+                if config and isinstance(config, dict) and "name" in config:
+                    designs.append({
+                        "name": config["name"],
+                        "path": str(yaml_file.relative_to(PROJECTS_DIR)),
+                        "full_path": str(yaml_file)
+                    })
+        except yaml.YAMLError as e:
+            print(f"YAML error in {yaml_file}: {e}")
+        except ValueError as e:
+            print(f"Value error in {yaml_file}: {e}")
+        except FileNotFoundError as e:
+            print(f"File not found {yaml_file}: {e}")
+    return designs
 
 @app.route("/")
-def index():
-    # Count valid designs for display
-    designs = []
-    project_root = "projects"
-    for root, _, files in os.walk(project_root):
-        for filename in files:
-            if filename.endswith(".yaml"):
-                file_path = os.path.join(root, filename)
-                try:
-                    with open(file_path, "r") as f:
-                        config = yaml.safe_load(f)
-                        if config and isinstance(config, dict) and "name" in config:
-                            designs.append(normalize_project_dict(config))
-                except yaml.YAMLError:
-                    continue
-    return render_template("index.html", design_count=len(designs))
+def home():
+    return redirect(url_for("designs"))
 
 @app.route("/designs")
 def designs():
-    designs = []
-    project_root = "projects"
-    for root, _, files in os.walk(project_root):
-        for filename in files:
-            if filename.endswith(".yaml"):
-                file_path = os.path.join(root, filename)
-                try:
-                    with open(file_path, "r") as f:
-                        config = yaml.safe_load(f)
-                        if config and isinstance(config, dict) and "name" in config:
-                            normalized_config = normalize_project_dict(config)
-                            designs.append({
-                                "name": normalized_config["name"],
-                                "complexity": normalized_config.get("complexity", 2),
-                                "file_path": file_path
-                            })
-                except yaml.YAMLError as e:
-                    print(f"Error loading {file_path}: {e}")
-                    continue
-    return render_template("designs.html", designs=designs)
+    yaml_designs = get_yaml_designs()
+    return render_template("designs.html", designs=yaml_designs)
 
-@app.route("/generate", methods=["GET", "POST"])
+@app.route("/generate")
 def generate():
-    if request.method == "POST":
-        try:
-            config = yaml.safe_load(request.files["file"])
-            if not isinstance(config, dict):
-                raise ValueError("Invalid YAML format")
-            config = normalize_project_dict(config)
-            article_data = generate_production_article(config)
+    file_path = request.args.get("path")
+    if not file_path:
+        return render_template("generate.html", error="No design selected")
+    try:
+        with open(file_path, "r") as f:
+            config = yaml.safe_load(f)
+        article_path = generate_article(file_path)
+        if article_path:
+            with open(article_path, "r") as f:
+                article_data = {"content": f.read()}
             return render_template("result.html", **article_data)
-        except (yaml.YAMLError, ValueError) as e:
-            return render_template("generate.html", error=f"Error processing YAML: {str(e)}")
-    else:
-        design_path = request.args.get("design")
-        if design_path:
-            try:
-                with open(design_path, "r") as f:
-                    config = yaml.safe_load(f)
-                    if not isinstance(config, dict):
-                        raise ValueError("Invalid YAML format")
-                    config = normalize_project_dict(config)
-                    article_data = generate_production_article(config)
-                    return render_template("result.html", **article_data)
-                except (yaml.YAMLError, ValueError, FileNotFoundError) as e:
-                    return render_template("generate.html", error=f"Error loading design: {str(e)}")
-        return render_template("generate.html")
-
-@app.route("/design_form")
-def design_form():
-    return render_template("design_form.html")
-
-@app.route("/material_calculator")
-def material_calculator():
-    return render_template("material_calculator.html")
-
-@app.route("/template_generator")
-def template_generator():
-    return render_template("template_generator.html")
+        return render_template("generate.html", error="Article generation failed")
+    except yaml.YAMLError as e:
+        return render_template("generate.html", error=f"YAML error in {file_path}: {e}")
+    except ValueError as e:
+        return render_template("generate.html", error=f"Value error in {file_path}: {e}")
+    except FileNotFoundError as e:
+        return render_template("generate.html", error=f"File not found {file_path}: {e}")
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5001)
+    app.run(host="127.0.0.1", port=5001, debug=True)
