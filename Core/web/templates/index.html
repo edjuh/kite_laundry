@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kite Laundry Builder</title>
     <link rel="stylesheet" href="/Core/web/static/css/style.css">
 </head>
@@ -10,13 +11,17 @@
         <h1>Kite Laundry Builder</h1>
         <nav>
             <a href="/generate">Create New Design</a> |
-            <a href="/designs">View Designs</a>
+            <a href="/designs">View Designs</a> |
+            <a href="/design_form">Design Form</a>
         </nav>
     </header>
     <main>
-        <h2>Welcome!</h2>
-        <p>Create custom kite laundry designs with ease. Use the links above to start building or explore existing designs.</p>
-        <p>Current designs available: 6 (check the Designs page for details).</p>
+        <h2>Welcome to Kite Laundry!</h2>
+        <p>Create custom kite laundry designs with ease. Browse existing designs or upload your own YAML configuration.</p>
+        <p>Current designs available: {{ design_count }} (check the <a href="/designs">Designs</a> page for details).</p>
+        <div class="hero">
+            <img src="/Core/web/static/images/kite_laundry_logo.png" alt="Kite Laundry Logo" style="max-width: 300px;">
+        </div>
     </main>
 </body>
 </html>
