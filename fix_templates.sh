@@ -3,6 +3,7 @@ cd /Users/ed/kite_laundry-fork
 
 # Ensure directories
 mkdir -p Core/applications Core/web/templates Core/pattern_generators Core/pattern_templates
+mkdir -p projects/line_laundry/spinners
 touch Core/applications/__init__.py
 touch Core/pattern_generators/__init__.py
 touch Core/pattern_templates/__init__.py
@@ -15,12 +16,13 @@ Jinja2==3.1.4
 svgwrite==1.4.3
 EOF
 
-# Update app.py with template path debugging
+# Update app.py with enhanced debug logging
 cp app.py app.py.bak
 cat > app.py << 'EOF'
 from flask import Flask, render_template, request, redirect, url_for
 from pathlib import Path
 import yaml
+import os
 from Core.applications.article_generator import generate_article
 
 app = Flask(__name__, template_folder='Core/web/templates')
@@ -28,7 +30,9 @@ PROJECTS_DIR = Path("projects")
 
 def get_yaml_designs():
     designs = []
+    print(f"Scanning projects directory: {PROJECTS_DIR}")
     for yaml_file in PROJECTS_DIR.rglob("*.yaml"):
+        print(f"Found YAML file: {yaml_file}")
         try:
             with open(yaml_file, "r") as f:
                 config = yaml.safe_load(f)
@@ -38,6 +42,7 @@ def get_yaml_designs():
                         "path": str(yaml_file.relative_to(PROJECTS_DIR)),
                         "full_path": str(yaml_file)
                     })
+                    print(f"Added design: {config['name']} ({yaml_file})")
         except yaml.YAMLError as e:
             print(f"YAML error in {yaml_file}: {e}")
         except ValueError as e:
@@ -52,19 +57,27 @@ def home():
 
 @app.route("/designs")
 def designs():
+    print(f"Template folder configured: {app.template_folder}")
+    template_path = Path(app.template_folder) / 'designs.html'
+    print(f"Looking for template at: {template_path}")
+    if not template_path.exists():
+        print(f"ERROR: Template not found at {template_path}")
+    else:
+        print(f"Template exists at {template_path}")
     yaml_designs = get_yaml_designs()
-    print(f"Template folder: {app.template_folder}")
-    print(f"Looking for designs.html in: {Path(app.template_folder) / 'designs.html'}")
+    print(f"Designs found: {[d['name'] for d in yaml_designs]}")
     return render_template("designs.html", designs=yaml_designs)
 
 @app.route("/generate")
 def generate():
     file_path = request.args.get("path")
+    print(f"Generate requested for path: {file_path}")
     if not file_path:
         return render_template("generate.html", error="No design selected")
     try:
         with open(file_path, "r") as f:
             config = yaml.safe_load(f)
+        print(f"Loaded config for {file_path}: {config}")
         article_path = generate_article(file_path)
         if article_path:
             with open(article_path, "r") as f:
@@ -72,13 +85,17 @@ def generate():
             return render_template("result.html", **article_data)
         return render_template("generate.html", error="Article generation failed")
     except yaml.YAMLError as e:
+        print(f"YAML error in {file_path}: {e}")
         return render_template("generate.html", error=f"YAML error in {file_path}: {e}")
     except ValueError as e:
+        print(f"Value error in {file_path}: {e}")
         return render_template("generate.html", error=f"Value error in {file_path}: {e}")
     except FileNotFoundError as e:
+        print(f"File not found {file_path}: {e}")
         return render_template("generate.html", error=f"File not found {file_path}: {e}")
 
 if __name__ == "__main__":
+    print(f"Starting Flask with template folder: {app.template_folder}")
     app.run(host="127.0.0.1", port=5001, debug=True)
 EOF
 
@@ -262,8 +279,10 @@ from Core.pattern_generators.cone_generator import generate_cone_pattern, genera
 def load_resources(resources_dir="Core/configurations/resources"):
     resources = {}
     resources_path = Path(resources_dir)
+    print(f"Loading resources from: {resources_path}")
     for yaml_file in resources_path.rglob("*.yaml"):
         if yaml_file.stem != "suppliers":
+            print(f"Loading resource: {yaml_file}")
             try:
                 with open(yaml_file, "r") as f:
                     resources[yaml_file.stem] = yaml.safe_load(f)
@@ -273,6 +292,7 @@ def load_resources(resources_dir="Core/configurations/resources"):
                 print(f"File not found {yaml_file}: {e}")
     suppliers_path = resources_path / "suppliers.yaml"
     if suppliers_path.exists():
+        print(f"Loading suppliers: {suppliers_path}")
         try:
             with open(suppliers_path, "r") as f:
                 resources["suppliers"] = yaml.safe_load(f)
@@ -281,6 +301,7 @@ def load_resources(resources_dir="Core/configurations/resources"):
     return resources
 
 def generate_star_pattern(config):
+    print(f"Generating star pattern for config: {config.get('name')}")
     width = config.get("dimensions", {}).get("width", 30) * 10
     segments = config.get("segments", 8)
     dwg = svgwrite.Drawing(size=(width, width))
@@ -300,6 +321,7 @@ def generate_star_pattern(config):
     return {"name": "Star Template (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()}
 
 def generate_article(design_yaml_path, output_dir="output", resources=None):
+    print(f"Generating article for: {design_yaml_path}")
     if resources is None:
         resources = load_resources()
     
@@ -307,6 +329,7 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
     try:
         with open(design_path, "r") as f:
             config = yaml.safe_load(f)
+        print(f"Config loaded: {config}")
     except yaml.YAMLError as e:
         print(f"YAML error in {design_path}: {e}")
         return None
@@ -320,11 +343,13 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
             mat_data = resources[mat_key].copy()
             mat_data["suppliers"] = resources.get("suppliers", {}).get(mat_key, [])
             enriched_materials.append(mat_data)
+            print(f"Enriched material: {mat_key}")
     
     patterns = []
     cone_pattern = None
     cone_instructions = ""
     if config.get("shape", "").lower() == "cone":
+        print(f"Generating cone pattern for {config.get('name')}")
         cone_pattern = generate_cone_pattern(config)
         cone_instructions = generate_cone_instructions(config, cone_pattern)
         for piece in cone_pattern['pieces']:
@@ -341,11 +366,19 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
             ]
             dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
             patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
+            print(f"Generated SVG for gore {piece['name']}")
     else:
         patterns = [generate_star_pattern(config)]
+        print(f"Generated star pattern for non-cone shape")
     
     env = Environment(loader=FileSystemLoader("Core/web/templates"))
-    template = env.get_template("article_template.html")
+    print(f"Jinja2 loader path: Core/web/templates")
+    try:
+        template = env.get_template("article_template.html")
+        print(f"Loaded article_template.html")
+    except Exception as e:
+        print(f"Failed to load article_template.html: {e}")
+        return None
     
     html_content = template.render(
         config=config,
@@ -517,8 +550,49 @@ cat > Core/web/templates/result.html << 'EOF'
 </html>
 EOF
 
+# Create suppliers.yaml
+mkdir -p Core/configurations/resources
+cat > Core/configurations/resources/suppliers.yaml << 'EOF'
+tyvek:
+  name: Tyvek
+  type: Fabric
+  properties:
+    weight: 40
+    thickness: 0.2
+  article_notes:
+    - "Lightweight and durable for kites."
+rope:
+  name: Nylon Rope
+  type: Cord
+  properties:
+    weight: 10
+carbon_rods:
+  name: Carbon Rods
+  type: Frame
+  properties:
+    weight: 5
+suppliers:
+  tyvek:
+    - name: "KiteFabrics EU"
+      url: "https://kitefabrics.eu"
+      regions: ["EU"]
+      notes: "High-quality ripstop"
+      currency: "EUR"
+  rope:
+    - name: "KiteShop NL"
+      url: "https://kiteshop.nl"
+      regions: ["EU"]
+      notes: "Strong nylon cord"
+      currency: "EUR"
+  carbon_rods:
+    - name: "KiteParts EU"
+      url: "https://kiteparts.eu"
+      regions: ["EU"]
+      notes: "Lightweight rods"
+      currency: "EUR"
+EOF
+
 # Ensure helix_spinner.yaml
-mkdir -p projects/line_laundry/spinners
 cat > projects/line_laundry/spinners/helix_spinner.yaml << 'EOF'
 name: "Helix Spinner"
 shape: "cone"
@@ -540,8 +614,11 @@ article_notes:
   - "Use carbon rods for a lightweight, stiff frame."
 EOF
 
+# Remove frosch.yaml to focus on basics
+rm -f projects/line_laundry/drogues/frosch.yaml
+
 # Verify template permissions and existence
-chmod -R u+rw Core/web/templates
+chmod -R u+rw Core/web/templates Core/configurations/resources projects
 ls -l Core/web/templates/designs.html || echo "designs.html not found"
 if [ -f Core/web/templates/designs.html ]; then
     echo "designs.html exists at $(realpath Core/web/templates/designs.html)"
@@ -564,21 +641,22 @@ git add app.py Core/applications/__init__.py Core/applications/article_generator
 git status
 
 # Commit changes
-git commit -m "Fix TemplateNotFound, ensure designs.html, debug template path
+git commit -m "Fix TemplateNotFound, debug template path, focus on helix_spinner
 
 - Ensured designs.html with proper HTML structure.
-- Added template_folder='Core/web/templates' and debug logging in app.py.
+- Added extensive debug logging in app.py and article_generator.py.
+- Removed frosch.yaml to focus on basics.
 - Updated helix_spinner.yaml with cone parameters.
-- Committed uncommitted changes (__init__.py, article_generator.py).
-- Fixed PR base branch to 'main'.
-- Added template path verification."
+- Added suppliers.yaml with EUR currency.
+- Committed uncommitted changes.
+- Fixed PR to target 'main'."
 
 # Push to feature branch
 git push origin feature/add-resources-and-article-generator --force
 
 # Create PR
 if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
-    gh pr create --title "fix: TemplateNotFound, cone integration" --body "Fixed TemplateNotFound by ensuring designs.html with proper HTML structure, setting template_folder='Core/web/templates' in app.py, and adding debug logging. Integrated cone_generator.py for cone shapes with A4 SVGs. Updated helix_spinner.yaml with cone parameters. Committed uncommitted changes. Test: ./run.sh, http://127.0.0.1:5001/designs, http://127.0.0.1:5001/generate?path=projects/line_laundry/spinners/helix_spinner.yaml, check output/Helix_Spinner.html." --base main
+    gh pr create --title "fix: TemplateNotFound, cone integration" --body "Fixed TemplateNotFound by ensuring designs.html with proper HTML structure, setting template_folder='Core/web/templates' in app.py, and adding debug logging. Removed frosch.yaml to focus on basics. Integrated cone_generator.py for cone shapes with A4 SVGs. Updated helix_spinner.yaml with cone parameters. Added suppliers.yaml with EUR currency. Test: ./run.sh, http://127.0.0.1:5001/designs, http://127.0.0.1:5001/generate?path=projects/line_laundry/spinners/helix_spinner.yaml, check output/Helix_Spinner.html." --base main
 else
     echo "GitHub CLI not authenticated. Run 'gh auth login' or create PR manually at https://github.com/edjuh/kite_laundry/pull/new/feature/add-resources-and-article-generator"
 fi

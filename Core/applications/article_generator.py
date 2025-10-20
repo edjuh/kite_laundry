@@ -10,8 +10,10 @@ from Core.pattern_generators.cone_generator import generate_cone_pattern, genera
 def load_resources(resources_dir="Core/configurations/resources"):
     resources = {}
     resources_path = Path(resources_dir)
+    print(f"Loading resources from: {resources_path}")
     for yaml_file in resources_path.rglob("*.yaml"):
         if yaml_file.stem != "suppliers":
+            print(f"Loading resource: {yaml_file}")
             try:
                 with open(yaml_file, "r") as f:
                     resources[yaml_file.stem] = yaml.safe_load(f)
@@ -21,6 +23,7 @@ def load_resources(resources_dir="Core/configurations/resources"):
                 print(f"File not found {yaml_file}: {e}")
     suppliers_path = resources_path / "suppliers.yaml"
     if suppliers_path.exists():
+        print(f"Loading suppliers: {suppliers_path}")
         try:
             with open(suppliers_path, "r") as f:
                 resources["suppliers"] = yaml.safe_load(f)
@@ -29,6 +32,7 @@ def load_resources(resources_dir="Core/configurations/resources"):
     return resources
 
 def generate_star_pattern(config):
+    print(f"Generating star pattern for config: {config.get('name')}")
     width = config.get("dimensions", {}).get("width", 30) * 10
     segments = config.get("segments", 8)
     dwg = svgwrite.Drawing(size=(width, width))
@@ -48,6 +52,7 @@ def generate_star_pattern(config):
     return {"name": "Star Template (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()}
 
 def generate_article(design_yaml_path, output_dir="output", resources=None):
+    print(f"Generating article for: {design_yaml_path}")
     if resources is None:
         resources = load_resources()
     
@@ -55,6 +60,7 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
     try:
         with open(design_path, "r") as f:
             config = yaml.safe_load(f)
+        print(f"Config loaded: {config}")
     except yaml.YAMLError as e:
         print(f"YAML error in {design_path}: {e}")
         return None
@@ -68,11 +74,13 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
             mat_data = resources[mat_key].copy()
             mat_data["suppliers"] = resources.get("suppliers", {}).get(mat_key, [])
             enriched_materials.append(mat_data)
+            print(f"Enriched material: {mat_key}")
     
     patterns = []
     cone_pattern = None
     cone_instructions = ""
     if config.get("shape", "").lower() == "cone":
+        print(f"Generating cone pattern for {config.get('name')}")
         cone_pattern = generate_cone_pattern(config)
         cone_instructions = generate_cone_instructions(config, cone_pattern)
         for piece in cone_pattern['pieces']:
@@ -89,11 +97,19 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
             ]
             dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
             patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
+            print(f"Generated SVG for gore {piece['name']}")
     else:
         patterns = [generate_star_pattern(config)]
+        print(f"Generated star pattern for non-cone shape")
     
     env = Environment(loader=FileSystemLoader("Core/web/templates"))
-    template = env.get_template("article_template.html")
+    print(f"Jinja2 loader path: Core/web/templates")
+    try:
+        template = env.get_template("article_template.html")
+        print(f"Loaded article_template.html")
+    except Exception as e:
+        print(f"Failed to load article_template.html: {e}")
+        return None
     
     html_content = template.render(
         config=config,
