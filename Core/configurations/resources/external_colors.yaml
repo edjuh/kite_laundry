@@ -1,0 +1,17 @@
+external_colors:
+  red:
+    hex: "#FF0000"
+    supplier: "https://ripstopbytheroll.com/collections/ripstop-nylon"
+  blue:
+    hex: "#0000FF"
+    supplier: "https://kiteplans.org/colors/blue.html"
+  green:
+    hex: "#00FF00"
+    supplier: "https://drachenbernhard.de/colors/green.html"
+ripstop_samples:
+  standard:
+    weight: 40
+    supplier: "https://ripstopbytheroll.com/products/1-5-oz-ripstop-nylon"
+  heavy:
+    weight: 60
+    supplier: "https://kiteplans.org/ripstop/heavy"

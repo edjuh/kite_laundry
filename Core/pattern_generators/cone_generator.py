@@ -50,6 +50,7 @@ def generate_cone_pattern(parameters):
     pieces = []
     for i in range(num_gores):
         gore_letter = chr(65 + i)
+gore_piece["curve_radius"] = gore_height / 2  # Approximate curve for SVG
         gore_piece = {
             "name": gore_letter,
             "description": f"Gore panel {i + 1} of {num_gores}",

@@ -1,0 +1,25 @@
+name: "Helix Spinner Xmas"
+shape: "cone"
+materials:
+  - name: "ripstop_nylon"
+    color: "red_green_gold"
+    quantity: 1.5  # m2
+  - name: "carbon_rods"
+    length: 300  # mm
+  - name: "rope"
+    length: 2000  # mm
+colors: ["red", "green", "gold"]  # Xmas theme
+dimensions:
+  diameter: 300
+  length: 1000
+  segments: 8
+attachment:
+  type: "ring"
+  bridle_length: 15
+article_notes:
+  - "Xmas edition with festive colors."
+scale: 1.2  # Scale up 20%
+inlets:
+  type: "circular"
+  size: 50  # mm diameter for wind fill
+drag_factor: 0.5  # Relative drag for usability

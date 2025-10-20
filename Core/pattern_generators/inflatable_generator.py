@@ -1,48 +1,51 @@
 # -*- coding: utf-8 -*-
-# Core/pattern_generators/inflatable_generator.py
-import math
+"""
+Inflatable Generator for Kite Laundry
+Generates patterns for advanced inflatable designs like animals (frog, fish)
+"""
+def generate_inflatable_pattern(parameters):
+    # Placeholder for advanced inflatable (e.g., frog shape from Drachen Bernhard)
+    # Based on search: Multi-gore body, attached fins/eyes
+    num_gores = parameters.get("num_gores", 8)
+    pieces = []
+    for i in range(num_gores):
+        gore_letter = chr(65 + i)
+        gore_piece = {
+            "name": gore_letter,
+            "description": f"Body gore for inflatable",
+            "shape": "curved_gore",
+            "base_width_mm": 200,
+            "tip_width_mm": 50,
+            "height_mm": 1000,
+        }
+        pieces.append(gore_piece)
+    # Add fins, eyes
+    pieces.append({"name": "Fins", "shape": "triangle", "count": 4, "width_mm": 150, "height_mm": 300})
+    pieces.append({"name": "Eyes", "shape": "circle", "count": 2, "diameter_mm": 100})
+    result = {
+        "pieces": pieces,
+        "total_material": {"area_m2": 2.5},  # Approximate for large inflatable
+    }
+    return result
 
-import yaml
-from svgwrite import Drawing
+def generate_inflatable_instructions(parameters, pattern):
+    instructions = f"""
+## {parameters.get("name", "Inflatable Drogue")} Instructions
 
+### Materials Required
+- Ripstop nylon: approximately {pattern['total_material']['area_m2']:.2f} m²
+- Thread, seam tape
+- Plastic eyes, fins attachments
 
-class InflatablePatternGenerator:
-    def __init__(self, config_path):
-        with open(config_path) as f:
-            self.config = yaml.safe_load(f)
+### Cutting
+Cut body gores, fins, eyes.
 
-    def generate_pattern(self):
-        shape = self.config["shape"]
+### Sewing
+Sew gores for body, attach fins and attach eyes for animal shape.
 
-        if shape == "tube":
-            return self._generate_tube_pattern()
-        elif shape == "windsock":
-            return self._generate_windsock_pattern()
-        elif shape == "animal":
-            return self._generate_animal_pattern()
+### Inflation
+Add inlets for wind fill, ensure drag for creme de la creme effect.
 
-    def _generate_tube_pattern(self):
-        # Calculate dimensions from config
-        circumference = math.pi * self.config["diameter"]
-        length = self.config["length"]
-
-        # Create SVG pattern
-        dwg = Drawing(
-            filename=f"{self.config['name']}_pattern.svg",
-            size=(circumference + 2, length + 2),
-        )
-
-        # Draw rectangle (tube pattern)
-        dwg.add(
-            dwg.rect(
-                insert=(1, 1),
-                size=(circumference, length),
-                fill="white",
-                stroke="black",
-            )
-        )
-
-        # Add seam allowance indicators
-        # ...
-
-        return dwg
+Happy flying!
+"""
+    return instructions
