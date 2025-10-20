@@ -48,12 +48,10 @@ pip install -r requirements.txt
 
 ### Usage
 
-1. Prepare your design in a YAML configuration file (see Configuration section)
-2. Run the script with your desired parameters:
-```bash
-python main.py --config your_design.yaml --output ./output
-```
-3. Open the generated HTML file in your web browser to view templates and instructions
+1. Start with run.sh
+2. Check on the console whether all is functional
+3. Open web browser on : http://127.0.0.1:5001
+4. Start designing
 
 ## Configuration
 
