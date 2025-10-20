@@ -3,7 +3,7 @@ cd /Users/ed/kite_laundry-fork
 
 # Ensure directories
 mkdir -p Core/applications Core/web/templates Core/pattern_generators Core/pattern_templates
-mkdir -p projects/line_laundry/spinners
+mkdir -p projects/line_laundry/tube projects/line_laundry/spinners
 touch Core/applications/__init__.py
 touch Core/pattern_generators/__init__.py
 touch Core/pattern_templates/__init__.py
@@ -16,7 +16,7 @@ Jinja2==3.1.4
 svgwrite==1.4.3
 EOF
 
-# Update app.py with enhanced debug logging
+# Update app.py with debug logging
 cp app.py app.py.bak
 cat > app.py << 'EOF'
 from flask import Flask, render_template, request, redirect, url_for
@@ -350,23 +350,27 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
     cone_instructions = ""
     if config.get("shape", "").lower() == "cone":
         print(f"Generating cone pattern for {config.get('name')}")
-        cone_pattern = generate_cone_pattern(config)
-        cone_instructions = generate_cone_instructions(config, cone_pattern)
-        for piece in cone_pattern['pieces']:
-            dwg = svgwrite.Drawing(size=(210, 297))  # A4 mm
-            points = [
-                (piece['seam_allowance'], piece['seam_allowance']),
-                (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
-                (piece['tip_width_mm'] + piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance']),
-                (piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance'])
-            ] if piece['shape'] == "trapezoid" else [
-                (piece['seam_allowance'], piece['seam_allowance']),
-                (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
-                (piece['base_width_mm'] / 2, piece['height_mm'] - piece['seam_allowance'])
-            ]
-            dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
-            patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
-            print(f"Generated SVG for gore {piece['name']}")
+        try:
+            cone_pattern = generate_cone_pattern(config)
+            cone_instructions = generate_cone_instructions(config, cone_pattern)
+            for piece in cone_pattern['pieces']:
+                dwg = svgwrite.Drawing(size=(210, 297))  # A4 mm
+                points = [
+                    (piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['tip_width_mm'] + piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance']),
+                    (piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance'])
+                ] if piece['shape'] == "trapezoid" else [
+                    (piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] / 2, piece['height_mm'] - piece['seam_allowance'])
+                ]
+                dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
+                patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
+                print(f"Generated SVG for gore {piece['name']}")
+        except ValueError as e:
+            print(f"Error generating cone pattern: {e}")
+            return None
     else:
         patterns = [generate_star_pattern(config)]
         print(f"Generated star pattern for non-cone shape")
@@ -399,7 +403,7 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
     return str(output_path)
 EOF
 
-# Create article_template.html
+# Update article_template.html to handle missing attachment
 cat > Core/web/templates/article_template.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
@@ -461,8 +465,11 @@ cat > Core/web/templates/article_template.html << 'EOF'
         {% for note in article_notes %}
             <li>{{ note }}</li>
         {% endfor %}
-        <li>Sew pieces with a straight stitch, using a 0.5cm seam allowance.</li>
-        <li>Attach to kite line via {{ config.attachment.type|default('ring') }} with a {{ config.attachment.bridle_length|default(15) }}cm bridle.</li>
+        {% if config.attachment %}
+            <li>Attach to kite line via {{ config.attachment.type|default('ring') }} with a {{ config.attachment.bridle_length|default(15) }}cm bridle.</li>
+        {% else %}
+            <li>Attach to kite line using a standard ring with a 15cm bridle (adjust as needed).</li>
+        {% endif %}
     </ol>
     
     {% if cone_instructions %}
@@ -592,6 +599,24 @@ suppliers:
       currency: "EUR"
 EOF
 
+# Create tube.yaml (sample, adjust if you share the actual content)
+cat > projects/line_laundry/tube/tube.yaml << 'EOF'
+name: "Tube"
+shape: "cone"
+materials:
+  - "tyvek"
+  - "rope"
+colors: ["blue", "white"]
+diameter: 400
+length: 1200
+num_gores: 6
+seam_allowance: 10
+tip_diameter: 0
+article_notes:
+  - "Ensure smooth curves for aerodynamic shape."
+  - "Use lightweight rope for bridle."
+EOF
+
 # Ensure helix_spinner.yaml
 cat > projects/line_laundry/spinners/helix_spinner.yaml << 'EOF'
 name: "Helix Spinner"
@@ -619,7 +644,14 @@ rm -f projects/line_laundry/drogues/frosch.yaml
 
 # Verify template permissions and existence
 chmod -R u+rw Core/web/templates Core/configurations/resources projects
+ls -l Core/web/templates/article_template.html || echo "article_template.html not found"
 ls -l Core/web/templates/designs.html || echo "designs.html not found"
+if [ -f Core/web/templates/article_template.html ]; then
+    echo "article_template.html exists at $(realpath Core/web/templates/article_template.html)"
+else
+    echo "Failed to create article_template.html – check permissions in Core/web/templates/"
+    exit 1
+fi
 if [ -f Core/web/templates/designs.html ]; then
     echo "designs.html exists at $(realpath Core/web/templates/designs.html)"
 else
@@ -631,24 +663,25 @@ fi
 echo "Checking Flask template path..."
 python3 - << 'EOF'
 from flask import Flask
+from pathlib import Path
 app = Flask(__name__, template_folder='Core/web/templates')
 print(f"Flask template folder: {app.template_folder}")
-print(f"Full path to designs.html: {app.template_folder}/designs.html")
+print(f"Full path to designs.html: {Path(app.template_folder) / 'designs.html'}")
+print(f"Full path to article_template.html: {Path(app.template_folder) / 'article_template.html'}")
 EOF
 
 # Stage all changes
-git add app.py Core/applications/__init__.py Core/applications/article_generator.py Core/web/templates/*.html Core/pattern_generators/__init__.py Core/pattern_generators/cone_generator.py Core/configurations/resources/suppliers.yaml projects/line_laundry/spinners/helix_spinner.yaml requirements.txt fix_templates.sh
+git add app.py Core/applications/__init__.py Core/applications/article_generator.py Core/web/templates/*.html Core/pattern_generators/__init__.py Core/pattern_generators/cone_generator.py Core/configurations/resources/suppliers.yaml projects/line_laundry/tube/tube.yaml projects/line_laundry/spinners/helix_spinner.yaml requirements.txt fix_templates.sh
 git status
 
 # Commit changes
-git commit -m "Fix TemplateNotFound, debug template path, focus on helix_spinner
+git commit -m "Fix UndefinedError in article_template.html, add tube.yaml
 
-- Ensured designs.html with proper HTML structure.
-- Added extensive debug logging in app.py and article_generator.py.
+- Handled missing 'attachment' field in article_template.html with Jinja2 conditional.
+- Added debug logging in app.py and article_generator.py.
+- Created sample tube.yaml with cone parameters.
 - Removed frosch.yaml to focus on basics.
-- Updated helix_spinner.yaml with cone parameters.
-- Added suppliers.yaml with EUR currency.
-- Committed uncommitted changes.
+- Ensured designs.html and article_template.html exist.
 - Fixed PR to target 'main'."
 
 # Push to feature branch
@@ -656,15 +689,17 @@ git push origin feature/add-resources-and-article-generator --force
 
 # Create PR
 if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
-    gh pr create --title "fix: TemplateNotFound, cone integration" --body "Fixed TemplateNotFound by ensuring designs.html with proper HTML structure, setting template_folder='Core/web/templates' in app.py, and adding debug logging. Removed frosch.yaml to focus on basics. Integrated cone_generator.py for cone shapes with A4 SVGs. Updated helix_spinner.yaml with cone parameters. Added suppliers.yaml with EUR currency. Test: ./run.sh, http://127.0.0.1:5001/designs, http://127.0.0.1:5001/generate?path=projects/line_laundry/spinners/helix_spinner.yaml, check output/Helix_Spinner.html." --base main
+    gh pr create --title "fix: UndefinedError, cone integration" --body "Fixed UndefinedError by handling missing 'attachment' in article_template.html. Added sample tube.yaml with cone parameters. Removed frosch.yaml to focus on basics. Ensured designs.html and article_template.html exist with debug logging. Integrated cone_generator.py for cone shapes with A4 SVGs. Test: ./run.sh, http://127.0.0.1:5001/designs, http://127.0.0.1:5001/generate?path=projects/line_laundry/spinners/helix_spinner.yaml, http://127.0.0.1:5001/generate?path=projects/line_laundry/tube/tube.yaml, check output/Helix_Spinner.html and output/Tube.html." --base main
 else
     echo "GitHub CLI not authenticated. Run 'gh auth login' or create PR manually at https://github.com/edjuh/kite_laundry/pull/new/feature/add-resources-and-article-generator"
 fi
 
 # Check templates
-if [ -f Core/web/templates/designs.html ]; then
-    echo "designs.html created successfully at $(realpath Core/web/templates/designs.html)"
+if [ -f Core/web/templates/designs.html ] && [ -f Core/web/templates/article_template.html ]; then
+    echo "Templates created successfully:"
+    echo "designs.html at $(realpath Core/web/templates/designs.html)"
+    echo "article_template.html at $(realpath Core/web/templates/article_template.html)"
 else
-    echo "Failed to create designs.html – check permissions in Core/web/templates/"
+    echo "Failed to create templates – check permissions in Core/web/templates/"
     exit 1
 fi

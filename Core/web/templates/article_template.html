@@ -58,8 +58,11 @@
         {% for note in article_notes %}
             <li>{{ note }}</li>
         {% endfor %}
-        <li>Sew pieces with a straight stitch, using a 0.5cm seam allowance.</li>
-        <li>Attach to kite line via {{ config.attachment.type|default('ring') }} with a {{ config.attachment.bridle_length|default(15) }}cm bridle.</li>
+        {% if config.attachment %}
+            <li>Attach to kite line via {{ config.attachment.type|default('ring') }} with a {{ config.attachment.bridle_length|default(15) }}cm bridle.</li>
+        {% else %}
+            <li>Attach to kite line using a standard ring with a 15cm bridle (adjust as needed).</li>
+        {% endif %}
     </ol>
     
     {% if cone_instructions %}

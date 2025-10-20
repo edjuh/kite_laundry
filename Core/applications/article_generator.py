@@ -81,23 +81,27 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
     cone_instructions = ""
     if config.get("shape", "").lower() == "cone":
         print(f"Generating cone pattern for {config.get('name')}")
-        cone_pattern = generate_cone_pattern(config)
-        cone_instructions = generate_cone_instructions(config, cone_pattern)
-        for piece in cone_pattern['pieces']:
-            dwg = svgwrite.Drawing(size=(210, 297))  # A4 mm
-            points = [
-                (piece['seam_allowance'], piece['seam_allowance']),
-                (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
-                (piece['tip_width_mm'] + piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance']),
-                (piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance'])
-            ] if piece['shape'] == "trapezoid" else [
-                (piece['seam_allowance'], piece['seam_allowance']),
-                (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
-                (piece['base_width_mm'] / 2, piece['height_mm'] - piece['seam_allowance'])
-            ]
-            dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
-            patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
-            print(f"Generated SVG for gore {piece['name']}")
+        try:
+            cone_pattern = generate_cone_pattern(config)
+            cone_instructions = generate_cone_instructions(config, cone_pattern)
+            for piece in cone_pattern['pieces']:
+                dwg = svgwrite.Drawing(size=(210, 297))  # A4 mm
+                points = [
+                    (piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['tip_width_mm'] + piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance']),
+                    (piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance'])
+                ] if piece['shape'] == "trapezoid" else [
+                    (piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] / 2, piece['height_mm'] - piece['seam_allowance'])
+                ]
+                dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
+                patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
+                print(f"Generated SVG for gore {piece['name']}")
+        except ValueError as e:
+            print(f"Error generating cone pattern: {e}")
+            return None
     else:
         patterns = [generate_star_pattern(config)]
         print(f"Generated star pattern for non-cone shape")
