@@ -1,0 +1,20 @@
+name: "Kleiner Frosch"
+shape: "cone"
+description: "Frog-shaped drogue inspired by drachenbernhard.de"
+materials:
+  - "ripstop_nylon"
+  - "webbing"
+  - "carbon_rods"
+colors: ["green", "yellow"]
+diameter: 600
+length: 3500
+num_gores: 8
+seam_allowance: 10
+tip_diameter: 50
+attachment:
+  type: "ring"
+  bridle_length: 20
+article_notes:
+  - "Use green ripstop for body, yellow for accents."
+  - "Add eyes with white fabric circles and black pupils."
+  - "Ensure gores are symmetrical for balanced inflation."

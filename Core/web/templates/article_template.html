@@ -11,6 +11,7 @@
         a:hover { text-decoration: underline; }
         .template-page { page-break-after: always; margin-bottom: 20px; }
         img { max-width: 100%; height: auto; }
+        .checklist { list-style: square; }
     </style>
 </head>
 <body>
@@ -38,10 +39,11 @@
     </ul>
     
     <h2>Cutting Templates</h2>
+    <p>Print on A4 paper (multiple sheets for large designs).</p>
     {% if patterns %}
         {% for pattern in patterns %}
             <div class="template-page">
-                <h3>{{ pattern.name }} (A4 Printable)</h3>
+                <h3>{{ pattern.name }}</h3>
                 <p><img src="data:image/svg+xml;base64,{{ pattern.svg_base64 }}" alt="{{ pattern.name }} Template"></p>
             </div>
         {% endfor %}
@@ -59,6 +61,10 @@
         <li>Sew pieces with a straight stitch, using a 0.5cm seam allowance.</li>
         <li>Attach to kite line via {{ config.attachment.type|default('ring') }} with a {{ config.attachment.bridle_length|default(15) }}cm bridle.</li>
     </ol>
+    
+    {% if cone_instructions %}
+        {{ cone_instructions | safe }}
+    {% endif %}
     
     <h2>Visual Reference</h2>
     <p>Diagram: [Placeholder for additional visuals, e.g., frog shape]</p>

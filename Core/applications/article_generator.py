@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from base64 import b64encode
+from Core.pattern_generators.cone_generator import generate_cone_pattern, generate_cone_instructions
 
 def load_resources(resources_dir="Core/configurations/resources"):
     resources = {}
@@ -68,7 +69,29 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
             mat_data["suppliers"] = resources.get("suppliers", {}).get(mat_key, [])
             enriched_materials.append(mat_data)
     
-    patterns = [generate_star_pattern(config)]  # Add more patterns for multi-page
+    patterns = []
+    cone_pattern = None
+    cone_instructions = ""
+    if config.get("shape", "").lower() == "cone":
+        cone_pattern = generate_cone_pattern(config)
+        cone_instructions = generate_cone_instructions(config, cone_pattern)
+        for piece in cone_pattern['pieces']:
+            dwg = svgwrite.Drawing(size=(210, 297))  # A4 mm
+            points = [
+                (seam_allowance, seam_allowance),
+                (piece['base_width_mm'] - seam_allowance, seam_allowance),
+                (piece['tip_width_mm'] + seam_allowance, piece['height_mm'] - seam_allowance),
+                (seam_allowance, piece['height_mm'] - seam_allowance)
+            ] if piece['shape'] == "trapezoid" else [
+                (seam_allowance, seam_allowance),
+                (piece['base_width_mm'] - seam_allowance, seam_allowance),
+                (piece['base_width_mm'] / 2, piece['height_mm'] - seam_allowance)
+            ]
+            dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
+            patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
+    else:
+        patterns = [generate_star_pattern(config)]
+    
     env = Environment(loader=FileSystemLoader("Core/web/templates"))
     template = env.get_template("article_template.html")
     
@@ -77,7 +100,9 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
         materials=enriched_materials,
         patterns=patterns,
         article_notes=config.get("article_notes", []),
-        generated_date="2025-10-20"
+        generated_date="2025-10-20",
+        cone_pattern=cone_pattern,
+        cone_instructions=cone_instructions
     )
     
     output_path = Path(output_dir) / f"{config['name'].replace(' ', '_')}.html"
