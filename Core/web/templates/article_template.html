@@ -19,6 +19,12 @@
     <p><strong>Description:</strong> {{ config.description|default('Custom kite laundry design for single-line kites.') }}</p>
     <p><strong>Generated on:</strong> {{ generated_date }}</p>
     
+<h2>Color Samples</h2>
+<ul>
+{% for color in config.colors %}
+    <li>{{ color }} (Hex: {{ resources.external_colors.external_colors[color].hex }}) - <a href="{{ resources.external_colors.external_colors[color].supplier }}">Buy from External Supplier</a></li>
+{% endfor %}
+</ul>
     <h2>Materials Needed</h2>
     <ul>
         {% for mat in materials %}

@@ -1,36 +1,21 @@
 # -*- coding: utf-8 -*-
 """
 Inflatable Generator for Kite Laundry
-Generates patterns for advanced inflatable designs like animals (frog, fish)
+Generates single templates for advanced inflatable designs
 """
 def generate_inflatable_pattern(parameters):
-    # Placeholder for advanced inflatable (e.g., frog shape from Drachen Bernhard)
-    # Based on search: Multi-gore body, attached fins/eyes
     num_gores = parameters.get("num_gores", 8)
-    pieces = []
-    for i in range(num_gores):
-        gore_letter = chr(65 + i)
-        gore_piece = {
-            "name": gore_letter,
-            "description": f"Body gore for inflatable",
-            "shape": "curved_gore",
-            "base_width_mm": 200,
-            "tip_width_mm": 50,
-            "height_mm": 1000,
-        }
-        pieces.append(gore_piece)
-    # Add fins, eyes
-    pieces.append({"name": "Fins", "shape": "triangle", "count": 4, "width_mm": 150, "height_mm": 300})
-    pieces.append({"name": "Eyes", "shape": "circle", "count": 2, "diameter_mm": 100})
-    result = {
-        "pieces": pieces,
-        "total_material": {"area_m2": 2.5},  # Approximate for large inflatable
-    }
-    return result
+    pieces = [
+        {"name": "Body Gore Template", "shape": "curved_gore", "base_width_mm": 200, "tip_width_mm": 50, "height_mm": 1000, "count": num_gores},
+        {"name": "Fin Template", "shape": "triangle", "width_mm": 150, "height_mm": 300, "count": 4},
+        {"name": "Eye Template", "shape": "circle", "diameter_mm": 100, "count": 2}
+    ]
+    total_area_m2 = 2.5  # Approximate for large inflatable
+    return {"pieces": pieces, "total_material": {"area_m2": total_area_m2}}
 
 def generate_inflatable_instructions(parameters, pattern):
     instructions = f"""
-## {parameters.get("name", "Inflatable Drogue")} Instructions
+## {parameters.get('name', 'Inflatable Drogue')} Instructions
 
 ### Materials Required
 - Ripstop nylon: approximately {pattern['total_material']['area_m2']:.2f} m²
@@ -38,13 +23,16 @@ def generate_inflatable_instructions(parameters, pattern):
 - Plastic eyes, fins attachments
 
 ### Cutting
-Cut body gores, fins, eyes.
+- Cut {pattern['pieces'][0]['count']} body gores using template
+- Cut {pattern['pieces'][1]['count']} fins using template
+- Cut {pattern['pieces'][2]['count']} eyes using template
 
 ### Sewing
-Sew gores for body, attach fins and attach eyes for animal shape.
+- Sew body gores into shape, attach fins and eyes
+- Add inlets for wind fill
 
-### Inflation
-Add inlets for wind fill, ensure drag for creme de la creme effect.
+### Quality Check
+- Ensure inflation and drag
 
 Happy flying!
 """

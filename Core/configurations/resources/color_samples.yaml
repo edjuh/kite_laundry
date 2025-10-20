@@ -1,0 +1,20 @@
+colors:
+  red:
+    hex: "#FF0000"
+    supplier: "https://ripstop.eu/colors/red.html"
+  blue:
+    hex: "#0000FF"
+    supplier: "https://ripstop.eu/colors/blue.html"
+  green:
+    hex: "#00FF00"
+    supplier: "https://ripstop.eu/colors/green.html"
+  gold:
+    hex: "#FFD700"
+    supplier: "https://ripstop.eu/colors/gold.html"
+ripstop_samples:
+  standard:
+    weight: 40
+    supplier: "https://ripstop.eu/ripstop-40gsm.html"
+  heavy:
+    weight: 60
+    supplier: "https://ripstop.eu/ripstop-60gsm.html"
