@@ -44,7 +44,7 @@ def generate_star_pattern(config):
     colors = config.get("colors", ["red", "blue"])
     fill_color = colors[0] if colors else "none"
     dwg.add(dwg.polygon(points, fill=fill_color, stroke="black", stroke_width=2))
-    return {"name": "Star Template", "svg_base64": b64encode(dwg.tostring().encode()).decode()}
+    return {"name": "Star Template (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()}
 
 def generate_article(design_yaml_path, output_dir="output", resources=None):
     if resources is None:
@@ -68,7 +68,7 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
             mat_data["suppliers"] = resources.get("suppliers", {}).get(mat_key, [])
             enriched_materials.append(mat_data)
     
-    patterns = [generate_star_pattern(config)]
+    patterns = [generate_star_pattern(config)]  # Add more patterns for multi-page
     env = Environment(loader=FileSystemLoader("Core/web/templates"))
     template = env.get_template("article_template.html")
     
