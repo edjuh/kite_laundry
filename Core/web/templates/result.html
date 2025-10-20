@@ -101,7 +101,7 @@
         </div>
         <div class="metric-card">
             <h3>Fabric Area</h3>
-            <p>{{ "%.3f"|format(pattern_details.total_area_m2) }} m²</p>
+            <p>{{ "%.3f"|format(pattern_details.total_area_m2) if pattern_details.total_area_m2 is defined else "N/A" }} m²</p>
         </div>
     </div>
 

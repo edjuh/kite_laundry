@@ -1,0 +1,28 @@
+--- article_generator.py.orig
++++ article_generator.py
+@@ -1,4 +1,3 @@
+-# import math  # F401: Removed unused import
+ from Core.pattern_generators.bol_generator import (generate_bol_instructions,
+                                                    generate_bol_pattern)
+@@ -82,7 +81,6 @@ def estimate_construction_time(geometry_type, num_pieces):
+     base_time = 60  # F841: Removed unused variable
+     if geometry_type == "pipe":
+         if num_pieces == 1:
+             return "30-45 minutes"
+@@ -113,7 +111,7 @@ def generate_construction_tips(geometry_type, parameters):
+     if geometry_type == "bol":
+         num_gores = parameters.get("num_gores", 8)  # F841: Used variable
+         tips.extend([
+             "Use walking foot for even fabric feed on curves",
+-            "Pin every 5-10cm when sewing curved seams",  # Updated to use num_gores
++            f"Pin every 5-10cm when sewing {num_gores} curved seams",
+             "Test rotation before finalizing bridle attachments",
+             "Balance is crucial - ensure all gores are identical",
+         ])
+@@ -206,7 +204,7 @@ def generate_color_information(colors):
+     color_info = {
+         "selected_colors": colors,
+         "pattern_notes": f"Multi-color design with {len(colors)} colors",
+-        "visibility_tips": "Good visibility with selected color combination",  # E231: Added spaces
++        "visibility_tips": "Good visibility with selected color combination",
+     }
