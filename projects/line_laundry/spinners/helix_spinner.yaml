@@ -1,0 +1,19 @@
+name: "Helix Spinner"
+material: "ripstop_nylon"
+colors: ["DPIC040", "DPIC031", "DPIC046"]  # Red, White, Royal Blue
+geometry:
+  type: "pipe"
+parameters:
+  diameter: 300  # mm
+  length: 1200  # mm
+  seam_allowance: 10  # mm
+  segments: 12
+attachment:
+  type: "ring"
+  bridle_length: 20  # cm
+description: "A long, cylindrical spinner with alternating red, white, and blue segments for a vibrant spiral effect in high winds."
+author: "Kite Enthusiast"
+version: "1.0"
+wind_conditions:
+  min_speed: 10  # mph
+  max_speed: 20

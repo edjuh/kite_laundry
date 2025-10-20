@@ -1,0 +1,24 @@
+name: "Starburst Drogue"
+material: "ripstop_nylon_icarex"
+colors: ["DPIC057", "DPIC060"]  # Fluor Yellow, Fluor Orange
+geometry:
+  type: "cone"
+parameters:
+  diameter: 400  # mm
+  length: 600  # mm
+  num_gores: 8
+  seam_allowance: 10
+attachment:
+  type: "swivel"
+  bridle_length: 15  # cm
+drogue:
+  shape: "conical"
+  diameter: 400
+  length: 600
+  segments: 8
+description: "A conical drogue with fluorescent yellow and orange for high visibility and kite stability in moderate winds."
+author: "Kite Enthusiast"
+version: "1.0"
+wind_conditions:
+  min_speed: 8
+  max_speed: 15

@@ -1,0 +1,18 @@
+name: "Bol Orb"
+material: "ripstop_nylon"
+colors: ["DPIC052", "DPIC058", "DPIC033"]  # Purple, Fluor Green, Dark Grey
+geometry:
+  type: "bol"
+parameters:
+  diameter: 500  # mm
+  num_gores: 12
+  seam_allowance: 10
+attachment:
+  type: "ring"
+  bridle_length: 25  # cm
+description: "A spherical bol with vibrant purple, fluorescent green, and dark grey gores for intricate spinning patterns."
+author: "Kite Enthusiast"
+version: "1.0"
+wind_conditions:
+  min_speed: 5
+  max_speed: 12
