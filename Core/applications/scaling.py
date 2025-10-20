@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Scaling module for kite laundry designs
-Scales dimensions while maintaining usability (drag, inlet size)
+Scales dimensions while maintaining usability (e.g., drag, inlet size)
 """
 def calculate_drag(area_m2, shape_factor=1.0):
     """Estimate drag coefficient based on area and shape (simplified)"""
@@ -22,6 +22,11 @@ def scale_design(config, scale_factor):
     for key in ['diameter', 'length', 'bridle_length', 'tip_diameter']:
         if key in scaled:
             scaled[key] = scaled[key] * scale_factor
+    # Scale other params like diameter, length
+    for key in ['diameter', 'length', 'bridle_length', 'tip_diameter']:
+        if key in scaled:
+            scaled[key] = scaled[key] * scale_factor
+    # Scale area proportionally for drag
     if 'area' in scaled:
         scaled['area'] = scaled['area'] * (scale_factor ** 2)
     # Calculate drag for scaled design

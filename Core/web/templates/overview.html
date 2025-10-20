@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kite Laundry Overview</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; }
+        h1 { color: #4CAF50; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Kite Laundry Overview</h1>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Path</th>
+            <th>Generate</th>
+        </tr>
+        {% for design in designs %}
+            <tr>
+                <td>{{ design.name }}</td>
+                <td>{{ design.path }}</td>
+                <td><a href="{{ url_for('generate', path=design.full_path) }}">Generate</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <p><a href="{{ url_for('custom') }}">Custom Design</a> | <a href="https://github.com/edjuh/kite_laundry">GitHub</a></p>
+</body>
+</html>

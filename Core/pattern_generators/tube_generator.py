@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 Tube Pattern Generator for Kite Laundry
-Generates a single cutting template for tube-shaped line laundry
+Generates cutting patterns and instructions for tube-shaped line laundry (long pipe/tail)
 """
 import math
 
 def validate_parameters(parameters):
+    """Validate tube input parameters"""
     errors = []
     diameter = parameters.get("diameter", 400)
     if not isinstance(diameter, (int, float)) or diameter < 50 or diameter > 1000:
@@ -22,6 +23,7 @@ def validate_parameters(parameters):
     return errors
 
 def generate_tube_pattern(parameters):
+    """Generate a 2D pattern for a tube (long pipe/tail) based on parameters"""
     errors = validate_parameters(parameters)
     if errors:
         raise ValueError(f"Invalid parameters: {', '.join(errors)}")
@@ -41,10 +43,11 @@ def generate_tube_pattern(parameters):
         pieces.append({"name": "Ribbon Template", "shape": "rectangle", "width_mm": ribbon_width, "height_mm": ribbon_height, "count": ribbon_count})
     total_area_mm2 = (sleeve_width * sleeve_height) + (ribbon_count * ribbon_width * ribbon_height)
     total_area_m2 = total_area_mm2 / 1e6
-    return {
+    result = {
         "pieces": pieces,
         "total_material": {"area_m2": round(total_area_m2, 4)},
     }
+    return result
 
 def generate_tube_instructions(parameters, pattern):
     diameter = parameters.get("diameter", 400)
@@ -52,12 +55,12 @@ def generate_tube_instructions(parameters, pattern):
     seam_allowance_cm = parameters.get("seam_allowance", 10) / 10
     ribbon_count = parameters.get("ribbon_count", 4)
     instructions = f"""
-## {parameters.get('name', 'Tube Tail')} Instructions
+## {parameters.get("name", "Tube Tail")} Instructions
 
 ### Materials Required
 - Ripstop nylon: approximately {pattern['total_material']['area_m2']:.2f} m² (add 20% for waste)
 - Thread: high-strength polyester, matching colors
-- Seam tape (optional)
+- Seam tape (optional for edges)
 - Lightweight ring for attachment
 - Sewing machine recommended
 
@@ -67,8 +70,8 @@ def generate_tube_instructions(parameters, pattern):
 3. Plan colors
 
 ### Cutting
-- Cut 1 tube sleeve using template: {pattern['pieces'][0]['width_mm']/10:.1f}cm x {pattern['pieces'][0]['height_mm']/10:.1f}cm
-- Cut {ribbon_count} ribbons using template: {pattern['pieces'][1]['width_mm']/10:.1f}cm x {pattern['pieces'][1]['height_mm']/10:.1f}cm (if applicable)
+Cut 1 tube sleeve from template: {pattern['pieces'][0]['width_mm']/10:.1f}cm x {pattern['pieces'][0]['height_mm']/10:.1f}cm
+Cut {ribbon_count} ribbons from template: {pattern['pieces'][1]['width_mm']/10:.1f}cm x {pattern['pieces'][1]['height_mm']/10:.1f}cm (if applicable)
 
 ### Sewing
 1. Sew sleeve into cylinder with {seam_allowance_cm}cm seam
