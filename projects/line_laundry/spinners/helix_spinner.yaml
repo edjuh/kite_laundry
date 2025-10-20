@@ -1,13 +1,15 @@
 name: "Helix Spinner"
+shape: "cone"
 materials:
   - "tyvek"
   - "rope"
   - "carbon_rods"
 colors: ["red", "blue"]
-dimensions:
-  width: 30
-  height: 30
-  segments: 8
+diameter: 300
+length: 1000
+num_gores: 8
+seam_allowance: 10
+tip_diameter: 0
 attachment:
   type: "ring"
   bridle_length: 15

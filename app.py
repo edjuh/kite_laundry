@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 from Core.applications.article_generator import generate_article
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='Core/web/templates')
 PROJECTS_DIR = Path("projects")
 
 def get_yaml_designs():
@@ -33,6 +33,8 @@ def home():
 @app.route("/designs")
 def designs():
     yaml_designs = get_yaml_designs()
+    print(f"Template folder: {app.template_folder}")
+    print(f"Looking for designs.html in: {Path(app.template_folder) / 'designs.html'}")
     return render_template("designs.html", designs=yaml_designs)
 
 @app.route("/generate")
