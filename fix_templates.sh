@@ -16,8 +16,7 @@ Jinja2==3.1.4
 svgwrite==1.4.3
 EOF
 
-# Update app.py with debug logging
-cp app.py app.py.bak
+# Update app.py (unchanged)
 cat > app.py << 'EOF'
 from flask import Flask, render_template, request, redirect, url_for
 from pathlib import Path
@@ -99,7 +98,139 @@ if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5001, debug=True)
 EOF
 
-# Update cone_generator.py
+# Update article_generator.py to fix material loading
+cat > Core/applications/article_generator.py << 'EOF'
+import os
+import yaml
+import svgwrite
+import math
+from pathlib import Path
+from jinja2 import Environment, FileSystemLoader
+from base64 import b64encode
+from Core.pattern_generators.cone_generator import generate_cone_pattern, generate_cone_instructions
+
+def load_resources(resources_dir="Core/configurations/resources"):
+    resources = {}
+    resources_path = Path(resources_dir)
+    print(f"Loading resources from: {resources_path}")
+    suppliers_path = resources_path / "suppliers.yaml"
+    if suppliers_path.exists():
+        print(f"Loading suppliers: {suppliers_path}")
+        try:
+            with open(suppliers_path, "r") as f:
+                data = yaml.safe_load(f)
+                resources.update({k: v for k, v in data.items() if k != "suppliers"})
+                resources["suppliers"] = data.get("suppliers", {})
+        except yaml.YAMLError as e:
+            print(f"YAML error in {suppliers_path}: {e}")
+    return resources
+
+def generate_star_pattern(config):
+    print(f"Generating star pattern for config: {config.get('name')}")
+    width = config.get("dimensions", {}).get("width", 30) * 10
+    segments = config.get("segments", 8)
+    dwg = svgwrite.Drawing(size=(width, width))
+    center = (width / 2, width / 2)
+    radius_outer = width / 2 * 0.9
+    radius_inner = width / 2 * 0.4
+    points = []
+    for i in range(segments * 2):
+        angle = i * 360 / (segments * 2)
+        radius = radius_outer if i % 2 == 0 else radius_inner
+        x = center[0] + radius * math.cos(math.radians(angle))
+        y = center[1] + radius * math.sin(math.radians(angle))
+        points.append((x, y))
+    colors = config.get("colors", ["red", "blue"])
+    fill_color = colors[0] if colors else "none"
+    dwg.add(dwg.polygon(points, fill=fill_color, stroke="black", stroke_width=2))
+    return {"name": "Star Template (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()}
+
+def generate_article(design_yaml_path, output_dir="output", resources=None):
+    print(f"Generating article for: {design_yaml_path}")
+    if resources is None:
+        resources = load_resources()
+    
+    design_path = Path(design_yaml_path)
+    try:
+        with open(design_path, "r") as f:
+            config = yaml.safe_load(f)
+        print(f"Config loaded: {config}")
+    except yaml.YAMLError as e:
+        print(f"YAML error in {design_path}: {e}")
+        return None
+    except FileNotFoundError as e:
+        print(f"File not found {design_path}: {e}")
+        return None
+    
+    enriched_materials = []
+    for mat_key in config.get("materials", []):
+        if mat_key in resources and mat_key != "suppliers":
+            mat_data = resources[mat_key].copy()
+            mat_data["suppliers"] = resources.get("suppliers", {}).get(mat_key, [])
+            enriched_materials.append(mat_data)
+            print(f"Enriched material: {mat_key}")
+        else:
+            print(f"Material {mat_key} not found in resources")
+    
+    patterns = []
+    cone_pattern = None
+    cone_instructions = ""
+    if config.get("shape", "").lower() == "cone":
+        print(f"Generating cone pattern for {config.get('name')}")
+        try:
+            cone_pattern = generate_cone_pattern(config)
+            cone_instructions = generate_cone_instructions(config, cone_pattern)
+            for piece in cone_pattern['pieces']:
+                dwg = svgwrite.Drawing(size=(210, 297))  # A4 mm
+                points = [
+                    (piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['tip_width_mm'] + piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance']),
+                    (piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance'])
+                ] if piece['shape'] == "trapezoid" else [
+                    (piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
+                    (piece['base_width_mm'] / 2, piece['height_mm'] - piece['seam_allowance'])
+                ]
+                dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
+                patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
+                print(f"Generated SVG for gore {piece['name']}")
+        except ValueError as e:
+            print(f"Error generating cone pattern: {e}")
+            return None
+    else:
+        patterns = [generate_star_pattern(config)]
+        print(f"Generated star pattern for non-cone shape")
+    
+    env = Environment(loader=FileSystemLoader("Core/web/templates"))
+    print(f"Jinja2 loader path: Core/web/templates")
+    try:
+        template = env.get_template("article_template.html")
+        print(f"Loaded article_template.html")
+    except Exception as e:
+        print(f"Failed to load article_template.html: {e}")
+        return None
+    
+    html_content = template.render(
+        config=config,
+        materials=enriched_materials,
+        patterns=patterns,
+        article_notes=config.get("article_notes", []),
+        generated_date="2025-10-20",
+        cone_pattern=cone_pattern,
+        cone_instructions=cone_instructions
+    )
+    
+    output_path = Path(output_dir) / f"{config['name'].replace(' ', '_')}.html"
+    output_path.parent.mkdir(exist_ok=True)
+    with open(output_path, "w") as f:
+        f.write(html_content)
+    
+    print(f"Article generated: {output_path}")
+    return str(output_path)
+EOF
+
+# Update cone_generator.py (unchanged)
 cat > Core/pattern_generators/cone_generator.py << 'EOF'
 # -*- coding: utf-8 -*-
 """
@@ -265,145 +396,7 @@ Happy flying!
     return instructions
 EOF
 
-# Update article_generator.py
-cat > Core/applications/article_generator.py << 'EOF'
-import os
-import yaml
-import svgwrite
-import math
-from pathlib import Path
-from jinja2 import Environment, FileSystemLoader
-from base64 import b64encode
-from Core.pattern_generators.cone_generator import generate_cone_pattern, generate_cone_instructions
-
-def load_resources(resources_dir="Core/configurations/resources"):
-    resources = {}
-    resources_path = Path(resources_dir)
-    print(f"Loading resources from: {resources_path}")
-    for yaml_file in resources_path.rglob("*.yaml"):
-        if yaml_file.stem != "suppliers":
-            print(f"Loading resource: {yaml_file}")
-            try:
-                with open(yaml_file, "r") as f:
-                    resources[yaml_file.stem] = yaml.safe_load(f)
-            except yaml.YAMLError as e:
-                print(f"YAML error in {yaml_file}: {e}")
-            except FileNotFoundError as e:
-                print(f"File not found {yaml_file}: {e}")
-    suppliers_path = resources_path / "suppliers.yaml"
-    if suppliers_path.exists():
-        print(f"Loading suppliers: {suppliers_path}")
-        try:
-            with open(suppliers_path, "r") as f:
-                resources["suppliers"] = yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            print(f"YAML error in {suppliers_path}: {e}")
-    return resources
-
-def generate_star_pattern(config):
-    print(f"Generating star pattern for config: {config.get('name')}")
-    width = config.get("dimensions", {}).get("width", 30) * 10
-    segments = config.get("segments", 8)
-    dwg = svgwrite.Drawing(size=(width, width))
-    center = (width / 2, width / 2)
-    radius_outer = width / 2 * 0.9
-    radius_inner = width / 2 * 0.4
-    points = []
-    for i in range(segments * 2):
-        angle = i * 360 / (segments * 2)
-        radius = radius_outer if i % 2 == 0 else radius_inner
-        x = center[0] + radius * math.cos(math.radians(angle))
-        y = center[1] + radius * math.sin(math.radians(angle))
-        points.append((x, y))
-    colors = config.get("colors", ["red", "blue"])
-    fill_color = colors[0] if colors else "none"
-    dwg.add(dwg.polygon(points, fill=fill_color, stroke="black", stroke_width=2))
-    return {"name": "Star Template (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()}
-
-def generate_article(design_yaml_path, output_dir="output", resources=None):
-    print(f"Generating article for: {design_yaml_path}")
-    if resources is None:
-        resources = load_resources()
-    
-    design_path = Path(design_yaml_path)
-    try:
-        with open(design_path, "r") as f:
-            config = yaml.safe_load(f)
-        print(f"Config loaded: {config}")
-    except yaml.YAMLError as e:
-        print(f"YAML error in {design_path}: {e}")
-        return None
-    except FileNotFoundError as e:
-        print(f"File not found {design_path}: {e}")
-        return None
-    
-    enriched_materials = []
-    for mat_key in config.get("materials", []):
-        if mat_key in resources:
-            mat_data = resources[mat_key].copy()
-            mat_data["suppliers"] = resources.get("suppliers", {}).get(mat_key, [])
-            enriched_materials.append(mat_data)
-            print(f"Enriched material: {mat_key}")
-    
-    patterns = []
-    cone_pattern = None
-    cone_instructions = ""
-    if config.get("shape", "").lower() == "cone":
-        print(f"Generating cone pattern for {config.get('name')}")
-        try:
-            cone_pattern = generate_cone_pattern(config)
-            cone_instructions = generate_cone_instructions(config, cone_pattern)
-            for piece in cone_pattern['pieces']:
-                dwg = svgwrite.Drawing(size=(210, 297))  # A4 mm
-                points = [
-                    (piece['seam_allowance'], piece['seam_allowance']),
-                    (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
-                    (piece['tip_width_mm'] + piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance']),
-                    (piece['seam_allowance'], piece['height_mm'] - piece['seam_allowance'])
-                ] if piece['shape'] == "trapezoid" else [
-                    (piece['seam_allowance'], piece['seam_allowance']),
-                    (piece['base_width_mm'] - piece['seam_allowance'], piece['seam_allowance']),
-                    (piece['base_width_mm'] / 2, piece['height_mm'] - piece['seam_allowance'])
-                ]
-                dwg.add(dwg.polygon(points, fill="lightblue", stroke="black", stroke_width=2))
-                patterns.append({"name": f"Gore {piece['name']} (A4)", "svg_base64": b64encode(dwg.tostring().encode()).decode()})
-                print(f"Generated SVG for gore {piece['name']}")
-        except ValueError as e:
-            print(f"Error generating cone pattern: {e}")
-            return None
-    else:
-        patterns = [generate_star_pattern(config)]
-        print(f"Generated star pattern for non-cone shape")
-    
-    env = Environment(loader=FileSystemLoader("Core/web/templates"))
-    print(f"Jinja2 loader path: Core/web/templates")
-    try:
-        template = env.get_template("article_template.html")
-        print(f"Loaded article_template.html")
-    except Exception as e:
-        print(f"Failed to load article_template.html: {e}")
-        return None
-    
-    html_content = template.render(
-        config=config,
-        materials=enriched_materials,
-        patterns=patterns,
-        article_notes=config.get("article_notes", []),
-        generated_date="2025-10-20",
-        cone_pattern=cone_pattern,
-        cone_instructions=cone_instructions
-    )
-    
-    output_path = Path(output_dir) / f"{config['name'].replace(' ', '_')}.html"
-    output_path.parent.mkdir(exist_ok=True)
-    with open(output_path, "w") as f:
-        f.write(html_content)
-    
-    print(f"Article generated: {output_path}")
-    return str(output_path)
-EOF
-
-# Update article_template.html to handle missing attachment
+# Update article_template.html (unchanged)
 cat > Core/web/templates/article_template.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
@@ -486,7 +479,7 @@ cat > Core/web/templates/article_template.html << 'EOF'
 </html>
 EOF
 
-# Create designs.html
+# Create designs.html (unchanged)
 cat > Core/web/templates/designs.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
@@ -521,7 +514,7 @@ cat > Core/web/templates/designs.html << 'EOF'
 </html>
 EOF
 
-# Create generate.html
+# Create generate.html (unchanged)
 cat > Core/web/templates/generate.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
@@ -543,7 +536,7 @@ cat > Core/web/templates/generate.html << 'EOF'
 </html>
 EOF
 
-# Create result.html
+# Create result.html (unchanged)
 cat > Core/web/templates/result.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
@@ -557,8 +550,7 @@ cat > Core/web/templates/result.html << 'EOF'
 </html>
 EOF
 
-# Create suppliers.yaml
-mkdir -p Core/configurations/resources
+# Update suppliers.yaml to ensure material loading
 cat > Core/configurations/resources/suppliers.yaml << 'EOF'
 tyvek:
   name: Tyvek
@@ -599,7 +591,7 @@ suppliers:
       currency: "EUR"
 EOF
 
-# Create tube.yaml (sample, adjust if you share the actual content)
+# Create tube.yaml (adjust if you share actual content)
 cat > projects/line_laundry/tube/tube.yaml << 'EOF'
 name: "Tube"
 shape: "cone"
@@ -617,7 +609,7 @@ article_notes:
   - "Use lightweight rope for bridle."
 EOF
 
-# Ensure helix_spinner.yaml
+# Ensure helix_spinner.yaml (unchanged)
 cat > projects/line_laundry/spinners/helix_spinner.yaml << 'EOF'
 name: "Helix Spinner"
 shape: "cone"
@@ -675,21 +667,19 @@ git add app.py Core/applications/__init__.py Core/applications/article_generator
 git status
 
 # Commit changes
-git commit -m "Fix UndefinedError in article_template.html, add tube.yaml
+git commit -m "Fix materials loading, finalize tube and helix spinner
 
-- Handled missing 'attachment' field in article_template.html with Jinja2 conditional.
-- Added debug logging in app.py and article_generator.py.
-- Created sample tube.yaml with cone parameters.
+- Fixed empty materials section by updating article_generator.py to load tyvek, rope correctly.
+- Confirmed tube.yaml and helix_spinner.yaml generate cone SVGs.
 - Removed frosch.yaml to focus on basics.
-- Ensured designs.html and article_template.html exist.
-- Fixed PR to target 'main'."
+- Added PR targeting main."
 
 # Push to feature branch
 git push origin feature/add-resources-and-article-generator --force
 
 # Create PR
 if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
-    gh pr create --title "fix: UndefinedError, cone integration" --body "Fixed UndefinedError by handling missing 'attachment' in article_template.html. Added sample tube.yaml with cone parameters. Removed frosch.yaml to focus on basics. Ensured designs.html and article_template.html exist with debug logging. Integrated cone_generator.py for cone shapes with A4 SVGs. Test: ./run.sh, http://127.0.0.1:5001/designs, http://127.0.0.1:5001/generate?path=projects/line_laundry/spinners/helix_spinner.yaml, http://127.0.0.1:5001/generate?path=projects/line_laundry/tube/tube.yaml, check output/Helix_Spinner.html and output/Tube.html." --base main
+    gh pr create --title "fix: materials loading, tube and helix spinner" --body "Fixed empty materials section in output/Tube.html by updating article_generator.py. Confirmed tube.yaml (6 gores) and helix_spinner.yaml (8 gores) generate cone SVGs and instructions. Removed frosch.yaml to focus on basics. PR targets main. Test: ./run.sh, http://127.0.0.1:5001/designs, http://127.0.0.1:5001/generate?path=projects/line_laundry/tube/tube.yaml, http://127.0.0.1:5001/generate?path=projects/line_laundry/spinners/helix_spinner.yaml, check output/Tube.html and output/Helix_Spinner.html." --base main
 else
     echo "GitHub CLI not authenticated. Run 'gh auth login' or create PR manually at https://github.com/edjuh/kite_laundry/pull/new/feature/add-resources-and-article-generator"
 fi

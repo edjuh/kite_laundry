@@ -11,22 +11,14 @@ def load_resources(resources_dir="Core/configurations/resources"):
     resources = {}
     resources_path = Path(resources_dir)
     print(f"Loading resources from: {resources_path}")
-    for yaml_file in resources_path.rglob("*.yaml"):
-        if yaml_file.stem != "suppliers":
-            print(f"Loading resource: {yaml_file}")
-            try:
-                with open(yaml_file, "r") as f:
-                    resources[yaml_file.stem] = yaml.safe_load(f)
-            except yaml.YAMLError as e:
-                print(f"YAML error in {yaml_file}: {e}")
-            except FileNotFoundError as e:
-                print(f"File not found {yaml_file}: {e}")
     suppliers_path = resources_path / "suppliers.yaml"
     if suppliers_path.exists():
         print(f"Loading suppliers: {suppliers_path}")
         try:
             with open(suppliers_path, "r") as f:
-                resources["suppliers"] = yaml.safe_load(f)
+                data = yaml.safe_load(f)
+                resources.update({k: v for k, v in data.items() if k != "suppliers"})
+                resources["suppliers"] = data.get("suppliers", {})
         except yaml.YAMLError as e:
             print(f"YAML error in {suppliers_path}: {e}")
     return resources
@@ -70,11 +62,13 @@ def generate_article(design_yaml_path, output_dir="output", resources=None):
     
     enriched_materials = []
     for mat_key in config.get("materials", []):
-        if mat_key in resources:
+        if mat_key in resources and mat_key != "suppliers":
             mat_data = resources[mat_key].copy()
             mat_data["suppliers"] = resources.get("suppliers", {}).get(mat_key, [])
             enriched_materials.append(mat_data)
             print(f"Enriched material: {mat_key}")
+        else:
+            print(f"Material {mat_key} not found in resources")
     
     patterns = []
     cone_pattern = None
