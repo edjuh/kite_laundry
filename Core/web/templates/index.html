@@ -2,26 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kite Laundry Builder</title>
-    <link rel="stylesheet" href="/Core/web/static/css/style.css">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #87CEEB url('https://via.placeholder.com/800x200?text=Kite+Sky') no-repeat center top; background-size: cover; }
+        h1 { color: #4CAF50; text-align: center; font-size: 2.5em; text-shadow: 1px 1px #333; padding-top: 200px; }
+        p { text-align: center; color: #333; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 5px; }
+        nav { text-align: center; margin-top: 10px; }
+        nav a { margin: 0 10px; color: #FF4500; text-decoration: none; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        @media (max-width: 600px) { h1 { padding-top: 150px; } p { padding: 5px; } }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Kite Laundry Builder</h1>
-        <nav>
-            <a href="/generate">Create New Design</a> |
-            <a href="/designs">View Designs</a> |
-            <a href="/design_form">Design Form</a>
-        </nav>
-    </header>
-    <main>
-        <h2>Welcome to Kite Laundry!</h2>
-        <p>Create custom kite laundry designs with ease. Browse existing designs or upload your own YAML configuration.</p>
-        <p>Current designs available: {{ design_count }} (check the <a href="/designs">Designs</a> page for details).</p>
-        <div class="hero">
-            <img src="/Core/web/static/images/kite_laundry_logo.png" alt="Kite Laundry Logo" style="max-width: 300px;">
-        </div>
-    </main>
+    <h1>Welcome to Kite Laundry Builder 🪁</h1>
+    <p>Create stunning line decorations for your kites. Explore your options!</p>
+    <nav>
+        <a href="{{ url_for('designs') }}">Designs</a>
+        <a href="{{ url_for('overview') }}">Overview</a>
+        <a href="{{ url_for('custom') }}">Custom Design</a>
+    </nav>
 </body>
 </html>
