@@ -7,14 +7,10 @@
 <body>
     <div class="container mt-5">
         <h1>Kite Laundry</h1>
-<<<<<<< HEAD
-        <h2>Configure Form</h2>
-=======
         <nav>
             <a href="/" class="btn btn-secondary">Home</a>
         </nav>
         <h2>Configure {{ session.get('form_type', 'Design').capitalize() }}</h2>
->>>>>>> feature/new-app
         {% if error %}
         <p class="text-danger">{{ error }}</p>
         {% endif %}

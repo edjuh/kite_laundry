@@ -32,6 +32,7 @@ rods = load_yaml('projects/resources/rods.yaml') or {'rods': {}}
 
 @app.route('/')
 def index():
+    session.pop('form_type', None)  # Clear form_type on home
     return render_template('index.html')
 
 @app.route('/start', methods=['GET', 'POST'])
@@ -99,15 +100,8 @@ def configure_form():
             if length <= 0 or width <= 0:
                 return render_template('configure.html', error="Dimensions must be positive numbers", colors=colors['palette'], materials=materials['materials'], rods=rods['rods'].get(session.get('units', 'metric'), {}))
             color_codes = request.form.getlist('colors')
-<<<<<<< HEAD
-            material = request.form['material']
-<<<<<<< HEAD
-            rod = request.form.get('rod', '')
-=======
-=======
             material = request.form.get('material')
             logging.info(f"Configure POST: material={material}")
->>>>>>> feature/new-app
             # Parse material as mat_type:supplier_key
             try:
                 mat_type, supplier_key = material.split(':')
@@ -120,20 +114,10 @@ def configure_form():
             if rod:
                 try:
                     rod_type, rod_supplier_key = rod.split(':')
-<<<<<<< HEAD
-                    rod_display = f"{rod_type.capitalize()} ({rods['rods'][session.get('units', 'metric')][rod_supplier_key]['name']} - {rods['rods'][session.get('units', 'metric')][rod_supplier_key]['product']} - {rods['rods'][session.get('units', 'metric')][rod_supplier_key]['price']})"
-<<<<<<< HEAD
-                except (ValueError, KeyError):
-                    rod_display = rod
->>>>>>> feature/new-app
-=======
-=======
                     rod_display = f"{rod_type.capitalize()} ({rods['rods'][session.get('units', 'metric')].get(rod_supplier_key, {}).get('name', rod_supplier_key)} - {rods['rods'][session.get('units', 'metric')].get(rod_supplier_key, {}).get('product', 'N/A')} - {rods['rods'][session.get('units', 'metric')].get(rod_supplier_key, {}).get('price', 'N/A')})"
->>>>>>> feature/new-app
                 except (ValueError, KeyError) as e:
                     logging.error(f"Rod parsing error: {str(e)}")
                     rod_display = "None"
->>>>>>> feature/new-app
             units = session.get('units', 'metric')
             if units == 'imperial':
                 length_cm = length * 2.54
@@ -152,17 +136,10 @@ def configure_form():
             c.drawString(100, 750, f"{form_type.capitalize()} Template")
             c.drawString(100, 730, f"Length: {length} {'cm' if units == 'metric' else 'in'}")
             c.drawString(100, 710, f"Width: {width} {'cm' if units == 'metric' else 'in'}")
-<<<<<<< HEAD
-            c.drawString(100, 690, f"Material: {material}")
-            c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
-            if rod:
-                c.drawString(100, 650, f"Rod: {rod}")
-=======
             c.drawString(100, 690, f"Material: {material_display}")
             c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
             if rod_display != "None":
                 c.drawString(100, 650, f"Rod: {rod_display}")
->>>>>>> feature/new-app
             c.save()
             pattern_data = {
                 'pieces': [
@@ -171,21 +148,10 @@ def configure_form():
                     {'width': 50, 'height': 50, 'position': {'x': 0, 'y': length_cm * 10 * 0.75}}
                 ]
             }
-<<<<<<< HEAD
-<<<<<<< HEAD
-            return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, rod=rod, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools, pattern_data=pattern_data)
-=======
-=======
             logging.info(f"Configure POST: Generated SVG={svg_file}, PDF={pdf_file}, material_display={material_display}, pattern_data={json.dumps(pattern_data)}")
->>>>>>> feature/new-app
             return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material_display, rod=rod_display, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools, pattern_data=pattern_data)
-<<<<<<< HEAD
->>>>>>> feature/new-app
-        except ValueError:
-=======
         except ValueError as e:
             logging.error(f"Input validation error: {str(e)}")
->>>>>>> feature/new-app
             return render_template('configure.html', error="Invalid input: use positive numbers for dimensions", colors=colors['palette'], materials=materials['materials'], rods=rods['rods'].get(session.get('units', 'metric'), {}))
     units = session.get('units', 'metric')
     material_subset = {}
@@ -213,15 +179,7 @@ def configure_form():
         rod_subset[rod_type] = {}
         for supplier_key, supplier_info in rod_info.items():
             rod_subset[rod_type][supplier_key] = {
-<<<<<<< HEAD
-<<<<<<< HEAD
-                'name': supplier_data.get('name', supplier_key),
-=======
-                'name': suppliers['suppliers'].get(supplier_key, {}).get('name', supplier_key),
->>>>>>> feature/new-app
-=======
                 'name': supplier_info.get('name', supplier_key),
->>>>>>> feature/new-app
                 'product': supplier_info.get('product', ''),
                 'price': supplier_info.get('price', 'N/A'),
                 'diameter': supplier_info.get('diameter', ''),
@@ -277,9 +235,9 @@ def calculate():
             material = request.form.get('material', 'ripstop')
             units = session.get('units', 'metric')
             if units == 'imperial':
-                diameter = diameter * 25.4
-                length = length * 25.4
-                seam_allowance = seam_allowance * 25.4
+                diameter = diameter * 2.54
+                length = length * 2.54
+                seam_allowance = seam_allowance * 2.54
             circumference = 3.14159 * diameter
             pattern_width = circumference + (2 * seam_allowance)
             pattern_height = length + (2 * seam_allowance)
