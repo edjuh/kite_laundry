@@ -20,6 +20,7 @@ def load_yaml(file_path):
 tools = load_yaml('projects/resources/tools.yaml') or {}
 colors = load_yaml('projects/resources/colors.yaml') or {'palette': {}}
 materials = load_yaml('projects/resources/materials.yaml') or {'materials': {}}
+suppliers = load_yaml('projects/resources/suppliers.yaml') or {'suppliers': {}}
 
 @app.route('/')
 def index():
@@ -39,10 +40,16 @@ def select_form():
         units = session.get('units', 'metric')
         material_subset = {}
         for mat_type, mat_info in materials.get('materials', {}).items():
-            if mat_type == 'ripstop':
-                material_subset['ripstop'] = mat_info.get(units, {})
-            else:
-                material_subset[mat_type] = mat_info
+            material_subset[mat_type] = {
+                'type': mat_info['type'],
+                'weight': mat_info['weight'],
+                'properties': mat_info['properties'],
+                'suppliers': {}
+            }
+            for supplier in mat_info.get('suppliers', []):
+                supplier_data = suppliers['suppliers'].get(supplier, {})
+                if supplier_data and (units == 'metric' and supplier_data.get('country') in ['Germany', 'Netherlands'] or units == 'imperial' and supplier_data.get('country') not in ['Germany', 'Netherlands']):
+                    material_subset[mat_type]['suppliers'][supplier] = supplier_data['materials'].get(mat_type, {})
         return render_template('configure.html', colors=colors['palette'], materials=material_subset)
     return render_template('select.html', forms=['tail', 'drogue', 'windsock'])
 
@@ -86,10 +93,16 @@ def configure_form():
     units = session.get('units', 'metric')
     material_subset = {}
     for mat_type, mat_info in materials.get('materials', {}).items():
-        if mat_type == 'ripstop':
-            material_subset['ripstop'] = mat_info.get(units, {})
-        else:
-            material_subset[mat_type] = mat_info
+        material_subset[mat_type] = {
+            'type': mat_info['type'],
+            'weight': mat_info['weight'],
+            'properties': mat_info['properties'],
+            'suppliers': {}
+        }
+        for supplier in mat_info.get('suppliers', []):
+            supplier_data = suppliers['suppliers'].get(supplier, {})
+            if supplier_data and (units == 'metric' and supplier_data.get('country') in ['Germany', 'Netherlands'] or units == 'imperial' and supplier_data.get('country') not in ['Germany', 'Netherlands']):
+                material_subset[mat_type]['suppliers'][supplier] = supplier_data['materials'].get(mat_type, {})
     return render_template('configure.html', colors=colors['palette'], materials=material_subset)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -190,30 +203,36 @@ def validate_yaml(data):
 def merge_yaml(new_material):
     mat = new_material['material_template']
     type_key = mat['type'].lower()
+    supplier_key = mat['supplier']['name'].lower().replace(' ', '_')
+    with open('projects/resources/suppliers.yaml', 'r') as f:
+        current_suppliers = yaml.safe_load(f) or {'suppliers': {}}
+    current_suppliers['suppliers'][supplier_key] = {
+        'name': mat['supplier']['name'],
+        'country': 'Unknown',
+        'materials': {
+            type_key: {
+                'price': mat['supplier']['price'],
+                'colors': mat['supplier']['colors'],
+                'eco': mat['eco'],
+                'link': mat['supplier']['link']
+            }
+        }
+    }
     with open('projects/resources/materials.yaml', 'r') as f:
         current_materials = yaml.safe_load(f) or {'materials': {}}
-    units = session.get('units', 'metric')
-    if type_key == 'ripstop':
-        current_materials['materials'].setdefault('ripstop', {}).setdefault(units, {}).update({
-            mat['supplier']['name'].lower().replace(' ', '_'): {
-                'manufacturer': mat['manufacturer']['name'],
-                'product': mat['manufacturer']['product'],
-                'type': mat['manufacturer']['type'],
-                'weight': mat['manufacturer']['weight'],
-                'properties': mat['manufacturer']['properties'],
-                'price': mat['supplier']['price'],
-                'colors': mat['supplier']['colors']
-            }
-        })
-    else:
+    if type_key not in current_materials['materials']:
         current_materials['materials'][type_key] = {
-            'supplier': mat['supplier']['name'],
+            'manufacturer': mat['manufacturer']['name'],
             'type': mat['manufacturer']['type'],
             'weight': mat['manufacturer']['weight'],
             'properties': mat['manufacturer']['properties'],
-            'price': mat['supplier']['price'],
-            'colors': mat['supplier']['colors']
+            'suppliers': [supplier_key]
         }
+    else:
+        if supplier_key not in current_materials['materials'][type_key]['suppliers']:
+            current_materials['materials'][type_key]['suppliers'].append(supplier_key)
+    with open('projects/resources/suppliers.yaml', 'w') as f:
+        yaml.safe_dump(current_suppliers, f)
     with open('projects/resources/materials.yaml', 'w') as f:
         yaml.safe_dump(current_materials, f)
 

@@ -1,0 +1,47 @@
+suppliers:
+  wepa_flyer:
+    name: "Wepa-Flyer"
+    country: "Germany"
+    materials:
+      icarex:
+        price: "€9-11/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink", "Fluor Yellow", "Fluor Green", "Fluor Orange", "Sky Blue", "Teal", "Gold"]
+        eco: true
+        link: "https://wepa-flyer.de"
+      ripstop_nylon:
+        price: "€8-10/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Fluor Pink"]
+        eco: false
+        link: "https://wepa-flyer.de"
+  de_paddestoel:
+    name: "De Paddestoel"
+    country: "Netherlands"
+    materials:
+      icarex:
+        price: "€10-12/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple"]
+        eco: true
+        link: "https://depaddestoel.nl"
+      ripstop_nylon:
+        price: "€7-10/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink", "Fluor Pink", "Fluor Orange", "Grey", "Dark Grey", "Royal Blue"]
+        eco: true
+        link: "https://depaddestoel.nl"
+  emmakites:
+    name: "Emmakites"
+    country: "USA"
+    materials:
+      ripstop_nylon:
+        price: "$7.95/yard"
+        colors: ["Fluor Green", "Royal Blue", "Pink", "White", "Black", "Red", "Orange", "Yellow", "Gold", "Green", "Sky Blue", "Teal", "Purple", "Fluor Pink", "Fluor Orange", "Fluor Yellow", "Grey", "Dark Grey", "Midnight Blue"]
+        eco: false
+        link: "https://emmakites.com"
+  fly_market:
+    name: "Fly Market Kitemaking Supply"
+    country: "USA"
+    materials:
+      ripstop_nylon:
+        price: "$9.50-13.25/yard"
+        colors: ["Black", "White", "Red", "Orange", "Yellow", "Gold", "Green", "Blue", "Royal Blue", "Teal", "Purple", "Pink", "Grey", "Dark Grey", "Fluor Orange"]
+        eco: false
+        link: "https://flymarketkites.com"
