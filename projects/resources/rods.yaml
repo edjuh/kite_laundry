@@ -1,0 +1,76 @@
+rods:
+  carbon:
+    metric:
+      horvath_kites:
+        manufacturer: "Horvath Kites"
+        product: "Pultruded Carbon Rod"
+        diameter: "2-6 mm"
+        length: "2m"
+        properties: ["Stiff", "Lightweight", "High strength", "UV stable"]
+        price: "CHF 10-15/m"
+        link: "https://horvath.ch"
+      metropolis_drachen:
+        manufacturer: "Metropolis Drachen"
+        product: "Solid Carbon Rod"
+        diameter: "3-8 mm"
+        length: "1m"
+        properties: ["Durable", "Low flex", "Corrosion resistant"]
+        price: "€8-12/m"
+        link: "https://metropolis-drachen.de"
+      wepa_flyer:
+        manufacturer: "Various (Top Fabrics)"
+        product: "Carbon Kite Rod"
+        diameter: "2.5-5 mm"
+        length: "1.5m"
+        properties: ["Flexible for curves", "Light", "Kite-specific"]
+        price: "€7-10/m"
+        link: "https://wepa-flyer.de"
+      de_paddestoel:
+        manufacturer: "Horvath / Goodwinds"
+        product: "Carbon Spar Rod"
+        diameter: "3-6 mm"
+        length: "1m"
+        properties: ["Stiff for high wind", "Precise diameter"]
+        price: "€6-9/m"
+        link: "https://depaddestoel.nl"
+    imperial:
+      fly_market:
+        manufacturer: "Fly Market"
+        product: "Solid Carbon Rod"
+        diameter: "0.08-0.25 in"
+        length: "47.25 in"
+        properties: ["High strength-to-weight", "Pultruded", "Kite framing"]
+        price: "$9.50-13.25/rod"
+        link: "https://flymarketkites.com"
+      goodwinds:
+        manufacturer: "Goodwinds Composites"
+        product: "Pultruded Carbon Rod"
+        diameter: "0.020-0.750 in"
+        length: "48 in"
+        properties: ["Durable", "Lightweight", "Environmental stable"]
+        price: "$8-15/rod"
+        link: "https://goodwinds.com"
+      into_the_wind:
+        manufacturer: "Into The Wind"
+        product: "Micro Carbon Rod"
+        diameter: "0.125 in"
+        length: "48 in"
+        properties: ["Stiff", "Light", "For small kites"]
+        price: "$4-6/rod"
+        link: "https://intothewind.com"
+      kite_guys:
+        manufacturer: "GWK"
+        product: "Carbon Round Rod"
+        diameter: "0.08-0.2 in"
+        length: "39 in"
+        properties: ["Unidirectional fibers", "Resilient", "For light wind"]
+        price: "$5-8/rod"
+        link: "https://kiteguys.ca"
+      kitesandfunthings:
+        manufacturer: "Kites and Fun Things"
+        product: "Pultruded Carbon Tube"
+        diameter: "0.08-0.25 in"
+        length: "39 in"
+        properties: "Strong, lightweight, for spars"
+        price: "$6-10/rod"
+        link: "https://kitesandfunthings.com"
