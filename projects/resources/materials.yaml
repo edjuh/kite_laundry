@@ -1,127 +1,33 @@
 materials:
   ripstop:
-    metric:
-      top_fabrics:
-        manufacturer: "Top Fabrics"
-        product: "Icarex PC-31"
-        type: "polyester"
-        weight: "31 g/m²"
-        properties: ["Lightweight", "UV resistant", "Tear resistant", "Bright colors"]
-        price: "€10-12/m"
-        colors: ["White", "Black", "Red", "Orange", "Yellow", "Gold", "Green", "Blue", "Royal Blue", "Teal", "Purple", "Pink", "Fluor Pink", "Fluor Orange", "Fluor Yellow", "Grey", "Dark Grey", "Midnight Blue", "Sky Blue", "Forest Green"]
-      bilboquet:
-        manufacturer: "Top Fabrics"
-        product: "Schikarex Nylon"
-        type: "nylon"
-        weight: "41-48 g/m²"
-        properties: ["Waterproof", "Tear resistant", "Abrasion resistant"]
-        price: "€9/m"
-        colors: ["Orange", "Purple", "Teal", "Red", "Blue", "Yellow", "Green", "Black", "White", "Grey"]
-      premiumropes:
-        manufacturer: "Premiumropes"
-        product: "SK78 Nylon"
-        type: "nylon"
-        weight: "40 g/m²"
-        properties: ["High strength", "Low stretch", "UV stable"]
-        price: "€9-12/m"
-        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "Black", "White", "Grey", "Purple", "Teal", "Fluor Pink"]
-      aliexpress:
-        manufacturer: "Various (CN)"
-        product: "40D Nylon"
-        type: "nylon"
-        weight: "48 g/m²"
-        properties: ["Airtight", "Lightweight", "UV protected"]
-        price: "€5-7/m"
-        colors: ["Fluor Orange", "Sky Blue", "Black", "White", "Red", "Yellow", "Green", "Blue", "Purple", "Pink"]
-      extremtextil:
-        manufacturer: "Extremtextil"
-        product: "Ripstop Nylon"
-        type: "nylon"
-        weight: "42 g/m²"
-        properties: ["Abrasion resistant", "Water resistant"]
-        price: "€8/m"
-        colors: ["Midnight Blue", "Forest Green", "White", "Red", "Blue", "Yellow", "Orange", "Purple", "Teal"]
-    imperial:
-      emmakites:
-        manufacturer: "Emmakites"
-        product: "40D PU-Coated Nylon"
-        type: "nylon"
-        weight: "48 g/m²"
-        properties: ["Lightweight", "Airtight", "UV protected"]
-        price: ".95/yard"
-        colors: ["Fluor Green", "Royal Blue", "Pink", "White", "Black", "Red", "Orange", "Yellow", "Gold", "Green", "Sky Blue", "Teal", "Purple", "Fluor Pink", "Fluor Orange", "Fluor Yellow", "Grey", "Dark Grey", "Midnight Blue"]
-      fly_market:
-        manufacturer: "Fly Market"
-        product: "Mirai Nylon"
-        type: "nylon"
-        weight: "44 g/m²"
-        properties: ["Durable", "Windproof", "Low stretch"]
-        price: ".50-13.25/yard"
-        colors: ["Black", "White", "Red", "Orange", "Yellow", "Gold", "Green", "Blue", "Royal Blue", "Teal", "Purple", "Pink", "Grey", "Dark Grey", "Fluor Orange"]
-      into_the_wind:
-        manufacturer: "Into The Wind"
-        product: "0.75oz Nylon"
-        type: "nylon"
-        weight: "42 g/m²"
-        properties: ["No fraying", "Tear resistant"]
-        price: "-12/yard"
-        colors: ["Black", "White", "Red", "Yellow", "Blue", "Green", "Orange", "Purple", "Pink", "Gold"]
-      goodwinds:
-        manufacturer: "Goodwinds Composites"
-        product: "Ripstop Nylon/Polyester"
-        type: "nylon/polyester"
-        weight: "31-48 g/m²"
-        properties: ["Abrasion resistant", "UV stable"]
-        price: "-15/yard"
-        colors: ["White", "Black", "Red", "Orange", "Yellow", "Gold", "Green", "Blue", "Teal", "Purple", "Pink", "Grey", "Fluor Yellow", "Fluor Green", "Fluor Pink"]
-      texlon:
-        manufacturer: "Texlon Corp"
-        product: "Sail-Grade Nylon"
-        type: "nylon"
-        weight: "42 g/m²"
-        properties: ["Spinnaker-style", "Durable"]
-        price: "/yard"
-        colors: ["Blue", "Black", "White", "Red", "Yellow", "Green", "Orange", "Purple"]
+    icarex:
+      manufacturer: "Top Fabrics"
+      type: "polyester"
+      weight: "31 g/m²"
+      properties: ["Lightweight", "UV resistant", "Tear resistant", "Bright colors"]
+      suppliers: ["wepa_flyer", "de_paddestoel", "metropolis_drachen"]
+    ripstop_nylon:
+      manufacturer: "Various"
+      type: "nylon"
+      weight: "40-48 g/m²"
+      properties: ["Durable", "Water resistant", "Lightweight"]
+      suppliers: ["wepa_flyer", "de_paddestoel", "metropolis_drachen", "kitemana", "esvo_tentdoek", "lush_fabric", "fabric_land", "point_north_profabrics", "emmakites", "fly_market"]
+    ripstop_polyester:
+      manufacturer: "Various"
+      type: "polyester"
+      weight: "40-50 g/m²"
+      properties: ["Durable", "UV stable", "Low stretch"]
+      suppliers: ["horvath_kites", "ventex_supplier", "lush_fabric", "fabric_land", "point_north_profabrics"]
   tyvek:
-    supplier: "Various (Top Fabrics, Bilboquet)"
+    manufacturer: "Various"
     type: "non-woven polyethylene"
     weight: "40-68 g/m²"
     properties: ["Tear proof", "Waterproof", "Recyclable"]
-    price: "-10/yard, €4-8/m"
-    colors: ["White", "Grey"]
-  plasticfoil:
-    supplier: "Various (Top Fabrics, Kite Plans)"
-    type: "mylar/polyethylene"
-    weight: "10-30 g/m²"
-    properties: ["Airtight", "Reflective", "Fragile"]
-    price: "-8/yard, €2-7/m"
-    colors: ["Silver", "Gold", "Transparent", "Colored films"]
-  paper:
-    supplier: "Various (specialty kite shops)"
-    type: "kite paper"
-    weight: "20-40 g/m²"
-    properties: ["Lightweight", "Eco-friendly", "Fragile"]
-    price: "-5/yard, €1-4/m"
-    colors: ["White", "Red", "Blue", "Yellow"]
+    suppliers: ["wepa_flyer"]
   eco:
     recycled_ripstop:
-      supplier: "Kitezy"
+      manufacturer: "Kitezy"
       type: "recycled polyester"
       weight: "40 g/m²"
       properties: ["Sustainable", "Tear resistant", "UV stable"]
-      price: "€12/m"
-      colors: ["Red", "Blue", "Green", "Yellow", "White", "Grey"]
-    organic_cotton:
-      supplier: "Organic Cotton Plus"
-      type: "cotton"
-      weight: "100 g/m²"
-      properties: ["Biodegradable", "Breathable", "Less durable"]
-      price: "€8/m"
-      colors: ["Natural", "White", "Red", "Blue"]
-    bamboo_fabric:
-      supplier: "AliExpress"
-      type: "bamboo"
-      weight: "50 g/m²"
-      properties: ["Eco-friendly", "Flexible", "Lightweight"]
-      price: "€6/m"
-      colors: ["Natural", "White"]
+      suppliers: ["de_paddestoel", "lush_fabric", "point_north_profabrics"]

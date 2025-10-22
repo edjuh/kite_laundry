@@ -1,0 +1,139 @@
+suppliers:
+  wepa_flyer:
+    name: "Wepa-Flyer"
+    country: "Netherlands"
+    materials:
+      icarex:
+        price: "€9-11/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink", "Fluor Yellow", "Fluor Green", "Fluor Orange", "Sky Blue", "Teal", "Gold"]
+        eco: true
+        link: "https://wepa-flyer.de"
+      ripstop_nylon:
+        price: "€8-10/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Fluor Pink"]
+        eco: false
+        link: "https://wepa-flyer.de"
+  de_paddestoel:
+    name: "De Paddestoel"
+    country: "Netherlands"
+    materials:
+      icarex:
+        price: "€10-12/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple"]
+        eco: true
+        link: "https://depaddestoel.nl"
+      ripstop_nylon:
+        price: "€7-10/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink", "Fluor Pink", "Fluor Orange", "Grey", "Dark Grey", "Royal Blue"]
+        eco: true
+        link: "https://depaddestoel.nl"
+  metropolis_drachen:
+    name: "Metropolis Drachen"
+    country: "Germany"
+    materials:
+      icarex:
+        price: "€10-13/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink", "Fluor Yellow", "Fluor Green", "Sky Blue", "Teal", "Gold", "Grey"]
+        eco: true
+        link: "https://metropolis-drachen.de"
+      ripstop_nylon:
+        price: "€8-11/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Fluor Pink", "Fluor Orange"]
+        eco: false
+        link: "https://metropolis-drachen.de"
+  kitemana:
+    name: "Kitemana"
+    country: "Netherlands"
+    materials:
+      ripstop_nylon:
+        price: "€7-10/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink", "Fluor Pink", "Fluor Orange", "Grey", "Royal Blue", "Teal"]
+        eco: true
+        link: "https://kitemana.com"
+  esvo_tentdoek:
+    name: "ESVO Tentdoek"
+    country: "Netherlands"
+    materials:
+      ripstop_nylon:
+        price: "€6-9/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Grey"]
+        eco: false
+        link: "https://esvocampingshop.com"
+  horvath_kites:
+    name: "Horvath Kites"
+    country: "Switzerland"
+    materials:
+      ripstop_polyester:
+        price: "CHF 12-18/m"
+        colors: ["White", "Black", "Red", "Orange", "Yellow", "Gold", "Green", "Blue", "Teal", "Purple", "Pink", "Grey"]
+        eco: false
+        link: "https://horvath.ch"
+  ventex_supplier:
+    name: "Ventex (via EU distributors)"
+    country: "Various EU"
+    materials:
+      ripstop_polyester:
+        price: "€10-14/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Purple"]
+        eco: false
+        link: "https://topfabrics.nl"
+  lush_fabric:
+    name: "Lush Fabric"
+    country: "UK"
+    materials:
+      ripstop_nylon:
+        price: "£6-8/m"
+        colors: ["Silver", "Gold", "White", "Blue", "Black", "Pink", "Red", "Dark Green", "Mustard", "Cream", "Orange", "Yellow", "Purple", "Teal"]
+        eco: false
+        link: "https://lushfabric.com"
+      ripstop_polyester:
+        price: "£7-9/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black"]
+        eco: true
+        link: "https://lushfabric.com"
+  fabric_land:
+    name: "Fabric Land"
+    country: "UK"
+    materials:
+      ripstop_polyester:
+        price: "£3-5/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink"]
+        eco: false
+        link: "https://fabricland.co.uk"
+      ripstop_nylon:
+        price: "£4-6/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black"]
+        eco: false
+        link: "https://fabricland.co.uk"
+  point_north_profabrics:
+    name: "Point North Profabrics"
+    country: "UK"
+    materials:
+      ripstop_polyester:
+        price: "£10-14/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "Black", "White", "Grey", "Purple", "Teal", "Fluor Yellow", "Fluor Green", "Fluor Pink"]
+        eco: true
+        link: "https://www.profabrics.co.uk"
+      ripstop_nylon:
+        price: "£8-12/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Purple", "Pink", "Fluor Yellow", "Fluor Green", "Fluor Pink"]
+        eco: false
+        link: "https://www.profabrics.co.uk"
+  emmakites:
+    name: "Emmakites"
+    country: "USA"
+    materials:
+      ripstop_nylon:
+        price: "$7.95/yard"
+        colors: ["Fluor Green", "Royal Blue", "Pink", "White", "Black", "Red", "Orange", "Yellow", "Gold", "Green", "Sky Blue", "Teal", "Purple", "Fluor Pink", "Fluor Orange", "Fluor Yellow", "Grey", "Dark Grey", "Midnight Blue"]
+        eco: false
+        link: "https://emmakites.com"
+  fly_market:
+    name: "Fly Market Kitemaking Supply"
+    country: "USA"
+    materials:
+      ripstop_nylon:
+        price: "$9.50-13.25/yard"
+        colors: ["Black", "White", "Red", "Orange", "Yellow", "Gold", "Green", "Blue", "Royal Blue", "Teal", "Purple", "Pink", "Grey", "Dark Grey", "Fluor Orange"]
+        eco: false
+        link: "https://flymarketkites.com"
