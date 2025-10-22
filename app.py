@@ -4,6 +4,7 @@ import svgwrite
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 import os
+import re
 
 app = Flask(__name__)
 app.secret_key = 'kite-laundry-key'
@@ -87,17 +88,21 @@ def configure_form():
 def upload_yaml():
     if request.method == 'POST':
         file = request.files.get('yaml_file')
-        if file and file.filename.endswith('.yaml'):
+        if file and file.filename.endswith(('.yaml', '.yml')):
             try:
                 new_material = yaml.safe_load(file)
+                if not new_material or 'material_template' not in new_material:
+                    return render_template('upload.html', error="Invalid YAML: missing material_template")
                 if validate_yaml(new_material):
                     merge_yaml(new_material)
                     return render_template('upload.html', message="Material added successfully!")
                 else:
-                    return render_template('upload.html', error="Invalid YAML structure")
+                    return render_template('upload.html', error="Invalid YAML structure: check required fields")
+            except yaml.YAMLError as e:
+                return render_template('upload.html', error=f"YAML parsing error: {str(e)}")
             except Exception as e:
-                return render_template('upload.html', error=f"Error processing YAML: {str(e)}")
-        return render_template('upload.html', error="Please upload a valid YAML file")
+                return render_template('upload.html', error=f"Error processing file: {str(e)}")
+        return render_template('upload.html', error="Please upload a valid YAML file (.yaml or .yml)")
     return render_template('upload.html')
 
 def validate_yaml(data):
@@ -113,11 +118,17 @@ def validate_yaml(data):
         return False
     if not all(key in mat['supplier'] for key in supplier_keys):
         return False
+    if not isinstance(mat['manufacturer']['properties'], list):
+        return False
+    if not isinstance(mat['supplier']['colors'], list):
+        return False
+    if not re.match(r'^https?://', mat['supplier']['link']):
+        return False
     return True
 
 def merge_yaml(new_material):
     mat = new_material['material_template']
-    type_key = mat['type']
+    type_key = mat['type'].lower()
     with open('projects/resources/materials.yaml', 'r') as f:
         current_materials = yaml.safe_load(f) or {'materials': {}}
     units = session.get('units', 'metric')
