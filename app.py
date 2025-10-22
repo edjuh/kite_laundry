@@ -34,7 +34,14 @@ def start():
 def select_form():
     if request.method == 'POST':
         session['form_type'] = request.form['form_type']
-        return render_template('configure.html', colors=colors['palette'], materials=materials['materials'])
+        units = session.get('units', 'metric')
+        material_subset = {}
+        for mat_type, mat_info in materials.get('materials', {}).items():
+            if mat_type == 'ripstop':
+                material_subset['ripstop'] = mat_info.get(units, {})
+            else:
+                material_subset[mat_type] = mat_info
+        return render_template('configure.html', colors=colors['palette'], materials=material_subset)
     return render_template('select.html', forms=['tail', 'drogue', 'windsock'])
 
 @app.route('/configure', methods=['GET', 'POST'])
@@ -67,7 +74,76 @@ def configure_form():
         c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
         c.save()
         return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools)
-    return render_template('configure.html', colors=colors['palette'], materials=materials['materials'])
+    units = session.get('units', 'metric')
+    material_subset = {}
+    for mat_type, mat_info in materials.get('materials', {}).items():
+        if mat_type == 'ripstop':
+            material_subset['ripstop'] = mat_info.get(units, {})
+        else:
+            material_subset[mat_type] = mat_info
+    return render_template('configure.html', colors=colors['palette'], materials=material_subset)
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_yaml():
+    if request.method == 'POST':
+        file = request.files.get('yaml_file')
+        if file and file.filename.endswith('.yaml'):
+            try:
+                new_material = yaml.safe_load(file)
+                if validate_yaml(new_material):
+                    merge_yaml(new_material)
+                    return render_template('upload.html', message="Material added successfully!")
+                else:
+                    return render_template('upload.html', error="Invalid YAML structure")
+            except Exception as e:
+                return render_template('upload.html', error=f"Error processing YAML: {str(e)}")
+        return render_template('upload.html', error="Please upload a valid YAML file")
+    return render_template('upload.html')
+
+def validate_yaml(data):
+    template_keys = {'type', 'manufacturer', 'supplier', 'eco'}
+    manufacturer_keys = {'name', 'product', 'type', 'weight', 'properties'}
+    supplier_keys = {'name', 'price', 'colors', 'link'}
+    if not isinstance(data, dict) or 'material_template' not in data:
+        return False
+    mat = data['material_template']
+    if not all(key in mat for key in template_keys):
+        return False
+    if not all(key in mat['manufacturer'] for key in manufacturer_keys):
+        return False
+    if not all(key in mat['supplier'] for key in supplier_keys):
+        return False
+    return True
+
+def merge_yaml(new_material):
+    mat = new_material['material_template']
+    type_key = mat['type']
+    with open('projects/resources/materials.yaml', 'r') as f:
+        current_materials = yaml.safe_load(f) or {'materials': {}}
+    units = session.get('units', 'metric')
+    if type_key == 'ripstop':
+        current_materials['materials'].setdefault('ripstop', {}).setdefault(units, {}).update({
+            mat['supplier']['name'].lower().replace(' ', '_'): {
+                'manufacturer': mat['manufacturer']['name'],
+                'product': mat['manufacturer']['product'],
+                'type': mat['manufacturer']['type'],
+                'weight': mat['manufacturer']['weight'],
+                'properties': mat['manufacturer']['properties'],
+                'price': mat['supplier']['price'],
+                'colors': mat['supplier']['colors']
+            }
+        })
+    else:
+        current_materials['materials'][type_key] = {
+            'supplier': mat['supplier']['name'],
+            'type': mat['manufacturer']['type'],
+            'weight': mat['manufacturer']['weight'],
+            'properties': mat['manufacturer']['properties'],
+            'price': mat['supplier']['price'],
+            'colors': mat['supplier']['colors']
+        }
+    with open('projects/resources/materials.yaml', 'w') as f:
+        yaml.safe_dump(current_materials, f)
 
 if __name__ == '__main__':
     os.makedirs('output', exist_ok=True)
