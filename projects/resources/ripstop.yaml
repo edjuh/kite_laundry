@@ -1,1 +1,31 @@
-<contents of ripstop.yaml>
+materials:
+  ripstop_nylon:
+    weight: "30-40 g/m²"
+    properties:
+      - Lightweight
+      - Tear resistant
+      - Water resistant
+  ripstop_nylon_icarex:
+    weight: "40 g/m²"
+    properties:
+      - Lightweight
+      - Tear resistant
+      - UV resistant
+  polyester:
+    weight: "50-60 g/m²"
+    properties:
+      - Durable
+      - Colorfast
+      - Weather resistant
+  dyneema_cord:
+    weight: "Varies by diameter"
+    properties:
+      - High strength
+      - Low stretch
+      - UV resistant
+  webbing_loops:
+    weight: "Light"
+    properties:
+      - Strong
+      - Durable
+      - Easy to attach
