@@ -1,4 +1,0 @@
-diff a/Core/applications/base.py b/Core/applications/base.py	(rejected hunks)
-@@ -480,1 +480,1 @@
--        bg_color = project.get("colors", {}).get("accent", "#f0f0f0”)
-+        bg_color = project.get("colors", {}).get("accent", "#f0f0f0")

@@ -1,7 +1,0 @@
-body { font-family: Arial, sans-serif; margin: 20px; }
-header { background: #3498db; color: white; padding: 10px; }
-nav a { color: white; margin-right: 10px; text-decoration: none; }
-nav a:hover { text-decoration: underline; }
-h1, h2 { color: #2c3e50; }
-.meter { background: #ecf0f1; padding: 10px; border-radius: 5px; }
-ul { list-style-type: disc; margin-left: 20px; }
