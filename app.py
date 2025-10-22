@@ -21,6 +21,10 @@ materials = load_yaml('projects/resources/ripstop.yaml') or {'materials': {}}
 
 beaufort_to_kph = {0: (0, 1), 1: (1, 5), 2: (6, 11), 3: (12, 19), 4: (20, 28), 5: (29, 38), 6: (39, 49), 7: (50, 61)}
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/start', methods=['GET', 'POST'])
 def start():
     if request.method == 'POST':
@@ -32,7 +36,7 @@ def start():
 def select_form():
     if request.method == 'POST':
         session['form_type'] = request.form['form_type']
-        return render_template('configure.html', colors=colors['palette'], materials=materials['materials'], beaufort_range=range(8))
+        return render_template('configure.html', colors=colors['palette'], materials=materials['materials'], beaufort_range=range(8), beaufort_to_kph=beaufort_to_kph)
     return render_template('select.html', forms=['tail', 'drogue', 'windsock'])
 
 @app.route('/configure', methods=['GET', 'POST'])
@@ -65,7 +69,7 @@ def configure_form():
         c.drawString(100, 650, f"Wind: {beaufort} Beaufort ({beaufort_to_kph[beaufort][0]}-{beaufort_to_kph[beaufort][1]} kph)")
         c.save()
         return render_template('output.html', form_type=form_type, length=length, width=width, color=colors['palette'].get(color, {'name': 'Unknown'})['name'], material=material, beaufort=beaufort, units=units, svg_file=svg_file, pdf_file=pdf_file)
-    return render_template('configure.html', colors=colors['palette'], materials=materials['materials'], beaufort_range=range(8))
+    return render_template('configure.html', colors=colors['palette'], materials=materials['materials'], beaufort_range=range(8), beaufort_to_kph=beaufort_to_kph)
 
 if __name__ == '__main__':
     os.makedirs('output', exist_ok=True)
