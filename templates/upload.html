@@ -7,12 +7,20 @@
 <body>
     <div class="container mt-5">
         <h1>Kite Laundry</h1>
+        <nav>
+            <a href="/" class="btn btn-secondary">Home</a>
+        </nav>
         <h2>Upload Material YAML</h2>
         {% if error %}
         <p class="text-danger">{{ error }}</p>
         {% endif %}
         {% if message %}
         <p class="text-success">{{ message }}</p>
+        <script>
+            setTimeout(() => {
+                window.location.href = "{{ redirect_url }}";
+            }, 2000);
+        </script>
         {% endif %}
         <form action="/upload" method="post" enctype="multipart/form-data">
             <div class="form-group">
