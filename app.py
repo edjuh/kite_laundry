@@ -23,10 +23,6 @@ materials = load_yaml('projects/resources/materials.yaml') or {'materials': {}}
 def index():
     return render_template('index.html')
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 @app.route('/start', methods=['GET', 'POST'])
 def start():
     if request.method == 'POST':
@@ -38,11 +34,9 @@ def start():
 def select_form():
     if request.method == 'POST':
         session['form_type'] = request.form['form_type']
-<<<<<<< HEAD
-        return render_template('configure.html', colors=colors['palette'], materials=materials['materials'], beaufort_range=range(8), beaufort_to_kph=beaufort_to_kph)
-=======
-        return render_template('configure.html', colors=colors['palette'], materials=materials['materials'])
->>>>>>> feature/new-app
+        units = session.get('units', 'metric')
+        material_subset = materials['materials'].get('ripstop', {}).get(units, {}) if units in ['metric', 'imperial'] else materials['materials']
+        return render_template('configure.html', colors=colors['palette'], materials=material_subset)
     return render_template('select.html', forms=['tail', 'drogue', 'windsock'])
 
 @app.route('/configure', methods=['GET', 'POST'])
@@ -74,13 +68,10 @@ def configure_form():
         c.drawString(100, 690, f"Material: {material}")
         c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
         c.save()
-<<<<<<< HEAD
-        return render_template('output.html', form_type=form_type, length=length, width=width, color=colors['palette'].get(color, {'name': 'Unknown'})['name'], material=material, beaufort=beaufort, units=units, svg_file=svg_file, pdf_file=pdf_file)
-    return render_template('configure.html', colors=colors['palette'], materials=materials['materials'], beaufort_range=range(8), beaufort_to_kph=beaufort_to_kph)
-=======
         return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools)
-    return render_template('configure.html', colors=colors['palette'], materials=materials['materials'])
->>>>>>> feature/new-app
+    units = session.get('units', 'metric')
+    material_subset = materials['materials'].get('ripstop', {}).get(units, {}) if units in ['metric', 'imperial'] else materials['materials']
+    return render_template('configure.html', colors=colors['palette'], materials=material_subset)
 
 if __name__ == '__main__':
     os.makedirs('output', exist_ok=True)
