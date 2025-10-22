@@ -17,9 +17,11 @@ def load_yaml(file_path):
 
 tools = load_yaml('projects/resources/tools.yaml') or {}
 colors = load_yaml('projects/resources/colors.yaml') or {'palette': {}}
-materials = load_yaml('projects/resources/ripstop.yaml') or {'materials': {}}
+materials = load_yaml('projects/resources/materials.yaml') or {'materials': {}}
 
-beaufort_to_kph = {0: (0, 1), 1: (1, 5), 2: (6, 11), 3: (12, 19), 4: (20, 28), 5: (29, 38), 6: (39, 49), 7: (50, 61)}
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/')
 def index():
@@ -36,7 +38,11 @@ def start():
 def select_form():
     if request.method == 'POST':
         session['form_type'] = request.form['form_type']
+<<<<<<< HEAD
         return render_template('configure.html', colors=colors['palette'], materials=materials['materials'], beaufort_range=range(8), beaufort_to_kph=beaufort_to_kph)
+=======
+        return render_template('configure.html', colors=colors['palette'], materials=materials['materials'])
+>>>>>>> feature/new-app
     return render_template('select.html', forms=['tail', 'drogue', 'windsock'])
 
 @app.route('/configure', methods=['GET', 'POST'])
@@ -45,9 +51,8 @@ def configure_form():
         form_type = session.get('form_type', 'tail')
         length = float(request.form['length'])
         width = float(request.form['width'])
-        color = request.form['color']
+        color_codes = request.form.getlist('colors')
         material = request.form['material']
-        beaufort = int(request.form['beaufort'])
         units = session.get('units', 'metric')
         if units == 'imperial':
             length_cm = length * 2.54
@@ -57,7 +62,9 @@ def configure_form():
             width_cm = width
         svg_file = f"output/{form_type}_template.svg"
         dwg = svgwrite.Drawing(svg_file, profile='tiny', size=(f"{width_cm*10}mm", f"{length_cm*10}mm"))
-        dwg.add(dwg.rect((0, 0), (width_cm*10, length_cm*10), fill=colors['palette'].get(color, {'hex': '#FFFFFF'})['hex']))
+        segment_width = (width_cm*10) / len(color_codes) if color_codes else width_cm*10
+        for i, color in enumerate(color_codes):
+            dwg.add(dwg.rect((i*segment_width, 0), (segment_width, length_cm*10), fill=colors['palette'].get(color, {'hex': '#FFFFFF'})['hex']))
         dwg.save()
         pdf_file = f"output/{form_type}_template.pdf"
         c = canvas.Canvas(pdf_file, pagesize=A4)
@@ -65,11 +72,15 @@ def configure_form():
         c.drawString(100, 730, f"Length: {length} {'cm' if units == 'metric' else 'in'}")
         c.drawString(100, 710, f"Width: {width} {'cm' if units == 'metric' else 'in'}")
         c.drawString(100, 690, f"Material: {material}")
-        c.drawString(100, 670, f"Color: {colors['palette'].get(color, {'name': 'Unknown'})['name']}")
-        c.drawString(100, 650, f"Wind: {beaufort} Beaufort ({beaufort_to_kph[beaufort][0]}-{beaufort_to_kph[beaufort][1]} kph)")
+        c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
         c.save()
+<<<<<<< HEAD
         return render_template('output.html', form_type=form_type, length=length, width=width, color=colors['palette'].get(color, {'name': 'Unknown'})['name'], material=material, beaufort=beaufort, units=units, svg_file=svg_file, pdf_file=pdf_file)
     return render_template('configure.html', colors=colors['palette'], materials=materials['materials'], beaufort_range=range(8), beaufort_to_kph=beaufort_to_kph)
+=======
+        return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools)
+    return render_template('configure.html', colors=colors['palette'], materials=materials['materials'])
+>>>>>>> feature/new-app
 
 if __name__ == '__main__':
     os.makedirs('output', exist_ok=True)

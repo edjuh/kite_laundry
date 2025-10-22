@@ -1,0 +1,14 @@
+material_template:
+  type: ""
+  manufacturer:
+    name: ""
+    product: ""
+    type: ""
+    weight: ""
+    properties: []
+  supplier:
+    name: ""
+    price: ""
+    colors: []
+    link: ""
+  eco: false
