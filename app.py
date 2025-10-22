@@ -7,6 +7,7 @@ import os
 import re
 import glob
 import logging
+import json
 
 app = Flask(__name__)
 app.secret_key = 'kite-laundry-key'
@@ -36,33 +37,41 @@ def index():
 @app.route('/start', methods=['GET', 'POST'])
 def start():
     if request.method == 'POST':
-        session['units'] = request.form['units']
+        session['units'] = request.form.get('units', 'metric')
+        logging.info(f"Start: Set units to {session['units']}")
         return render_template('select.html', forms=['tail', 'drogue', 'windsock'])
     return render_template('start.html')
 
 @app.route('/select', methods=['GET', 'POST'])
 def select_form():
     if request.method == 'POST':
-        session['form_type'] = request.form['form_type']
+        form_type = request.form.get('form_type')
+        if form_type not in ['tail', 'drogue', 'windsock']:
+            logging.error(f"Invalid form_type: {form_type}")
+            return render_template('select.html', forms=['tail', 'drogue', 'windsock'], error="Invalid form type")
+        session['form_type'] = form_type
+        logging.info(f"Select: Set form_type to {session['form_type']}")
         units = session.get('units', 'metric')
         material_subset = {}
         for mat_type, mat_info in materials.get('materials', {}).items():
             material_subset[mat_type] = {
-                'type': mat_info.get('type', ''),
-                'weight': mat_info.get('weight', ''),
+                'type': mat_info.get('type', 'Unknown'),
+                'weight': mat_info.get('weight', 'N/A'),
                 'properties': mat_info.get('properties', []),
                 'suppliers': {}
             }
             for supplier_key in mat_info.get('suppliers', []):
                 supplier_data = suppliers['suppliers'].get(supplier_key, {})
-                if supplier_data and (units == 'metric' and supplier_data.get('country') in ['Germany', 'Netherlands', 'UK', 'Switzerland', 'France', 'Italy', 'Spain', 'Sweden', 'Denmark', 'Various EU', 'Scandinavia'] or units == 'imperial' and supplier_data.get('country') not in ['Germany', 'Netherlands', 'UK', 'Switzerland', 'France', 'Italy', 'Spain', 'Sweden', 'Denmark', 'Various EU', 'Scandinavia']):
+                if supplier_data and supplier_data.get('materials', {}).get(mat_type):
                     material_subset[mat_type]['suppliers'][supplier_key] = {
                         'name': supplier_data.get('name', supplier_key),
-                        'price': supplier_data['materials'].get(mat_type, {}).get('price', 'N/A'),
-                        'colors': supplier_data['materials'].get(mat_type, {}).get('colors', []),
-                        'eco': supplier_data['materials'].get(mat_type, {}).get('eco', False),
-                        'link': supplier_data['materials'].get(mat_type, {}).get('link', '')
+                        'price': supplier_data['materials'][mat_type].get('price', 'N/A'),
+                        'colors': supplier_data['materials'][mat_type].get('colors', []),
+                        'eco': supplier_data['materials'][mat_type].get('eco', False),
+                        'link': supplier_data['materials'][mat_type].get('link', '')
                     }
+                else:
+                    logging.warning(f"Skipping invalid supplier {supplier_key} for {mat_type}")
         rod_subset = {}
         for rod_type, rod_info in rods.get('rods', {}).get(units, {}).items():
             rod_subset[rod_type] = {}
@@ -75,6 +84,7 @@ def select_form():
                     'length': supplier_info.get('length', ''),
                     'link': supplier_info.get('link', '')
                 }
+        logging.info(f"Select: material_subset={json.dumps(material_subset, indent=2)}")
         return render_template('configure.html', colors=colors['palette'], materials=material_subset, rods=rod_subset)
     return render_template('select.html', forms=['tail', 'drogue', 'windsock'])
 
@@ -83,15 +93,21 @@ def configure_form():
     if request.method == 'POST':
         try:
             form_type = session.get('form_type', 'tail')
+            logging.info(f"Configure POST: form_type={form_type}, session={json.dumps(dict(session), indent=2)}")
             length = round(float(request.form['length']), 1)
             width = round(float(request.form['width']), 1)
             if length <= 0 or width <= 0:
                 return render_template('configure.html', error="Dimensions must be positive numbers", colors=colors['palette'], materials=materials['materials'], rods=rods['rods'].get(session.get('units', 'metric'), {}))
             color_codes = request.form.getlist('colors')
+<<<<<<< HEAD
             material = request.form['material']
 <<<<<<< HEAD
             rod = request.form.get('rod', '')
 =======
+=======
+            material = request.form.get('material')
+            logging.info(f"Configure POST: material={material}")
+>>>>>>> feature/new-app
             # Parse material as mat_type:supplier_key
             try:
                 mat_type, supplier_key = material.split(':')
@@ -100,16 +116,20 @@ def configure_form():
                 logging.error(f"Material parsing error: {str(e)}")
                 material_display = "Unknown Material"
             rod = request.form.get('rod', '')
-            rod_display = rod
+            rod_display = "None"
             if rod:
                 try:
                     rod_type, rod_supplier_key = rod.split(':')
+<<<<<<< HEAD
                     rod_display = f"{rod_type.capitalize()} ({rods['rods'][session.get('units', 'metric')][rod_supplier_key]['name']} - {rods['rods'][session.get('units', 'metric')][rod_supplier_key]['product']} - {rods['rods'][session.get('units', 'metric')][rod_supplier_key]['price']})"
 <<<<<<< HEAD
                 except (ValueError, KeyError):
                     rod_display = rod
 >>>>>>> feature/new-app
 =======
+=======
+                    rod_display = f"{rod_type.capitalize()} ({rods['rods'][session.get('units', 'metric')].get(rod_supplier_key, {}).get('name', rod_supplier_key)} - {rods['rods'][session.get('units', 'metric')].get(rod_supplier_key, {}).get('product', 'N/A')} - {rods['rods'][session.get('units', 'metric')].get(rod_supplier_key, {}).get('price', 'N/A')})"
+>>>>>>> feature/new-app
                 except (ValueError, KeyError) as e:
                     logging.error(f"Rod parsing error: {str(e)}")
                     rod_display = "None"
@@ -152,8 +172,12 @@ def configure_form():
                 ]
             }
 <<<<<<< HEAD
+<<<<<<< HEAD
             return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, rod=rod, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools, pattern_data=pattern_data)
 =======
+=======
+            logging.info(f"Configure POST: Generated SVG={svg_file}, PDF={pdf_file}, material_display={material_display}, pattern_data={json.dumps(pattern_data)}")
+>>>>>>> feature/new-app
             return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material_display, rod=rod_display, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools, pattern_data=pattern_data)
 <<<<<<< HEAD
 >>>>>>> feature/new-app
@@ -167,21 +191,23 @@ def configure_form():
     material_subset = {}
     for mat_type, mat_info in materials.get('materials', {}).items():
         material_subset[mat_type] = {
-            'type': mat_info.get('type', ''),
-            'weight': mat_info.get('weight', ''),
+            'type': mat_info.get('type', 'Unknown'),
+            'weight': mat_info.get('weight', 'N/A'),
             'properties': mat_info.get('properties', []),
             'suppliers': {}
         }
         for supplier_key in mat_info.get('suppliers', []):
             supplier_data = suppliers['suppliers'].get(supplier_key, {})
-            if supplier_data and (units == 'metric' and supplier_data.get('country') in ['Germany', 'Netherlands', 'UK', 'Switzerland', 'France', 'Italy', 'Spain', 'Sweden', 'Denmark', 'Various EU', 'Scandinavia'] or units == 'imperial' and supplier_data.get('country') not in ['Germany', 'Netherlands', 'UK', 'Switzerland', 'France', 'Italy', 'Spain', 'Sweden', 'Denmark', 'Various EU', 'Scandinavia']):
+            if supplier_data and supplier_data.get('materials', {}).get(mat_type):
                 material_subset[mat_type]['suppliers'][supplier_key] = {
                     'name': supplier_data.get('name', supplier_key),
-                    'price': supplier_data['materials'].get(mat_type, {}).get('price', 'N/A'),
-                    'colors': supplier_data['materials'].get(mat_type, {}).get('colors', []),
-                    'eco': supplier_data['materials'].get(mat_type, {}).get('eco', False),
-                    'link': supplier_data['materials'].get(mat_type, {}).get('link', '')
+                    'price': supplier_data['materials'][mat_type].get('price', 'N/A'),
+                    'colors': supplier_data['materials'][mat_type].get('colors', []),
+                    'eco': supplier_data['materials'][mat_type].get('eco', False),
+                    'link': supplier_data['materials'][mat_type].get('link', '')
                 }
+            else:
+                logging.warning(f"Skipping invalid supplier {supplier_key} for {mat_type}")
     rod_subset = {}
     for rod_type, rod_info in rods.get('rods', {}).get(units, {}).items():
         rod_subset[rod_type] = {}
@@ -202,6 +228,7 @@ def configure_form():
                 'length': supplier_info.get('length', ''),
                 'link': supplier_info.get('link', '')
             }
+    logging.info(f"Configure GET: material_subset={json.dumps(material_subset, indent=2)}, rod_subset={json.dumps(rod_subset, indent=2)}")
     return render_template('configure.html', colors=colors['palette'], materials=material_subset, rods=rod_subset)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -235,6 +262,7 @@ def designs():
         data = load_yaml(file)
         if data:
             designs.append({'name': os.path.basename(file), 'complexity': 'Unknown'})
+    logging.info(f"Designs: Loaded {len(designs)} designs")
     return render_template('designs.html', designs=designs)
 
 @app.route('/calculate', methods=['GET', 'POST'])
@@ -276,6 +304,7 @@ def calculate():
                     "Sewing needles"
                 ]
             }
+            logging.info(f"Calculate: Generated result={json.dumps(result, indent=2)}")
             return render_template('material_calculator.html', result=result, units=units)
         except ValueError as e:
             logging.error(f"Calculate input error: {str(e)}")

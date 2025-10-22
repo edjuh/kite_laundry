@@ -7,17 +7,23 @@
 <body>
     <div class="container mt-5">
         <h1>Kite Laundry</h1>
-        <h2>Select Form</h2>
+        <nav>
+            <a href="/" class="btn btn-secondary">Home</a>
+        </nav>
+        <h2>Select Form Type</h2>
+        {% if error %}
+        <p class="text-danger">{{ error }}</p>
+        {% endif %}
         <form action="/select" method="post">
             <div class="form-group">
                 <label for="form_type" class="form-label">Form Type</label>
                 <select class="form-select" id="form_type" name="form_type" required>
-                    <option value="tail">Tail</option>
-                    <option value="drogue">Drogue</option>
-                    <option value="windsock">Windsock</option>
+                    {% for form in forms %}
+                    <option value="{{ form }}">{{ form.capitalize() }}</option>
+                    {% endfor %}
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Configure</button>
+            <button type="submit" class="btn btn-primary">Next</button>
         </form>
     </div>
 </body>

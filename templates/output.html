@@ -8,6 +8,9 @@
 <body>
     <div class="container mt-5">
         <h1>Kite Laundry: {{ form_type.capitalize() }}</h1>
+        <nav>
+            <a href="/" class="btn btn-secondary">Home</a>
+        </nav>
         <h2>Design Output</h2>
         <div class="metrics">
             <div class="metric-card">
@@ -26,6 +29,12 @@
                 <h3>Material</h3>
                 <p>{{ material }}</p>
             </div>
+            {% if rod != "None" %}
+            <div class="metric-card">
+                <h3>Rod</h3>
+                <p>{{ rod }}</p>
+            </div>
+            {% endif %}
         </div>
         <h3>Template</h3>
         <div id="pattern-visualizer"></div>
@@ -51,7 +60,11 @@
     </div>
     <script>
         const patternData = {{ pattern_data | tojson }};
-        new PatternVisualizer('pattern-visualizer', patternData);
+        try {
+            new PatternVisualizer('pattern-visualizer', patternData);
+        } catch (e) {
+            console.error('PatternVisualizer error:', e);
+        }
     </script>
 </body>
 </html>
