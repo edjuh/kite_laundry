@@ -43,7 +43,7 @@ def configure_form():
         form_type = session.get('form_type', 'tail')
         length = float(request.form['length'])
         width = float(request.form['width'])
-        color = request.form['color']
+        color_codes = request.form.getlist('colors')
         material = request.form['material']
         units = session.get('units', 'metric')
         if units == 'imperial':
@@ -54,7 +54,9 @@ def configure_form():
             width_cm = width
         svg_file = f"output/{form_type}_template.svg"
         dwg = svgwrite.Drawing(svg_file, profile='tiny', size=(f"{width_cm*10}mm", f"{length_cm*10}mm"))
-        dwg.add(dwg.rect((0, 0), (width_cm*10, length_cm*10), fill=colors['palette'].get(color, {'hex': '#FFFFFF'})['hex']))
+        segment_width = (width_cm*10) / len(color_codes) if color_codes else width_cm*10
+        for i, color in enumerate(color_codes):
+            dwg.add(dwg.rect((i*segment_width, 0), (segment_width, length_cm*10), fill=colors['palette'].get(color, {'hex': '#FFFFFF'})['hex']))
         dwg.save()
         pdf_file = f"output/{form_type}_template.pdf"
         c = canvas.Canvas(pdf_file, pagesize=A4)
@@ -62,9 +64,9 @@ def configure_form():
         c.drawString(100, 730, f"Length: {length} {'cm' if units == 'metric' else 'in'}")
         c.drawString(100, 710, f"Width: {width} {'cm' if units == 'metric' else 'in'}")
         c.drawString(100, 690, f"Material: {material}")
-        c.drawString(100, 670, f"Color: {colors['palette'].get(color, {'name': 'Unknown'})['name']}")
+        c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
         c.save()
-        return render_template('output.html', form_type=form_type, length=length, width=width, color=colors['palette'].get(color, {'name': 'Unknown'})['name'], material=material, units=units, svg_file=svg_file, pdf_file=pdf_file)
+        return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools)
     return render_template('configure.html', colors=colors['palette'], materials=materials['materials'])
 
 if __name__ == '__main__':
