@@ -17,7 +17,7 @@ def load_yaml(file_path):
 
 tools = load_yaml('projects/resources/tools.yaml') or {}
 colors = load_yaml('projects/resources/colors.yaml') or {'palette': {}}
-materials = load_yaml('projects/resources/ripstop.yaml') or {'materials': {}}
+materials = load_yaml('projects/resources/materials.yaml') or {'materials': {}}
 
 @app.route('/')
 def index():

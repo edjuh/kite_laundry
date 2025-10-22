@@ -31,8 +31,22 @@
             <div class="mb-3">
                 <label for="material" class="form-label">Material</label>
                 <select class="form-select" id="material" name="material" required>
-                    {% for mat_name, mat_info in materials.items() %}
-                    <option value="{{ mat_name }}">{{ mat_name.replace('_', ' ').title() }}</option>
+                    {% for mat_type, mat_info in materials.items() %}
+                    {% if mat_type == 'ripstop' %}
+                    <optgroup label="Ripstop">
+                        {% for sub_type, sub_info in mat_info.items() %}
+                        {% if sub_type == 'other' %}
+                        {% for other_mat in sub_info %}
+                        <option value="{{ other_mat.name }}">{{ other_mat.name }} ({{ other_mat.supplier }})</option>
+                        {% endfor %}
+                        {% else %}
+                        <option value="{{ sub_type }}">{{ sub_type.capitalize() }} ({{ mat_info[sub_type].supplier }})</option>
+                        {% endif %}
+                        {% endfor %}
+                    </optgroup>
+                    {% else %}
+                    <option value="{{ mat_type }}">{{ mat_type.capitalize() }} ({{ mat_info.supplier }})</option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>

@@ -1,0 +1,68 @@
+materials:
+  ripstop:
+    icarex:
+      supplier: "Top Fabrics"
+      type: "polyester"
+      weight: "31 g/m²"
+      properties:
+        - Lightweight
+        - UV resistant
+        - Tear resistant
+        - Bright colors
+    km9:
+      supplier: "KM9 Sport"
+      type: "nylon"
+      weight: "40 g/m²"
+      properties:
+        - Lightweight
+        - Durable
+        - Water resistant
+    esvo:
+      supplier: "ESVO Tentdoek"
+      type: "nylon"
+      weight: "48 g/m²"
+      properties:
+        - Water resistant
+        - Tear resistant
+        - Affordable
+    other:
+      - name: "Emmakites 40D"
+        supplier: "Emmakites"
+        type: "nylon"
+        weight: "48 g/m²"
+        properties:
+          - Lightweight
+          - Airtight
+          - UV protected
+      - name: "Mirai"
+        supplier: "Fly Market Kites"
+        type: "nylon"
+        weight: "44 g/m²"
+        properties:
+          - Durable
+          - Windproof
+          - Low stretch
+  tyvek:
+    supplier: "Various (Top Fabrics, Bilboquet)"
+    type: "non-woven polyethylene"
+    weight: "40-68 g/m²"
+    properties:
+      - Tear proof
+      - Waterproof
+      - Recyclable
+  plasticfoil:
+    supplier: "Various (Top Fabrics, Kite Plans)"
+    type: "mylar/polyethylene"
+    weight: "10-30 g/m²"
+    properties:
+      - Airtight
+      - Reflective
+      - Fragile
+  paper:
+    supplier: "Various (specialty kite shops)"
+    type: "kite paper"
+    weight: "20-40 g/m²"
+    properties:
+      - Lightweight
+      - Eco-friendly
+      - Fragile
