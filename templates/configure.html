@@ -33,14 +33,6 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="mb-3">
-                <label for="beaufort" class="form-label">Wind Force (Beaufort)</label>
-                <select class="form-select" id="beaufort" name="beaufort" required>
-                    {% for i in beaufort_range %}
-                    <option value="{{ i }}">{{ i }} ({{ beaufort_to_kph[i][0] }}-{{ beaufort_to_kph[i][1] }} kph)</option>
-                    {% endfor %}
-                </select>
-            </div>
             <button type="submit" class="btn btn-primary">Generate</button>
         </form>
     </div>
