@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Material</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Kite Laundry</h1>
+        <h2>Upload Material YAML</h2>
+        {% if error %}
+        <p class="text-danger">{{ error }}</p>
+        {% endif %}
+        {% if message %}
+        <p class="text-success">{{ message }}</p>
+        {% endif %}
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="yaml_file" class="form-label">Select YAML File</label>
+                <input type="file" class="form-control" id="yaml_file" name="yaml_file" accept=".yaml,.yml" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+        <p>Download <a href="/static/template.yaml" download>template.yaml</a> for the correct format.</p>
+    </div>
+</body>
+</html>
