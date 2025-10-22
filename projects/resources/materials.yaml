@@ -5,27 +5,19 @@ materials:
       type: "polyester"
       weight: "31 g/m²"
       properties: ["Lightweight", "UV resistant", "Tear resistant", "Bright colors"]
-<<<<<<< HEAD
-      suppliers: ["wepa_flyer", "de_paddestoel"]
-=======
       suppliers: ["wepa_flyer", "de_paddestoel", "metropolis_drachen"]
->>>>>>> feature/materials
     ripstop_nylon:
       manufacturer: "Various"
       type: "nylon"
       weight: "40-48 g/m²"
       properties: ["Durable", "Water resistant", "Lightweight"]
-<<<<<<< HEAD
-      suppliers: ["wepa_flyer", "de_paddestoel", "emmakites", "fly_market"]
-=======
-      suppliers: ["wepa_flyer", "de_paddestoel", "metropolis_drachen", "kitemana", "esvo_tentdoek", "lush_fabric", "fabric_land", "point_north_profabrics", "emmakites", "fly_market"]
+      suppliers: ["wepa_flyer", "de_paddestoel", "metropolis_drachen", "kitemana", "esvo_tentdoek", "lush_fabric", "fabric_land", "point_north_profabrics", "bilboquet_sport", "addnature", "friluftsland", "tessuti", "cometas_voladoras", "various_scandinavia", "emmakites", "fly_market"]
     ripstop_polyester:
       manufacturer: "Various"
       type: "polyester"
       weight: "40-50 g/m²"
       properties: ["Durable", "UV stable", "Low stretch"]
       suppliers: ["horvath_kites", "ventex_supplier", "lush_fabric", "fabric_land", "point_north_profabrics"]
->>>>>>> feature/materials
   tyvek:
     manufacturer: "Various"
     type: "non-woven polyethylene"
@@ -38,8 +30,4 @@ materials:
       type: "recycled polyester"
       weight: "40 g/m²"
       properties: ["Sustainable", "Tear resistant", "UV stable"]
-<<<<<<< HEAD
-      suppliers: ["de_paddestoel"]
-=======
       suppliers: ["de_paddestoel", "lush_fabric", "point_north_profabrics"]
->>>>>>> feature/materials
