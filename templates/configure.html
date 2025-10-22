@@ -18,12 +18,15 @@
                 <input type="number" step="0.1" class="form-control" id="width" name="width" required>
             </div>
             <div class="mb-3">
-                <label for="color" class="form-label">Color</label>
-                <select class="form-select" id="color" name="color" required>
+                <label class="form-label">Colors (select multiple)</label>
+                <div class="d-flex flex-wrap">
                     {% for code, color in colors.items() %}
-                    <option value="{{ code }}">{{ color.name }}</option>
+                    <div class="form-check me-3">
+                        <input type="checkbox" class="form-check-input" id="color-{{ code }}" name="colors" value="{{ code }}">
+                        <label class="form-check-label" for="color-{{ code }}" style="color: {{ color.hex }};">{{ color.name }}</label>
+                    </div>
                     {% endfor %}
-                </select>
+                </div>
             </div>
             <div class="mb-3">
                 <label for="material" class="form-label">Material</label>

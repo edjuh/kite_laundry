@@ -10,7 +10,7 @@
         <h2>Design Output</h2>
         <p><strong>Length:</strong> {{ length }} {{ 'cm' if units == 'metric' else 'in' }}</p>
         <p><strong>Width:</strong> {{ width }} {{ 'cm' if units == 'metric' else 'in' }}</p>
-        <p><strong>Color:</strong> {{ color }}</p>
+        <p><strong>Colors:</strong> {{ colors | join(', ') }}</p>
         <p><strong>Material:</strong> {{ material }}</p>
         <h3>Template</h3>
         <img src="/{{ svg_file }}" class="img-fluid" alt="Template" style="max-width: 500px;">
@@ -22,7 +22,13 @@
         <h3>Tools Needed</h3>
         <ul>
             {% for category, items in tools.items() %}
-            <li>{{ category.capitalize() }}: {{ items | join(', ') }}</li>
+            <li>{{ category.capitalize() }}:
+                <ul>
+                    {% for item in items %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
             {% endfor %}
         </ul>
     </div>
