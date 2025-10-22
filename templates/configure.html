@@ -38,11 +38,9 @@
                 <label for="material" class="form-label">Material</label>
                 <select class="form-select" id="material" name="material" required>
                     {% for mat_type, mat_info in materials.items() %}
-                    <optgroup label="{{ mat_type.capitalize() }}">
                         {% for supplier_key, supplier_info in mat_info.suppliers.items() %}
                         <option value="{{ mat_type }}:{{ supplier_key }}">{{ mat_type.capitalize() }} ({{ supplier_info.name }} - {{ supplier_info.price }})</option>
                         {% endfor %}
-                    </optgroup>
                     {% endfor %}
                 </select>
                 <button type="button" onclick="resetMaterial()" class="btn btn-secondary mt-2">Reset to Default</button>

@@ -85,7 +85,7 @@ def select_form():
                     'length': supplier_info.get('length', ''),
                     'link': supplier_info.get('link', '')
                 }
-        logging.info(f"Select: material_subset={json.dumps(material_subset, indent=2)}")
+        logging.info(f"Select: material_subset={json.dumps(material_subset, indent=2)}, suppliers={json.dumps(suppliers, indent=2)}")
         return render_template('configure.html', colors=colors['palette'], materials=material_subset, rods=rod_subset)
     return render_template('select.html', forms=['tail', 'drogue', 'windsock'])
 
@@ -290,7 +290,7 @@ def validate_yaml(data):
         return False
     if not isinstance(mat['supplier']['colors'], list):
         return False
-    if not re.match(r'^https?://', mat['supplier']['link']):
+    if not re.match(r'^https?://', mat['supplier']['link'):
         return False
     return True
 
