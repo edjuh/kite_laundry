@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Existing Designs</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Existing Designs</h1>
+            <p>Browse through your available designs</p>
+        </header>
+        <main>
+            {% if designs %}
+                <div class="designs-grid">
+                    {% for design in designs %}
+                    <div class="design-card">
+                        <h3>{{ design.name }}</h3>
+                        <p>Complexity: {{ design.complexity }}</p>
+                        <a href="/configure" class="btn">Generate Plan</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-designs">
+                    <p>No designs found. Please add YAML files to the projects directory.</p>
+                    <a href="/configure" class="btn">Generate from Available</a>
+                </div>
+            {% endif %}
+        </main>
+    </div>
+</body>
+</html>

@@ -106,3 +106,75 @@ button {
 button:hover {
     transform: scale(1.05);
 }
+.designs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+.design-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+.no-designs {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+.result {
+    background: #e8f4f8;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+}
+.material-list {
+    background: white;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+.cost-estimator {
+    background: #f0f8ff;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+}
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+.metric-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+.progress {
+    background: #e9ecef;
+    height: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+.progress-bar {
+    background: #2196F3;
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+.tips {
+    background: #fff3cd;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+.warning {
+    background: #f8d7da;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}

@@ -9,15 +9,15 @@
         <h1>Kite Laundry</h1>
         <h2>Configure Form</h2>
         <form action="/configure" method="post">
-            <div class="mb-3">
+            <div class="form-group">
                 <label for="length" class="form-label">Length ({{ 'cm' if session.get('units') == 'metric' else 'in' }})</label>
                 <input type="number" step="0.1" class="form-control" id="length" name="length" required>
             </div>
-            <div class="mb-3">
+            <div class="form-group">
                 <label for="width" class="form-label">Width ({{ 'cm' if session.get('units') == 'metric' else 'in' }})</label>
                 <input type="number" step="0.1" class="form-control" id="width" name="width" required>
             </div>
-            <div class="mb-3">
+            <div class="form-group">
                 <label class="form-label">Colors (select multiple)</label>
                 <div class="color-palette">
                     {% for code, color in colors.items() %}
@@ -28,7 +28,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="mb-3">
+            <div class="form-group">
                 <label for="material" class="form-label">Material</label>
                 <select class="form-select" id="material" name="material" required>
                     {% for mat_type, mat_info in materials.items() %}

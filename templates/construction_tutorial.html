@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Construction Tutorial</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Tube Tail Construction Tutorial</h1>
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="step" data-step="1">
+            <h3>Step 1: Materials Preparation</h3>
+            <p>Gather all your materials and tools before starting:</p>
+            <ul>
+                <li>Ripstop nylon fabric</li>
+                <li>Sewing machine or needle and thread</li>
+                <li>Sharp scissors</li>
+                <li>Measuring tape</li>
+                <li>2 carabiners</li>
+                <li>Iron and pressing surface</li>
+            </ul>
+            <div class="tips">
+                <strong>Pro Tip:</strong> Press your fabric before cutting to ensure it's flat and wrinkle-free.
+            </div>
+        </div>
+        <div class="step" data-step="2">
+            <h3>Step 2: Cutting the Fabric</h3>
+            <p>Cut your fabric according to the pattern dimensions:</p>
+            <div class="step-image">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect x='10' y='10' width='380' height='180' fill='none' stroke='%23333' stroke-width='2'/%3E%3Ctext x='200' y='100' text-anchor='middle' font-size='16'%3EMain tube piece%3C/text%3E%3C/svg%3E" alt="Cutting diagram">
+            </div>
+            <p>Dimensions: <span id="cutting-dimensions"></span></p>
+            <div class="warning">
+                <strong>Warning:</strong> Don't forget to add seam allowance to all edges!
+            </div>
+        </div>
+        <div class="step" data-step="3">
+            <h3>Step 3: Sewing the Tube</h3>
+            <p>Sew the fabric into a tube shape:</p>
+            <ol>
+                <li>Fold the fabric lengthwise, right sides together</li>
+                <li>Sew along the long edge with a 10mm seam allowance</li>
+                <li>Press the seam open</li>
+            </ol>
+            <div class="tips">
+                <strong>Pro Tip:</strong> Use a zigzag or overlock stitch for better durability.
+            </div>
+        </div>
+        <div class="step" data-step="4">
+            <h3>Step 4: Turning and Pressing</h3>
+            <p>Turn the tube right side out and press it flat:</p>
+            <ol>
+                <li>Turn the tube through the opening</li>
+                <li>Use a dowel or chopstick to push out corners</li>
+                <li>Press the entire tube with a hot iron</li>
+                <li>Topstitch close to the edge to reinforce</li>
+            </ol>
+        </div>
+        <div class="step" data-step="5">
+            <h3>Step 5: Adding Reinforcements</h3>
+            <p>Add reinforcement patches at the attachment points:</p>
+            <ol>
+                <li>Mark the positions at 25% and 75% of the length</li>
+                <li>Fold fabric to create double layers at these points</li>
+                <li>Sew through all layers with a reinforced stitch</li>
+                <li>Attach carabiners to the reinforced sections</li>
+            </ol>
+            <div class="tips">
+                <strong>Pro Tip:</strong> Use a triple stitch or backstitch for extra strength at reinforcement points.
+            </div>
+        </div>
+        <div class="step" data-step="6">
+            <h3>Step 6: Final Assembly</h3>
+            <p>Complete the final touches:</p>
+            <ol>
+                <li>Close the opening with a hidden stitch</li>
+                <li>Press the entire tube one final time</li>
+                <li>Test that carabiners move freely</li>
+                <li>Attach to your kite line and test fly!</li>
+            </ol>
+            <div class="tips">
+                <strong>Pro Tip:</strong> Test fly in light winds first to ensure everything works properly.
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener('scroll', () => {
+            const steps = document.querySelectorAll('.step');
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('progress-bar').style.width = scrollPercent + '%';
+        });
+        document.querySelectorAll('.step').forEach(step => {
+            step.addEventListener('click', () => {
+                step.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>

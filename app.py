@@ -5,6 +5,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 import os
 import re
+import glob
 
 app = Flask(__name__)
 app.secret_key = 'kite-laundry-key'
@@ -74,7 +75,14 @@ def configure_form():
         c.drawString(100, 690, f"Material: {material}")
         c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
         c.save()
-        return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools)
+        pattern_data = {
+            'pieces': [
+                {'width': width_cm * 10, 'height': length_cm * 10, 'position': {'x': 0, 'y': 0}},
+                {'width': 50, 'height': 50, 'position': {'x': 0, 'y': length_cm * 10 * 0.25}},
+                {'width': 50, 'height': 50, 'position': {'x': 0, 'y': length_cm * 10 * 0.75}}
+            ]
+        }
+        return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools, pattern_data=pattern_data)
     units = session.get('units', 'metric')
     material_subset = {}
     for mat_type, mat_info in materials.get('materials', {}).items():
@@ -104,6 +112,59 @@ def upload_yaml():
                 return render_template('upload.html', error=f"Error processing file: {str(e)}")
         return render_template('upload.html', error="Please upload a valid YAML file (.yaml or .yml)")
     return render_template('upload.html')
+
+@app.route('/designs')
+def designs():
+    design_files = glob.glob('projects/resources/*.yaml')
+    designs = []
+    for file in design_files:
+        data = load_yaml(file)
+        if data:
+            designs.append({'name': os.path.basename(file), 'complexity': 'Unknown'})
+    return render_template('designs.html', designs=designs)
+
+@app.route('/calculate', methods=['GET', 'POST'])
+def calculate():
+    if request.method == 'POST':
+        diameter = float(request.form.get('diameter', 50))
+        length = float(request.form.get('length', 10000))
+        material = request.form.get('material', 'ripstop')
+        seam_allowance = float(request.form.get('seam_allowance', 10))
+        units = session.get('units', 'metric')
+        if units == 'imperial':
+            diameter = diameter * 25.4
+            length = length * 25.4
+            seam_allowance = seam_allowance * 25.4
+        circumference = 3.14159 * diameter
+        pattern_width = circumference + (2 * seam_allowance)
+        pattern_height = length + (2 * seam_allowance)
+        total_area = (pattern_width * pattern_height) / 1000000
+        prices = {'ripstop': 15, 'polyester': 12, 'cotton': 8}
+        material_cost = total_area * prices.get(material, 15)
+        additional_supplies = 5
+        total_cost = material_cost + additional_supplies
+        result = {
+            'circumference': circumference / (25.4 if units == 'imperial' else 10),
+            'pattern_width': pattern_width / (25.4 if units == 'imperial' else 10),
+            'pattern_height': pattern_height / (25.4 if units == 'metric' else 10),
+            'total_area': total_area,
+            'material_cost': material_cost,
+            'additional_supplies': additional_supplies,
+            'total_cost': total_cost,
+            'material': material,
+            'shopping_list': [
+                f"{total_area:.2f}m² of {material}",
+                "2 carabiners",
+                "Matching thread",
+                "Sewing needles"
+            ]
+        }
+        return render_template('material_calculator.html', result=result, units=units)
+    return render_template('material_calculator.html', units=session.get('units', 'metric'))
+
+@app.route('/tutorial')
+def tutorial():
+    return render_template('construction_tutorial.html')
 
 def validate_yaml(data):
     template_keys = {'type', 'manufacturer', 'supplier', 'eco'}
