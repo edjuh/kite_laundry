@@ -68,7 +68,7 @@ def select_form():
             rod_subset[rod_type] = {}
             for supplier_key, supplier_info in rod_info.items():
                 rod_subset[rod_type][supplier_key] = {
-                    'name': supplier_data.get('name', supplier_key),
+                    'name': supplier_info.get('name', supplier_key),
                     'product': supplier_info.get('product', ''),
                     'price': supplier_info.get('price', 'N/A'),
                     'diameter': supplier_info.get('diameter', ''),
@@ -92,17 +92,19 @@ def configure_form():
             # Parse material as mat_type:supplier_key
             try:
                 mat_type, supplier_key = material.split(':')
-                material_display = f"{mat_type.capitalize()} ({suppliers['suppliers'][supplier_key]['name']} - {suppliers['suppliers'][supplier_key]['materials'][mat_type]['price']})"
-            except (ValueError, KeyError):
-                material_display = material
+                material_display = f"{mat_type.capitalize()} ({suppliers['suppliers'].get(supplier_key, {}).get('name', supplier_key)} - {suppliers['suppliers'].get(supplier_key, {}).get('materials', {}).get(mat_type, {}).get('price', 'N/A')})"
+            except (ValueError, KeyError) as e:
+                logging.error(f"Material parsing error: {str(e)}")
+                material_display = "Unknown Material"
             rod = request.form.get('rod', '')
             rod_display = rod
             if rod:
                 try:
                     rod_type, rod_supplier_key = rod.split(':')
                     rod_display = f"{rod_type.capitalize()} ({rods['rods'][session.get('units', 'metric')][rod_supplier_key]['name']} - {rods['rods'][session.get('units', 'metric')][rod_supplier_key]['product']} - {rods['rods'][session.get('units', 'metric')][rod_supplier_key]['price']})"
-                except (ValueError, KeyError):
-                    rod_display = rod
+                except (ValueError, KeyError) as e:
+                    logging.error(f"Rod parsing error: {str(e)}")
+                    rod_display = "None"
             units = session.get('units', 'metric')
             if units == 'imperial':
                 length_cm = length * 2.54
@@ -123,7 +125,7 @@ def configure_form():
             c.drawString(100, 710, f"Width: {width} {'cm' if units == 'metric' else 'in'}")
             c.drawString(100, 690, f"Material: {material_display}")
             c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
-            if rod:
+            if rod_display != "None":
                 c.drawString(100, 650, f"Rod: {rod_display}")
             c.save()
             pattern_data = {
@@ -134,7 +136,8 @@ def configure_form():
                 ]
             }
             return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material_display, rod=rod_display, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools, pattern_data=pattern_data)
-        except ValueError:
+        except ValueError as e:
+            logging.error(f"Input validation error: {str(e)}")
             return render_template('configure.html', error="Invalid input: use positive numbers for dimensions", colors=colors['palette'], materials=materials['materials'], rods=rods['rods'].get(session.get('units', 'metric'), {}))
     units = session.get('units', 'metric')
     material_subset = {}
@@ -160,7 +163,7 @@ def configure_form():
         rod_subset[rod_type] = {}
         for supplier_key, supplier_info in rod_info.items():
             rod_subset[rod_type][supplier_key] = {
-                'name': suppliers['suppliers'].get(supplier_key, {}).get('name', supplier_key),
+                'name': supplier_info.get('name', supplier_key),
                 'product': supplier_info.get('product', ''),
                 'price': supplier_info.get('price', 'N/A'),
                 'diameter': supplier_info.get('diameter', ''),
@@ -184,8 +187,10 @@ def upload_yaml():
                 else:
                     return render_template('upload.html', error="Invalid YAML structure: check required fields")
             except yaml.YAMLError as e:
+                logging.error(f"YAML parsing error: {str(e)}")
                 return render_template('upload.html', error=f"YAML parsing error: {str(e)}")
             except Exception as e:
+                logging.error(f"Upload error: {str(e)}")
                 return render_template('upload.html', error=f"Error processing file: {str(e)}")
         return render_template('upload.html', error="Please upload a valid YAML file (.yaml or .yml)")
     return render_template('upload.html')
@@ -240,8 +245,9 @@ def calculate():
                 ]
             }
             return render_template('material_calculator.html', result=result, units=units)
-        except ValueError:
-            return render_template('material_calculator.html', error="Invalid input: use positive numbers", units=units)
+        except ValueError as e:
+            logging.error(f"Calculate input error: {str(e)}")
+            return render_template('material_calculator.html', error="Invalid input: use positive numbers", units=session.get('units', 'metric'))
     return render_template('material_calculator.html', units=session.get('units', 'metric'))
 
 @app.route('/tutorial')
