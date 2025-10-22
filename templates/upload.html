@@ -13,6 +13,11 @@
         {% endif %}
         {% if message %}
         <p class="text-success">{{ message }}</p>
+        <script>
+            setTimeout(() => {
+                window.location.href = "{{ redirect_url }}";
+            }, 2000);
+        </script>
         {% endif %}
         <form action="/upload" method="post" enctype="multipart/form-data">
             <div class="form-group">
