@@ -89,7 +89,24 @@ def configure_form():
                 return render_template('configure.html', error="Dimensions must be positive numbers", colors=colors['palette'], materials=materials['materials'], rods=rods['rods'].get(session.get('units', 'metric'), {}))
             color_codes = request.form.getlist('colors')
             material = request.form['material']
+<<<<<<< HEAD
             rod = request.form.get('rod', '')
+=======
+            # Parse material as mat_type:supplier_key
+            try:
+                mat_type, supplier_key = material.split(':')
+                material_display = f"{mat_type.capitalize()} ({suppliers['suppliers'][supplier_key]['name']} - {suppliers['suppliers'][supplier_key]['materials'][mat_type]['price']})"
+            except (ValueError, KeyError):
+                material_display = material
+            rod = request.form.get('rod', '')
+            rod_display = rod
+            if rod:
+                try:
+                    rod_type, rod_supplier_key = rod.split(':')
+                    rod_display = f"{rod_type.capitalize()} ({rods['rods'][session.get('units', 'metric')][rod_supplier_key]['name']} - {rods['rods'][session.get('units', 'metric')][rod_supplier_key]['product']} - {rods['rods'][session.get('units', 'metric')][rod_supplier_key]['price']})"
+                except (ValueError, KeyError):
+                    rod_display = rod
+>>>>>>> feature/new-app
             units = session.get('units', 'metric')
             if units == 'imperial':
                 length_cm = length * 2.54
@@ -108,10 +125,17 @@ def configure_form():
             c.drawString(100, 750, f"{form_type.capitalize()} Template")
             c.drawString(100, 730, f"Length: {length} {'cm' if units == 'metric' else 'in'}")
             c.drawString(100, 710, f"Width: {width} {'cm' if units == 'metric' else 'in'}")
+<<<<<<< HEAD
             c.drawString(100, 690, f"Material: {material}")
             c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
             if rod:
                 c.drawString(100, 650, f"Rod: {rod}")
+=======
+            c.drawString(100, 690, f"Material: {material_display}")
+            c.drawString(100, 670, f"Colors: {', '.join(colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes)}")
+            if rod:
+                c.drawString(100, 650, f"Rod: {rod_display}")
+>>>>>>> feature/new-app
             c.save()
             pattern_data = {
                 'pieces': [
@@ -120,7 +144,11 @@ def configure_form():
                     {'width': 50, 'height': 50, 'position': {'x': 0, 'y': length_cm * 10 * 0.75}}
                 ]
             }
+<<<<<<< HEAD
             return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material, rod=rod, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools, pattern_data=pattern_data)
+=======
+            return render_template('output.html', form_type=form_type, length=length, width=width, colors=[colors['palette'].get(c, {'name': 'Unknown'})['name'] for c in color_codes], material=material_display, rod=rod_display, units=units, svg_file=svg_file, pdf_file=pdf_file, tools=tools, pattern_data=pattern_data)
+>>>>>>> feature/new-app
         except ValueError:
             return render_template('configure.html', error="Invalid input: use positive numbers for dimensions", colors=colors['palette'], materials=materials['materials'], rods=rods['rods'].get(session.get('units', 'metric'), {}))
     units = session.get('units', 'metric')
@@ -147,7 +175,11 @@ def configure_form():
         rod_subset[rod_type] = {}
         for supplier_key, supplier_info in rod_info.items():
             rod_subset[rod_type][supplier_key] = {
+<<<<<<< HEAD
                 'name': supplier_data.get('name', supplier_key),
+=======
+                'name': suppliers['suppliers'].get(supplier_key, {}).get('name', supplier_key),
+>>>>>>> feature/new-app
                 'product': supplier_info.get('product', ''),
                 'price': supplier_info.get('price', 'N/A'),
                 'diameter': supplier_info.get('diameter', ''),

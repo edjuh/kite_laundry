@@ -1,11 +1,7 @@
 suppliers:
   wepa_flyer:
     name: "Wepa-Flyer"
-<<<<<<< HEAD
-    country: "Germany"
-=======
     country: "Netherlands"
->>>>>>> feature/materials
     materials:
       icarex:
         price: "€9-11/m"
@@ -31,8 +27,6 @@ suppliers:
         colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink", "Fluor Pink", "Fluor Orange", "Grey", "Dark Grey", "Royal Blue"]
         eco: true
         link: "https://depaddestoel.nl"
-<<<<<<< HEAD
-=======
   metropolis_drachen:
     name: "Metropolis Drachen"
     country: "Germany"
@@ -125,7 +119,60 @@ suppliers:
         colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Purple", "Pink", "Fluor Yellow", "Fluor Green", "Fluor Pink"]
         eco: false
         link: "https://www.profabrics.co.uk"
->>>>>>> feature/materials
+  bilboquet_sport:
+    name: "Bilboquet Sport"
+    country: "France"
+    materials:
+      ripstop_nylon:
+        price: "€9/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple", "Pink", "Teal"]
+        eco: false
+        link: "https://bilboquet-sport.com"
+  addnature:
+    name: "Addnature"
+    country: "Sweden"
+    materials:
+      ripstop_nylon:
+        price: "€8/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Grey"]
+        eco: false
+        link: "https://addnature.se"
+  friluftsland:
+    name: "Friluftsland"
+    country: "Denmark"
+    materials:
+      ripstop_nylon:
+        price: "€7/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black"]
+        eco: false
+        link: "https://friluftsland.dk"
+  tessuti:
+    name: "Tessuti"
+    country: "Italy"
+    materials:
+      ripstop_nylon:
+        price: "€6/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black"]
+        eco: false
+        link: "https://tessuti.com"
+  cometas_voladoras:
+    name: "Cometas Voladoras"
+    country: "Spain"
+    materials:
+      ripstop_nylon:
+        price: "€10/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "Orange", "White", "Black", "Purple"]
+        eco: true
+        link: "https://cometasvoladoras.es"
+  various_scandinavia:
+    name: "Various Scandinavia"
+    country: "Scandinavia"
+    materials:
+      ripstop_nylon:
+        price: "€7-10/m"
+        colors: ["Red", "Blue", "Yellow", "Green", "White", "Black", "Grey"]
+        eco: false
+        link: "https://general-scandinavia-kites.com"
   emmakites:
     name: "Emmakites"
     country: "USA"

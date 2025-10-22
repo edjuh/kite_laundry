@@ -71,6 +71,6 @@ rods:
         product: "Pultruded Carbon Tube"
         diameter: "0.08-0.25 in"
         length: "39 in"
-        properties: "Strong, lightweight, for spars"
+        properties: ["Strong", "Lightweight", "For spars"]
         price: "$6-10/rod"
         link: "https://kitesandfunthings.com"
