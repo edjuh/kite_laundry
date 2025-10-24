@@ -67,11 +67,11 @@ design_principles = {
         'has_outlet': False
     },
     'spinner': {
-        'description': 'Oregon Spinner (graded drogue). Length ~4 times diameter, 6 gores for taper, fiber hoop for spin. Icarex ripstop material.',
-        'dimensions': ['length', 'diameter'],
+        'description': 'Helix Spinner (tapering cone with hoop). Length ~4 times entry diameter, 8 gores for taper, carbon hoop for spin. Icarex ripstop material.',
+        'dimensions': ['length', 'entry_diameter'],
         'suggested_ratio': 4,
-        'ratio_field': ('length', 'diameter'),
-        'ratio_desc': 'length to diameter',
+        'ratio_field': ('length', 'entry_diameter'),
+        'ratio_desc': 'length to entry diameter',
         'has_gore': True,
         'has_outlet': False
     }
@@ -121,18 +121,18 @@ def configure():
         dimensions = {}
         try:
             for dim in dims:
-                if dim == 'outlet_diameter':
-                    entry_dia = float(request.form['entry_diameter'])
-                    val = float(request.form.get(dim, entry_dia / 4))
-                    if val > entry_dia:
-                        raise ValueError("Outlet must be smaller than entry.")
-                else:
-                    val = float(request.form[dim])
+                val = float(request.form[dim])
                 if val <= 0:
                     raise ValueError
                 dimensions[dim] = round(convert_to_metric(val, is_imperial), 0)
             if has_gore:
-                dimensions['gore'] = int(request.form.get('gore', 6))
+                dimensions['gore'] = int(request.form.get('gore', 8 if design_type == 'spinner' else 6))
+            if has_outlet:
+                entry_dia = float(request.form['entry_diameter'])
+                val = float(request.form.get('outlet_diameter', entry_dia / 4))
+                if val > entry_dia:
+                    raise ValueError("Outlet must be smaller than entry.")
+                dimensions['outlet_diameter'] = round(convert_to_metric(val, is_imperial), 0)
             ratio = dimensions[ratio_field[0]] / dimensions[ratio_field[1]]
             if abs(ratio - suggested_ratio) > suggested_ratio * 0.2:
                 flash(f'Suggestion: Optimal {ratio_desc} ratio ~{suggested_ratio}:1. Yours is {ratio:.1f}:1.')
@@ -200,16 +200,16 @@ def get_svg():
     return send_file(svg_io, mimetype='image/svg+xml', download_name=f'{name}.svg')
 
 def generate_svg(design_type, dimensions, colors):
-    gore = dimensions.get('gore', 6)
-    max_length = dimensions.get('length', 100) * 2  # Base scale
+    gore = dimensions.get('gore', 8 if design_type == 'spinner' else 6)
+    max_length = dimensions.get('length', 100) * 2
     max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 2
-    frame_width = max(max_length * 1.2, 500)  # Dynamic frame
+    frame_width = max(max_length * 1.2, 500)
     frame_height = max(max_width * 1.2, 500)
     dwg = svgwrite.Drawing(size=(f'{frame_width}px', f'{frame_height}px'))
     primary = colors[0] if colors else 'red'
     secondary = colors[1] if len(colors) > 1 else 'black'
     tertiary = colors[2] if len(colors) > 2 else secondary
-    scale = min(400 / max_length, 400 / max_width)  # Fit within 400px
+    scale = min(400 / max_length, 400 / max_width)
     if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -224,13 +224,15 @@ def generate_svg(design_type, dimensions, colors):
             gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - 10) / length
             dwg.add(dwg.line(start=(gore_x, 10 + (entry_dia - gore_height) / 2), end=(gore_x, 10 + (entry_dia - gore_height) / 2 + gore_height), stroke='black', stroke_width=1))
     elif design_type == 'spinner':
-        diameter = dimensions['diameter'] * scale
+        entry_dia = dimensions['entry_diameter'] * scale
         length = dimensions['length'] * scale
-        dwg.add(dwg.rect(insert=(10, 10), size=(length, diameter), fill=primary, stroke=secondary))
-        dwg.add(dwg.circle(center=(10 + length, 10 + diameter / 2), r=diameter / 2, fill='white', stroke=secondary))
+        outlet_dia = 0  # Pointed tip for Helix Spinner
+        dwg.add(dwg.polygon(points=[(10, 10), (10 + length, 10 + entry_dia/2), (10 + length, 10 + entry_dia/2), (10, 10 + entry_dia)], fill=primary, stroke=secondary))
+        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary))  # Hoop at entry
         for i in range(1, gore):
             gore_x = 10 + i * (length / gore)
-            dwg.add(dwg.line(start=(gore_x, 10), end=(gore_x, 10 + diameter), stroke='black', stroke_width=1))
+            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - 10) / length
+            dwg.add(dwg.line(start=(gore_x, 10 + (entry_dia - gore_height) / 2), end=(gore_x, 10 + (entry_dia - gore_height) / 2 + gore_height), stroke='black', stroke_width=1))
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -328,17 +330,24 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
             gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - x_start) / length
             c.line(gore_x, y_start + (entry_dia - gore_height) / 2, gore_x, y_start + (entry_dia - gore_height) / 2 + gore_height)
     elif design_type == 'spinner':
-        diameter = dimensions['diameter'] * scale
+        entry_dia = dimensions['entry_diameter'] * scale
         length = dimensions['length'] * scale
+        outlet_dia = 0  # Pointed tip
         c.setFillColor(primary)
         c.setStrokeColor(secondary)
-        c.rect(x_start, y_start, length, diameter, fill=1)
-        c.setFillColor(rl_colors.white)
-        c.circle(x_start + length, y_start + diameter / 2, diameter / 2, fill=1, stroke=1)
-        gore = dimensions.get('gore', 6)
+        points = [(x_start, y_start), (x_start + length, y_start + entry_dia/2), (x_start + length, y_start + entry_dia/2), (x_start, y_start + entry_dia)]
+        path = c.beginPath()
+        path.moveTo(*points[0])
+        for p in points[1:]:
+            path.lineTo(*p)
+        path.close()
+        c.drawPath(path, fill=1, stroke=1)
+        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1)
+        gore = dimensions.get('gore', 8)
         for i in range(1, gore):
             gore_x = x_start + i * (length / gore)
-            c.line(gore_x, y_start, gore_x, y_start + diameter)
+            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - x_start) / length
+            c.line(gore_x, y_start + (entry_dia - gore_height) / 2, gore_x, y_start + (entry_dia - gore_height) / 2 + gore_height)
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
