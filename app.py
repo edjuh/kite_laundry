@@ -58,7 +58,7 @@ design_principles = {
         'has_outlet': True
     },
     'graded_tail': {
-        'description': 'Graded tapering tail (diagonal grading for color shift). Cut 12\"x41\" rectangles, diagonal taper to 4\" strips, 6-10 gores/sections. Icarex ripstop, no rod. From KitePlans: graded for taper/color change.',
+        'description': 'Graded tapering tail (diagonal grading for color shift). Cut 12"x41" rectangles, diagonal taper to 4" strips, 6-10 gores/sections. Icarex ripstop, no rod.',
         'dimensions': ['length', 'width'],
         'suggested_ratio': 10,
         'ratio_field': ('length', 'width'),
@@ -200,22 +200,25 @@ def get_svg():
     return send_file(svg_io, mimetype='image/svg+xml', download_name=f'{name}.svg')
 
 def generate_svg(design_type, dimensions, colors):
-    dwg = svgwrite.Drawing(size=('500px', '500px'))
+    gore = dimensions.get('gore', 6)
+    max_length = dimensions.get('length', 100) * 2  # Base scale
+    max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 2
+    frame_width = max(max_length * 1.2, 500)  # Dynamic frame
+    frame_height = max(max_width * 1.2, 500)
+    dwg = svgwrite.Drawing(size=(f'{frame_width}px', f'{frame_height}px'))
     primary = colors[0] if colors else 'red'
     secondary = colors[1] if len(colors) > 1 else 'black'
-    scale = 2
-    gore = dimensions.get('gore', 6)
+    tertiary = colors[2] if len(colors) > 2 else secondary
+    scale = min(400 / max_length, 400 / max_width)  # Fit within 400px
     if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
-        dwg.add(dwg.rect(insert=(10, 10), size=(length, width), rx=width/2, ry=width/2, fill=primary, stroke=secondary))  # Pipe as rounded rect
+        dwg.add(dwg.rect(insert=(10, 10), size=(length, width), rx=width/2, ry=width/2, fill=primary, stroke=secondary))
     elif design_type == 'drogue':
         entry_dia = dimensions['entry_diameter'] * scale
         outlet_dia = dimensions['outlet_diameter'] * scale
         length = dimensions['length'] * scale
-        # Horizontal taper
         dwg.add(dwg.polygon(points=[(10, 10), (10 + length, 10 + (entry_dia - outlet_dia)/2), (10 + length, 10 + (entry_dia + outlet_dia)/2), (10, 10 + entry_dia)], fill=primary, stroke=secondary))
-        # Gore lines for taper
         for i in range(1, gore):
             gore_x = 10 + i * (length / gore)
             gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - 10) / length
@@ -225,20 +228,19 @@ def generate_svg(design_type, dimensions, colors):
         length = dimensions['length'] * scale
         dwg.add(dwg.rect(insert=(10, 10), size=(length, diameter), fill=primary, stroke=secondary))
         dwg.add(dwg.circle(center=(10 + length, 10 + diameter / 2), r=diameter / 2, fill='white', stroke=secondary))
-        # Add gore lines
         for i in range(1, gore):
             gore_x = 10 + i * (length / gore)
             dwg.add(dwg.line(start=(gore_x, 10), end=(gore_x, 10 + diameter), stroke='black', stroke_width=1))
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
-        # Horizontal graded taper
-        dwg.add(dwg.polygon(points=[(10, 10), (10 + length, 10), (10 + length, 10 + width / 4), (10, 10 + width)], fill=primary, stroke=secondary))
-        # Add gore lines
-        for i in range(1, gore):
-            gore_x = 10 + i * (length / gore)
-            gore_width = width - (width * 0.75 * (gore_x - 10) / length)
-            dwg.add(dwg.line(start=(gore_x, 10), end=(gore_x, 10 + gore_width), stroke='black', stroke_width=1))
+        for i in range(gore):
+            start_x = 10 + i * (length / gore)
+            end_x = 10 + (i + 1) * (length / gore)
+            start_width = width - (width * 0.75 * i / gore)
+            end_width = width - (width * 0.75 * (i + 1) / gore)
+            color = colors[i % len(colors)]
+            dwg.add(dwg.polygon(points=[(start_x, 10), (end_x, 10), (end_x, 10 + end_width), (start_x, 10 + start_width)], fill=color, stroke=secondary))
     svg_str_io = io.StringIO()
     dwg.write(svg_str_io)
     svg_bytes = svg_str_io.getvalue().encode('utf-8')
@@ -294,24 +296,25 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     c.drawString(100, y, f"Created: {date}")
     y -= 50
     c.drawString(100, y, "Preview:")
-    y -= 20
-    primary_color = getattr(rl_colors, colors[0] if colors else 'red', rl_colors.black)
-    secondary_color = getattr(rl_colors, colors[1] if len(colors) > 1 else 'black', rl_colors.black)
-    scale = 5
+    y -= 200
+    primary = colors[0] if colors else 'red'
+    secondary = colors[1] if len(colors) > 1 else 'black'
+    tertiary = colors[2] if len(colors) > 2 else secondary
+    scale = min(5, 400 / dimensions.get('length', 100), 400 / dimensions.get('width', dimensions.get('entry_diameter', 10)))
     x_start = 100
-    y_start = y - 200
+    y_start = y
     if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
-        c.setFillColor(primary_color)
-        c.setStrokeColor(secondary_color)
+        c.setFillColor(primary)
+        c.setStrokeColor(secondary)
         c.rect(x_start, y_start, length, width, fill=1)
     elif design_type == 'drogue':
         entry_dia = dimensions['entry_diameter'] * scale
         outlet_dia = dimensions['outlet_diameter'] * scale
         length = dimensions['length'] * scale
-        c.setFillColor(primary_color)
-        c.setStrokeColor(secondary_color)
+        c.setFillColor(primary)
+        c.setStrokeColor(secondary)
         points = [(x_start, y_start), (x_start + length, y_start + (entry_dia - outlet_dia)/2), (x_start + length, y_start + (entry_dia + outlet_dia)/2), (x_start, y_start + entry_dia)]
         path = c.beginPath()
         path.moveTo(*points[0])
@@ -327,8 +330,8 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     elif design_type == 'spinner':
         diameter = dimensions['diameter'] * scale
         length = dimensions['length'] * scale
-        c.setFillColor(primary_color)
-        c.setStrokeColor(secondary_color)
+        c.setFillColor(primary)
+        c.setStrokeColor(secondary)
         c.rect(x_start, y_start, length, diameter, fill=1)
         c.setFillColor(rl_colors.white)
         c.circle(x_start + length, y_start + diameter / 2, diameter / 2, fill=1, stroke=1)
@@ -339,15 +342,22 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
-        points = [(x_start, y_start), (x_start + length, y_start), (x_start + length, y_start + width / 4), (x_start, y_start + width)]
-        c.setFillColor(primary_color)
-        c.setStrokeColor(secondary_color)
-        path = c.beginPath()
-        path.moveTo(*points[0])
-        for p in points[1:]:
-            path.lineTo(*p)
-        path.close()
-        c.drawPath(path, fill=1, stroke=1)
+        gore = dimensions.get('gore', 6)
+        for i in range(gore):
+            start_x = x_start + i * (length / gore)
+            end_x = x_start + (i + 1) * (length / gore)
+            start_width = width - (width * 0.75 * i / gore)
+            end_width = width - (width * 0.75 * (i + 1) / gore)
+            color = colors[i % len(colors)]
+            c.setFillColor(color)
+            c.setStrokeColor(secondary)
+            path = c.beginPath()
+            path.moveTo(start_x, y_start)
+            path.lineTo(end_x, y_start)
+            path.lineTo(end_x, y_start + end_width)
+            path.lineTo(start_x, y_start + start_width)
+            path.close()
+            c.drawPath(path, fill=1, stroke=1)
     c.save()
     return pdf_io
 
@@ -374,7 +384,7 @@ def get_yaml():
 def designs():
     conn = sqlite3.connect('designs.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM designs ORDER BY creation_date DESC')
+    c.execute('SELECT * FROM designs ORDER BY id DESC')
     all_designs = c.fetchall()
     conn.close()
     return render_template('designs.html', designs=all_designs)
