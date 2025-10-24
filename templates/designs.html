@@ -1,19 +1,42 @@
 <!DOCTYPE html>
-<html>
-<head><title>Output</title></head>
-<body>
-<h1>Design Output: {{ name }}</h1>
-<p>Type: {{ type }}</p>
-<p>Dimensions: {{ dimensions }} ({{ unit_label }})</p>
-<p>Colors: {{ colors }}</p>
-<p>Rod: {{ rod }}</p>
-<p>Created: {{ date }}</p>
-<p>Text Description: {{ text_output }}</p>
-<h2>SVG Preview</h2>
-<img src="{{ svg_url }}" alt="SVG Design">
-<a href="{{ pdf_url }}">Download PDF</a>
-<a href="{{ yaml_url }}">Download YAML</a>
-<a href="/designs">View All Designs</a>
-<a href="/help">Help</a>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kite Laundry - Saved Designs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-4">Saved Designs</h1>
+        <table class="w-full bg-white rounded-lg shadow-md">
+            <thead>
+                <tr class="bg-blue-600 text-white">
+                    <th class="p-2">ID</th>
+                    <th class="p-2">Name</th>
+                    <th class="p-2">Type</th>
+                    <th class="p-2">Dimensions</th>
+                    <th class="p-2">Colors</th>
+                    <th class="p-2">Rod</th>
+                    <th class="p-2">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in designs %}
+                <tr class="border-t">
+                    <td class="p-2">{{ d[0] }}</td>
+                    <td class="p-2">{{ d[1] }}</td>
+                    <td class="p-2">{{ d[2] }}</td>
+                    <td class="p-2">{{ d[3] }}</td>
+                    <td class="p-2">{{ d[4] }}</td>
+                    <td class="p-2">{{ d[5] }}</td>
+                    <td class="p-2">{{ d[6] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="text-center mt-4">
+            <a href="/" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">New Design</a>
+        </div>
+    </div>
 </body>
 </html>

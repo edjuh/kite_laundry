@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html>
-<head><title>Select Type</title></head>
-<body>
-<h1>Select Design Type</h1>
-<form method="post">
-    <select name="type">
-        {% for t in types %}
-        <option value="{{ t }}">{{ t.capitalize() }}</option>
-        {% endfor %}
-    </select>
-    <button type="submit">Next</button>
-</form>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kite Laundry - Select Type</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-4">Select Design Type</h1>
+        <form method="post" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+            <select name="type" class="w-full p-2 mb-4 border rounded">
+                {% for t in types %}
+                <option value="{{ t }}">{{ t.capitalize() }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Next</button>
+        </form>
+    </div>
 </body>
 </html>
