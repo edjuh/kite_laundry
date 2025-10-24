@@ -57,21 +57,21 @@ design_principles = {
         'has_gore': True,
         'has_outlet': True
     },
-    'spinner': {
-        'description': 'Oregon Spinner (windsock-like with spin). Length ~4 times diameter, 6 gores default, fiber hoop. Icarex ripstop material.',
-        'dimensions': ['length', 'diameter'],
-        'suggested_ratio': 4,
-        'ratio_field': ('length', 'diameter'),
-        'ratio_desc': 'length to diameter',
-        'has_gore': True,
-        'has_outlet': False
-    },
     'graded_tail': {
-        'description': 'Graded tapering tail. Length-to-width ratio: 10:1, gores for grading. Icarex ripstop material.',
+        'description': 'Graded tapering tail (diagonal grading for color shift). Cut 12\"x41\" rectangles, diagonal taper to 4\" strips, 6-10 gores/sections. Icarex ripstop, no rod. From KitePlans: graded for taper/color change.',
         'dimensions': ['length', 'width'],
         'suggested_ratio': 10,
         'ratio_field': ('length', 'width'),
         'ratio_desc': 'length to width',
+        'has_gore': True,
+        'has_outlet': False
+    },
+    'spinner': {
+        'description': 'Oregon Spinner (graded drogue). Length ~4 times diameter, 6 gores for taper, fiber hoop for spin. Icarex ripstop material.',
+        'dimensions': ['length', 'diameter'],
+        'suggested_ratio': 4,
+        'ratio_field': ('length', 'diameter'),
+        'ratio_desc': 'length to diameter',
         'has_gore': True,
         'has_outlet': False
     }
@@ -123,7 +123,7 @@ def configure():
             for dim in dims:
                 if dim == 'outlet_diameter':
                     entry_dia = float(request.form['entry_diameter'])
-                    val = float(request.form.get(dim, entry_dia / 4))  # Default 1/4 entry
+                    val = float(request.form.get(dim, entry_dia / 4))
                     if val > entry_dia:
                         raise ValueError("Outlet must be smaller than entry.")
                 else:
@@ -132,10 +132,7 @@ def configure():
                     raise ValueError
                 dimensions[dim] = round(convert_to_metric(val, is_imperial), 0)
             if has_gore:
-                gore = int(request.form.get('gore', 6))
-                if gore < 3:
-                    raise ValueError
-                dimensions['gore'] = gore
+                dimensions['gore'] = int(request.form.get('gore', 6))
             ratio = dimensions[ratio_field[0]] / dimensions[ratio_field[1]]
             if abs(ratio - suggested_ratio) > suggested_ratio * 0.2:
                 flash(f'Suggestion: Optimal {ratio_desc} ratio ~{suggested_ratio}:1. Yours is {ratio:.1f}:1.')
@@ -148,7 +145,7 @@ def configure():
             logging.info(f'Saved design: {name}')
             return redirect(url_for('output', name=name, units=units))
         except ValueError as e:
-            flash(f'Error: {str(e)} Dimensions/gore must be positive (gore min 3, outlet < entry).')
+            flash(f'Error: {e}')
 
     return render_template('configure.html', units=units, unit_label=unit_label, type=design_type,
                            dims=dims, colors_list=['red', 'blue', 'green', 'yellow', 'black', 'white'], rod_types=rod_types, principle=principle,
@@ -216,13 +213,13 @@ def generate_svg(design_type, dimensions, colors):
         entry_dia = dimensions['entry_diameter'] * scale
         outlet_dia = dimensions['outlet_diameter'] * scale
         length = dimensions['length'] * scale
-        # Rotate 90 degrees for horizontal
-        dwg.add(dwg.g().add(dwg.polygon(points=[(10, 10), (10 + length, 10 + entry_dia / 2 - outlet_dia / 2), (10 + length, 10 + entry_dia / 2 + outlet_dia / 2), (10, 10 + entry_dia)], fill=primary, stroke=secondary)))
-        # Add gore lines horizontal
+        # Horizontal taper
+        dwg.add(dwg.polygon(points=[(10, 10), (10 + length, 10 + (entry_dia - outlet_dia)/2), (10 + length, 10 + (entry_dia + outlet_dia)/2), (10, 10 + entry_dia)], fill=primary, stroke=secondary))
+        # Gore lines for taper
         for i in range(1, gore):
-            gore_pos = 10 + i * (length / gore)
-            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_pos - 10) / length
-            dwg.add(dwg.line(start=(gore_pos, 10 + (entry_dia - gore_height) / 2), end=(gore_pos, 10 + (entry_dia - gore_height) / 2 + gore_height), stroke='black', stroke_width=1))
+            gore_x = 10 + i * (length / gore)
+            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - 10) / length
+            dwg.add(dwg.line(start=(gore_x, 10 + (entry_dia - gore_height) / 2), end=(gore_x, 10 + (entry_dia - gore_height) / 2 + gore_height), stroke='black', stroke_width=1))
     elif design_type == 'spinner':
         diameter = dimensions['diameter'] * scale
         length = dimensions['length'] * scale
@@ -235,8 +232,8 @@ def generate_svg(design_type, dimensions, colors):
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
-        points = [(10, 10), (10 + length, 10), (10 + length, 10 + width / 4), (10, 10 + width)]
-        dwg.add(dwg.polygon(points, fill=primary, stroke=secondary))  # Horizontal graded
+        # Horizontal graded taper
+        dwg.add(dwg.polygon(points=[(10, 10), (10 + length, 10), (10 + length, 10 + width / 4), (10, 10 + width)], fill=primary, stroke=secondary))
         # Add gore lines
         for i in range(1, gore):
             gore_x = 10 + i * (length / gore)
@@ -308,27 +305,25 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
         width = dimensions['width'] * scale
         c.setFillColor(primary_color)
         c.setStrokeColor(secondary_color)
-        c.rect(x_start, y_start, length, width, fill=1)  # Pipe as rect for simplicity
+        c.rect(x_start, y_start, length, width, fill=1)
     elif design_type == 'drogue':
         entry_dia = dimensions['entry_diameter'] * scale
         outlet_dia = dimensions['outlet_diameter'] * scale
         length = dimensions['length'] * scale
-        # Horizontal for drogue
         c.setFillColor(primary_color)
         c.setStrokeColor(secondary_color)
-        points = [(x_start, y_start), (x_start + length, y_start + entry_dia / 2 - outlet_dia / 2), (x_start + length, y_start + entry_dia / 2 + outlet_dia / 2), (x_start, y_start + entry_dia)]
+        points = [(x_start, y_start), (x_start + length, y_start + (entry_dia - outlet_dia)/2), (x_start + length, y_start + (entry_dia + outlet_dia)/2), (x_start, y_start + entry_dia)]
         path = c.beginPath()
         path.moveTo(*points[0])
         for p in points[1:]:
             path.lineTo(*p)
         path.close()
         c.drawPath(path, fill=1, stroke=1)
-        # Add gore lines horizontal
         gore = dimensions.get('gore', 6)
         for i in range(1, gore):
-            gore_pos = x_start + i * (length / gore)
-            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_pos - x_start) / length
-            c.line(gore_pos, y_start + (entry_dia - gore_height) / 2, gore_pos, y_start + (entry_dia - gore_height) / 2 + gore_height)
+            gore_x = x_start + i * (length / gore)
+            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - x_start) / length
+            c.line(gore_x, y_start + (entry_dia - gore_height) / 2, gore_x, y_start + (entry_dia - gore_height) / 2 + gore_height)
     elif design_type == 'spinner':
         diameter = dimensions['diameter'] * scale
         length = dimensions['length'] * scale
@@ -337,7 +332,6 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
         c.rect(x_start, y_start, length, diameter, fill=1)
         c.setFillColor(rl_colors.white)
         c.circle(x_start + length, y_start + diameter / 2, diameter / 2, fill=1, stroke=1)
-        # Add gore lines in PDF
         gore = dimensions.get('gore', 6)
         for i in range(1, gore):
             gore_x = x_start + i * (length / gore)
