@@ -31,18 +31,6 @@ def init_db():
 
 init_db()
 
-import os
-for yaml_file in os.listdir('projects'):
-    if yaml_file.endswith('.yaml'):
-        with open(os.path.join('projects', yaml_file), 'r') as f:
-            data = yaml.safe_load(f)
-            conn = sqlite3.connect('designs.db')
-            c = conn.cursor()
-            c.execute('INSERT INTO designs (name, type, dimensions, colors, rod, creation_date) VALUES (?, ?, ?, ?, ?, ?)',
-                      (data['name'], data['type'], json.dumps(data['dimensions']), json.dumps(data['colors']), data.get('rod', 'none'), data.get('creation_date', datetime.now().isoformat())))
-            conn.commit()
-            conn.close()
-
 def convert_to_metric(value, is_imperial):
     return value * 2.54 if is_imperial else value
 
@@ -51,32 +39,36 @@ def convert_to_imperial(value, is_imperial):
 
 design_principles = {
     'tail': {
-        'description': 'Tails provide stability. Ratio: 10:1 length to width.',
+        'description': 'Simple pipe tail for stability. Recommended length-to-width ratio: 10:1.',
         'dimensions': ['length', 'width'],
         'suggested_ratio': 10,
         'ratio_field': ('length', 'width'),
-        'ratio_desc': 'length to width'
+        'ratio_desc': 'length to width',
+        'has_gore': False
     },
     'drogue': {
-        'description': 'Drogues add drag. Ratio: 3:1 length to diameter.',
-        'dimensions': ['diameter', 'length'],
+        'description': 'Cone-shaped drogue for drag. Length ~3 times diameter, gores for shape.',
+        'dimensions': ['length', 'diameter'],
         'suggested_ratio': 3,
         'ratio_field': ('length', 'diameter'),
-        'ratio_desc': 'length to diameter'
+        'ratio_desc': 'length to diameter',
+        'has_gore': True
     },
-    'windsock': {
-        'description': 'Windsocks for direction. Ratio: 4:1 length to diameter.',
-        'dimensions': ['diameter', 'length'],
+    'spinner': {
+        'description': 'Oregon Spinner (windsock-like). Length ~4 times diameter, 6 gores default.',
+        'dimensions': ['length', 'diameter'],
         'suggested_ratio': 4,
         'ratio_field': ('length', 'diameter'),
-        'ratio_desc': 'length to diameter'
+        'ratio_desc': 'length to diameter',
+        'has_gore': True
     },
-    'streamer': {
-        'description': 'Streamers for decoration. Ratio: 50:1 length to width.',
+    'graded_tail': {
+        'description': 'Graded tapering tail. Length-to-width ratio: 10:1, gores for grading.',
         'dimensions': ['length', 'width'],
-        'suggested_ratio': 50,
+        'suggested_ratio': 10,
         'ratio_field': ('length', 'width'),
-        'ratio_desc': 'length to width'
+        'ratio_desc': 'length to width',
+        'has_gore': True
     }
 }
 
@@ -99,7 +91,7 @@ def select_type():
 
 @app.route('/configure', methods=['GET', 'POST'])
 def configure():
-    units = request.args.get('units')
+    units = request.args.get('units', 'metric')  # Default to metric
     design_type = request.args.get('type')
     is_imperial = (units == 'imperial')
     unit_label = 'inches' if is_imperial else 'cm'
@@ -113,10 +105,12 @@ def configure():
     suggested_ratio = design_principles[design_type]['suggested_ratio']
     ratio_field = design_principles[design_type]['ratio_field']
     ratio_desc = design_principles[design_type]['ratio_desc']
+    has_gore = design_principles[design_type]['has_gore']
 
     if request.method == 'POST':
         name = request.form['name']
-        colors = {'primary': request.form['primary_color'], 'secondary': request.form.get('secondary_color', '')}
+        colors = [request.form.get('color1', 'red'), request.form.get('color2', ''), request.form.get('color3', '')]
+        colors = [c for c in colors if c]  # Remove empty
         rod = request.form['rod']
         dimensions = {}
         try:
@@ -124,7 +118,9 @@ def configure():
                 val = float(request.form[dim])
                 if val <= 0:
                     raise ValueError
-                dimensions[dim] = convert_to_metric(val, is_imperial)
+                dimensions[dim] = round(convert_to_metric(val, is_imperial), 0)  # Round to 1mm tolerance
+            if has_gore:
+                dimensions['gore'] = int(request.form.get('gore', 6))
             ratio = dimensions[ratio_field[0]] / dimensions[ratio_field[1]]
             if abs(ratio - suggested_ratio) > suggested_ratio * 0.2:
                 flash(f'Suggestion: Optimal {ratio_desc} ratio ~{suggested_ratio}:1. Yours is {ratio:.1f}:1.')
@@ -134,18 +130,19 @@ def configure():
                       (name, design_type, json.dumps(dimensions), json.dumps(colors), rod, datetime.now().isoformat()))
             conn.commit()
             conn.close()
+            logging.info(f'Saved design: {name}')
             return redirect(url_for('output', name=name, units=units))
         except ValueError:
-            flash('Dimensions must be positive numbers.')
+            flash('Dimensions/gore must be positive numbers.')
 
     return render_template('configure.html', units=units, unit_label=unit_label, type=design_type,
-                           dims=dims, colors=['red', 'blue', 'green', 'yellow'], rod_types=rod_types, principle=principle,
-                           suggested_ratio=suggested_ratio, ratio_desc=ratio_desc)
+                           dims=dims, colors_list=['red', 'blue', 'green', 'yellow'], rod_types=rod_types, principle=principle,
+                           suggested_ratio=suggested_ratio, ratio_desc=ratio_desc, has_gore=has_gore)
 
 @app.route('/output')
 def output():
     name = request.args.get('name')
-    units = request.args.get('units')
+    units = request.args.get('units', 'metric')
     is_imperial = (units == 'imperial')
     unit_label = 'in' if is_imperial else 'cm'
 
@@ -163,8 +160,9 @@ def output():
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
 
-    for dim in dimensions:
-        dimensions[dim] = round(convert_to_imperial(dimensions[dim], is_imperial), 2)
+    for dim in ['length', 'width', 'diameter']:
+        if dim in dimensions:
+            dimensions[dim] = round(convert_to_imperial(dimensions[dim], is_imperial), 0) if is_imperial else round(dimensions[dim], 0)
 
     text_output = f"{name} ({design_type}): Dimensions {dimensions} {unit_label}, Colors {colors}, Rod: {rod}"
 
@@ -191,10 +189,10 @@ def get_svg():
 
 def generate_svg(design_type, dimensions, colors):
     dwg = svgwrite.Drawing(size=('500px', '500px'))
-    primary = colors['primary']
-    secondary = colors.get('secondary', 'black')
+    primary = colors[0] if colors else 'red'
+    secondary = colors[1] if len(colors) > 1 else 'black'
     scale = 2
-    if design_type in ['tail', 'streamer']:
+    if design_type in ['tail', 'graded_tail']:
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
         dwg.add(dwg.rect(insert=(10, 10), size=(width, length), fill=primary, stroke=secondary))
@@ -203,7 +201,7 @@ def generate_svg(design_type, dimensions, colors):
         length = dimensions['length'] * scale
         points = [(10, 10), (10 + diameter, 10), (10 + diameter / 2, 10 + length)]
         dwg.add(dwg.polygon(points, fill=primary, stroke=secondary))
-    elif design_type == 'windsock':
+    elif design_type == 'spinner':
         diameter = dimensions['diameter'] * scale
         length = dimensions['length'] * scale
         dwg.add(dwg.rect(insert=(10, 10), size=(length, diameter), fill=primary, stroke=secondary))
@@ -215,7 +213,7 @@ def generate_svg(design_type, dimensions, colors):
 @app.route('/pdf')
 def get_pdf():
     name = request.args.get('name')
-    units = request.args.get('units')
+    units = request.args.get('units', 'metric')
     is_imperial = (units == 'imperial')
     unit_label = 'in' if is_imperial else 'cm'
 
@@ -232,8 +230,9 @@ def get_pdf():
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
 
-    for dim in dimensions:
-        dimensions[dim] = round(convert_to_imperial(dimensions[dim], is_imperial), 2)
+    for dim in ['length', 'width', 'diameter']:
+        if dim in dimensions:
+            dimensions[dim] = round(convert_to_imperial(dimensions[dim], is_imperial), 0) if is_imperial else round(dimensions[dim], 0)
 
     pdf_io = generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label)
     pdf_io.seek(0)
@@ -252,8 +251,8 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     dims_str = ', '.join([f"{k}: {v} {unit_label}" for k, v in dimensions.items()])
     c.drawString(100, y, f"Dimensions: {dims_str}")
     y -= 20
-    colors_str = f"Primary: {colors['primary']}, Secondary: {colors.get('secondary', 'None')}"
-    c.drawString(100, y, f"Colors: {colors_str}")
+    colors_str = ', '.join(colors)
+    c.drawString(100, y, f"Colors: {colors_str} (Icarex Ripstop)")
     y -= 20
     c.drawString(100, y, f"Rod: {rod.capitalize()}")
     y -= 20
@@ -261,12 +260,12 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     y -= 50
     c.drawString(100, y, "Preview:")
     y -= 20
-    primary_color = getattr(rl_colors, colors['primary'], rl_colors.black)
-    secondary_color = getattr(rl_colors, colors.get('secondary', 'black'), rl_colors.black)
+    primary_color = getattr(rl_colors, colors[0] if colors else 'red', rl_colors.black)
+    secondary_color = getattr(rl_colors, colors[1] if len(colors) > 1 else 'black', rl_colors.black)
     scale = 5
     x_start = 100
     y_start = y - 200
-    if design_type in ['tail', 'streamer']:
+    if design_type in ['tail', 'graded_tail']:
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
         c.setFillColor(primary_color)
@@ -284,7 +283,7 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
             path.lineTo(*p)
         path.close()
         c.drawPath(path, fill=1, stroke=1)
-    elif design_type == 'windsock':
+    elif design_type == 'spinner':
         diameter = dimensions['diameter'] * scale
         length = dimensions['length'] * scale
         c.setFillColor(primary_color)
@@ -308,7 +307,7 @@ def get_yaml():
     id, name, design_type, dims_json, colors_json, rod, date = design
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
-    data = {'name': name, 'type': design_type, 'dimensions': dimensions, 'colors': colors, 'rod': rod, 'creation_date': date}
+    data = {'name': name, 'type': design_type, 'dimensions': dimensions, 'colors': colors, 'rod': rod, 'creation_date': date, 'material': 'Icarex Ripstop'}
     yaml_io = io.StringIO()
     yaml.dump(data, yaml_io)
     yaml_io.seek(0)
