@@ -9,6 +9,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors as rl_colors
 from reportlab.pdfgen import canvas
 import yaml
+import math
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -39,36 +40,40 @@ def convert_to_imperial(value, is_imperial):
 
 design_principles = {
     'tail': {
-        'description': 'Simple pipe tail for stability. Recommended length-to-width ratio: 10:1.',
+        'description': 'Simple pipe tail for stability. Recommended length-to-width ratio: 10:1. Icarex ripstop material.',
         'dimensions': ['length', 'width'],
         'suggested_ratio': 10,
         'ratio_field': ('length', 'width'),
         'ratio_desc': 'length to width',
-        'has_gore': False
+        'has_gore': False,
+        'has_outlet': False
     },
     'drogue': {
-        'description': 'Cone-shaped drogue for drag. Length ~3 times diameter, gores for shape.',
-        'dimensions': ['length', 'diameter'],
+        'description': 'Cone-shaped drogue for drag (tapered like bucket). Length ~3 times entry diameter, outlet ~1/4 entry, 6 gores default. Icarex ripstop material.',
+        'dimensions': ['length', 'entry_diameter', 'outlet_diameter'],
         'suggested_ratio': 3,
-        'ratio_field': ('length', 'diameter'),
-        'ratio_desc': 'length to diameter',
-        'has_gore': True
+        'ratio_field': ('length', 'entry_diameter'),
+        'ratio_desc': 'length to entry diameter',
+        'has_gore': True,
+        'has_outlet': True
     },
     'spinner': {
-        'description': 'Oregon Spinner (windsock-like). Length ~4 times diameter, 6 gores default.',
+        'description': 'Oregon Spinner (windsock-like with spin). Length ~4 times diameter, 6 gores default, fiber hoop. Icarex ripstop material.',
         'dimensions': ['length', 'diameter'],
         'suggested_ratio': 4,
         'ratio_field': ('length', 'diameter'),
         'ratio_desc': 'length to diameter',
-        'has_gore': True
+        'has_gore': True,
+        'has_outlet': False
     },
     'graded_tail': {
-        'description': 'Graded tapering tail. Length-to-width ratio: 10:1, gores for grading.',
+        'description': 'Graded tapering tail. Length-to-width ratio: 10:1, gores for grading. Icarex ripstop material.',
         'dimensions': ['length', 'width'],
         'suggested_ratio': 10,
         'ratio_field': ('length', 'width'),
         'ratio_desc': 'length to width',
-        'has_gore': True
+        'has_gore': True,
+        'has_outlet': False
     }
 }
 
@@ -91,7 +96,7 @@ def select_type():
 
 @app.route('/configure', methods=['GET', 'POST'])
 def configure():
-    units = request.args.get('units', 'metric')  # Default to metric
+    units = request.args.get('units', 'metric')
     design_type = request.args.get('type')
     is_imperial = (units == 'imperial')
     unit_label = 'inches' if is_imperial else 'cm'
@@ -106,21 +111,31 @@ def configure():
     ratio_field = design_principles[design_type]['ratio_field']
     ratio_desc = design_principles[design_type]['ratio_desc']
     has_gore = design_principles[design_type]['has_gore']
+    has_outlet = design_principles[design_type]['has_outlet']
 
     if request.method == 'POST':
         name = request.form['name']
         colors = [request.form.get('color1', 'red'), request.form.get('color2', ''), request.form.get('color3', '')]
-        colors = [c for c in colors if c]  # Remove empty
+        colors = [c for c in colors if c]
         rod = request.form['rod']
         dimensions = {}
         try:
             for dim in dims:
-                val = float(request.form[dim])
+                if dim == 'outlet_diameter':
+                    entry_dia = float(request.form['entry_diameter'])
+                    val = float(request.form.get(dim, entry_dia / 4))  # Default 1/4 entry
+                    if val > entry_dia:
+                        raise ValueError("Outlet must be smaller than entry.")
+                else:
+                    val = float(request.form[dim])
                 if val <= 0:
                     raise ValueError
-                dimensions[dim] = round(convert_to_metric(val, is_imperial), 0)  # Round to 1mm tolerance
+                dimensions[dim] = round(convert_to_metric(val, is_imperial), 0)
             if has_gore:
-                dimensions['gore'] = int(request.form.get('gore', 6))
+                gore = int(request.form.get('gore', 6))
+                if gore < 3:
+                    raise ValueError
+                dimensions['gore'] = gore
             ratio = dimensions[ratio_field[0]] / dimensions[ratio_field[1]]
             if abs(ratio - suggested_ratio) > suggested_ratio * 0.2:
                 flash(f'Suggestion: Optimal {ratio_desc} ratio ~{suggested_ratio}:1. Yours is {ratio:.1f}:1.')
@@ -132,12 +147,12 @@ def configure():
             conn.close()
             logging.info(f'Saved design: {name}')
             return redirect(url_for('output', name=name, units=units))
-        except ValueError:
-            flash('Dimensions/gore must be positive numbers.')
+        except ValueError as e:
+            flash(f'Error: {str(e)} Dimensions/gore must be positive (gore min 3, outlet < entry).')
 
     return render_template('configure.html', units=units, unit_label=unit_label, type=design_type,
-                           dims=dims, colors_list=['red', 'blue', 'green', 'yellow'], rod_types=rod_types, principle=principle,
-                           suggested_ratio=suggested_ratio, ratio_desc=ratio_desc, has_gore=has_gore)
+                           dims=dims, colors_list=['red', 'blue', 'green', 'yellow', 'black', 'white'], rod_types=rod_types, principle=principle,
+                           suggested_ratio=suggested_ratio, ratio_desc=ratio_desc, has_gore=has_gore, has_outlet=has_outlet)
 
 @app.route('/output')
 def output():
@@ -160,11 +175,11 @@ def output():
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
 
-    for dim in ['length', 'width', 'diameter']:
-        if dim in dimensions:
+    for dim in dimensions:
+        if dim not in ['gore']:
             dimensions[dim] = round(convert_to_imperial(dimensions[dim], is_imperial), 0) if is_imperial else round(dimensions[dim], 0)
 
-    text_output = f"{name} ({design_type}): Dimensions {dimensions} {unit_label}, Colors {colors}, Rod: {rod}"
+    text_output = f"{name} ({design_type}): Dimensions {dimensions} {unit_label}, Colors {colors} (Icarex Ripstop), Rod: {rod}"
 
     return render_template('output.html', name=name, type=design_type, dimensions=dimensions,
                            colors=colors, rod=rod, date=date, text_output=text_output, svg_url='/svg?name=' + name,
@@ -192,22 +207,45 @@ def generate_svg(design_type, dimensions, colors):
     primary = colors[0] if colors else 'red'
     secondary = colors[1] if len(colors) > 1 else 'black'
     scale = 2
-    if design_type in ['tail', 'graded_tail']:
+    gore = dimensions.get('gore', 6)
+    if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
-        dwg.add(dwg.rect(insert=(10, 10), size=(width, length), fill=primary, stroke=secondary))
+        dwg.add(dwg.rect(insert=(10, 10), size=(length, width), rx=width/2, ry=width/2, fill=primary, stroke=secondary))  # Pipe as rounded rect
     elif design_type == 'drogue':
-        diameter = dimensions['diameter'] * scale
+        entry_dia = dimensions['entry_diameter'] * scale
+        outlet_dia = dimensions['outlet_diameter'] * scale
         length = dimensions['length'] * scale
-        points = [(10, 10), (10 + diameter, 10), (10 + diameter / 2, 10 + length)]
-        dwg.add(dwg.polygon(points, fill=primary, stroke=secondary))
+        # Rotate 90 degrees for horizontal
+        dwg.add(dwg.g().add(dwg.polygon(points=[(10, 10), (10 + length, 10 + entry_dia / 2 - outlet_dia / 2), (10 + length, 10 + entry_dia / 2 + outlet_dia / 2), (10, 10 + entry_dia)], fill=primary, stroke=secondary)))
+        # Add gore lines horizontal
+        for i in range(1, gore):
+            gore_pos = 10 + i * (length / gore)
+            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_pos - 10) / length
+            dwg.add(dwg.line(start=(gore_pos, 10 + (entry_dia - gore_height) / 2), end=(gore_pos, 10 + (entry_dia - gore_height) / 2 + gore_height), stroke='black', stroke_width=1))
     elif design_type == 'spinner':
         diameter = dimensions['diameter'] * scale
         length = dimensions['length'] * scale
         dwg.add(dwg.rect(insert=(10, 10), size=(length, diameter), fill=primary, stroke=secondary))
         dwg.add(dwg.circle(center=(10 + length, 10 + diameter / 2), r=diameter / 2, fill='white', stroke=secondary))
-    svg_io = io.BytesIO()
-    dwg.write(svg_io)
+        # Add gore lines
+        for i in range(1, gore):
+            gore_x = 10 + i * (length / gore)
+            dwg.add(dwg.line(start=(gore_x, 10), end=(gore_x, 10 + diameter), stroke='black', stroke_width=1))
+    elif design_type == 'graded_tail':
+        length = dimensions['length'] * scale
+        width = dimensions['width'] * scale
+        points = [(10, 10), (10 + length, 10), (10 + length, 10 + width / 4), (10, 10 + width)]
+        dwg.add(dwg.polygon(points, fill=primary, stroke=secondary))  # Horizontal graded
+        # Add gore lines
+        for i in range(1, gore):
+            gore_x = 10 + i * (length / gore)
+            gore_width = width - (width * 0.75 * (gore_x - 10) / length)
+            dwg.add(dwg.line(start=(gore_x, 10), end=(gore_x, 10 + gore_width), stroke='black', stroke_width=1))
+    svg_str_io = io.StringIO()
+    dwg.write(svg_str_io)
+    svg_bytes = svg_str_io.getvalue().encode('utf-8')
+    svg_io = io.BytesIO(svg_bytes)
     return svg_io
 
 @app.route('/pdf')
@@ -230,8 +268,8 @@ def get_pdf():
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
 
-    for dim in ['length', 'width', 'diameter']:
-        if dim in dimensions:
+    for dim in dimensions:
+        if dim not in ['gore']:
             dimensions[dim] = round(convert_to_imperial(dimensions[dim], is_imperial), 0) if is_imperial else round(dimensions[dim], 0)
 
     pdf_io = generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label)
@@ -265,24 +303,32 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     scale = 5
     x_start = 100
     y_start = y - 200
-    if design_type in ['tail', 'graded_tail']:
+    if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
         c.setFillColor(primary_color)
         c.setStrokeColor(secondary_color)
-        c.rect(x_start, y_start, width, length, fill=1)
+        c.rect(x_start, y_start, length, width, fill=1)  # Pipe as rect for simplicity
     elif design_type == 'drogue':
-        diameter = dimensions['diameter'] * scale
+        entry_dia = dimensions['entry_diameter'] * scale
+        outlet_dia = dimensions['outlet_diameter'] * scale
         length = dimensions['length'] * scale
-        points = [(x_start, y_start + length), (x_start + diameter / 2, y_start), (x_start + diameter, y_start + length)]
+        # Horizontal for drogue
         c.setFillColor(primary_color)
         c.setStrokeColor(secondary_color)
+        points = [(x_start, y_start), (x_start + length, y_start + entry_dia / 2 - outlet_dia / 2), (x_start + length, y_start + entry_dia / 2 + outlet_dia / 2), (x_start, y_start + entry_dia)]
         path = c.beginPath()
         path.moveTo(*points[0])
         for p in points[1:]:
             path.lineTo(*p)
         path.close()
         c.drawPath(path, fill=1, stroke=1)
+        # Add gore lines horizontal
+        gore = dimensions.get('gore', 6)
+        for i in range(1, gore):
+            gore_pos = x_start + i * (length / gore)
+            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_pos - x_start) / length
+            c.line(gore_pos, y_start + (entry_dia - gore_height) / 2, gore_pos, y_start + (entry_dia - gore_height) / 2 + gore_height)
     elif design_type == 'spinner':
         diameter = dimensions['diameter'] * scale
         length = dimensions['length'] * scale
@@ -291,6 +337,23 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
         c.rect(x_start, y_start, length, diameter, fill=1)
         c.setFillColor(rl_colors.white)
         c.circle(x_start + length, y_start + diameter / 2, diameter / 2, fill=1, stroke=1)
+        # Add gore lines in PDF
+        gore = dimensions.get('gore', 6)
+        for i in range(1, gore):
+            gore_x = x_start + i * (length / gore)
+            c.line(gore_x, y_start, gore_x, y_start + diameter)
+    elif design_type == 'graded_tail':
+        length = dimensions['length'] * scale
+        width = dimensions['width'] * scale
+        points = [(x_start, y_start), (x_start + length, y_start), (x_start + length, y_start + width / 4), (x_start, y_start + width)]
+        c.setFillColor(primary_color)
+        c.setStrokeColor(secondary_color)
+        path = c.beginPath()
+        path.moveTo(*points[0])
+        for p in points[1:]:
+            path.lineTo(*p)
+        path.close()
+        c.drawPath(path, fill=1, stroke=1)
     c.save()
     return pdf_io
 
@@ -307,7 +370,7 @@ def get_yaml():
     id, name, design_type, dims_json, colors_json, rod, date = design
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
-    data = {'name': name, 'type': design_type, 'dimensions': dimensions, 'colors': colors, 'rod': rod, 'creation_date': date, 'material': 'Icarex Ripstop'}
+    data = {'name': name, 'type': design_type, 'dimensions': dimensions, 'colors': colors, 'material': 'Icarex Ripstop', 'rod': rod, 'creation_date': date}
     yaml_io = io.StringIO()
     yaml.dump(data, yaml_io)
     yaml_io.seek(0)
