@@ -1,70 +1,19 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Output</title>
-    <link href="/static/css/style.css" rel="stylesheet">
-    <script src="/static/js/pattern_visualizer.js"></script>
-</head>
+<head><title>Output</title></head>
 <body>
-    <div class="container mt-5">
-        <h1>Kite Laundry: {{ form_type.capitalize() }}</h1>
-        <nav>
-            <a href="/" class="btn btn-secondary">Home</a>
-        </nav>
-        <h2>Design Output</h2>
-        <div class="metrics">
-            <div class="metric-card">
-                <h3>Length</h3>
-                <p>{{ length }} {{ 'cm' if units == 'metric' else 'in' }}</p>
-            </div>
-            <div class="metric-card">
-                <h3>Width</h3>
-                <p>{{ width }} {{ 'cm' if units == 'metric' else 'in' }}</p>
-            </div>
-            <div class="metric-card">
-                <h3>Colors</h3>
-                <p>{{ colors | join(', ') }}</p>
-            </div>
-            <div class="metric-card">
-                <h3>Material</h3>
-                <p>{{ material }}</p>
-            </div>
-            {% if rod != "None" %}
-            <div class="metric-card">
-                <h3>Rod</h3>
-                <p>{{ rod }}</p>
-            </div>
-            {% endif %}
-        </div>
-        <h3>Template</h3>
-        <div id="pattern-visualizer"></div>
-        <h3>Download</h3>
-        <a href="/{{ svg_file }}" class="btn btn-primary" download>Download SVG</a>
-        <a href="/{{ pdf_file }}" class="btn btn-primary" download>Download PDF</a>
-        <button onclick="downloadArticle()" class="btn btn-primary">Print Production Plan</button>
-        <h3>Instructions</h3>
-        <p>Cut {{ form_type }} to {{ length }} {{ 'cm' if units == 'metric' else 'in' }} x {{ width }} {{ 'cm' if units == 'metric' else 'in' }} using {{ material }}. Sew with 0.5 {{ 'cm' if units == 'metric' else 'in' }} seam allowance.</p>
-        <h3>Tools Needed</h3>
-        <ul>
-            {% for category, items in tools.items() %}
-            <li>{{ category.capitalize() }}:
-                <ul>
-                    {% for item in items %}
-                    <li>{{ item }}</li>
-                    {% endfor %}
-                </ul>
-            </li>
-            {% endfor %}
-        </ul>
-        <a href="/tutorial" class="btn btn-primary">View Construction Tutorial</a>
-    </div>
-    <script>
-        const patternData = {{ pattern_data | tojson }};
-        try {
-            new PatternVisualizer('pattern-visualizer', patternData);
-        } catch (e) {
-            console.error('PatternVisualizer error:', e);
-        }
-    </script>
+<h1>Design Output: {{ name }}</h1>
+<p>Type: {{ type }}</p>
+<p>Dimensions: {{ dimensions }} ({{ unit_label }})</p>
+<p>Colors: {{ colors }}</p>
+<p>Rod: {{ rod }}</p>
+<p>Created: {{ date }}</p>
+<p>Text Description: {{ text_output }}</p>
+<h2>SVG Preview</h2>
+<img src="{{ svg_url }}" alt="SVG Design">
+<a href="{{ pdf_url }}">Download PDF</a>
+<a href="{{ yaml_url }}">Download YAML</a>
+<a href="/designs">View All Designs</a>
+<a href="/help">Help</a>
 </body>
 </html>
