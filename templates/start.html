@@ -1,23 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Unit Selection</title>
-    <link href="/static/css/style.css" rel="stylesheet">
-</head>
+<head><title>Start</title></head>
 <body>
-    <div class="container mt-5">
-        <h1>Kite Laundry</h1>
-        <h2>Select Units</h2>
-        <form action="/start" method="post">
-            <div class="form-group">
-                <label for="units" class="form-label">Units</label>
-                <select class="form-select" id="units" name="units" required>
-                    <option value="metric">Metric (cm, m, kph)</option>
-                    <option value="imperial">Imperial (in, ft, mph)</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Next</button>
-        </form>
-    </div>
+<h1>Welcome to Kite Laundry Design Generator</h1>
+<p><a href="/help">Learn about Kite Laundry</a></p>
+<form method="post">
+    <label>Select Units:</label>
+    <select name="units">
+        <option value="metric">Metric (cm)</option>
+        <option value="imperial">Imperial (inches)</option>
+    </select>
+    <button type="submit">Next</button>
+</form>
 </body>
 </html>

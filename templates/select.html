@@ -1,30 +1,15 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Select Form</title>
-    <link href="/static/css/style.css" rel="stylesheet">
-</head>
+<head><title>Select Type</title></head>
 <body>
-    <div class="container mt-5">
-        <h1>Kite Laundry</h1>
-        <nav>
-            <a href="/" class="btn btn-secondary">Home</a>
-        </nav>
-        <h2>Select Form Type</h2>
-        {% if error %}
-        <p class="text-danger">{{ error }}</p>
-        {% endif %}
-        <form action="/select" method="post">
-            <div class="form-group">
-                <label for="form_type" class="form-label">Form Type</label>
-                <select class="form-select" id="form_type" name="form_type" required>
-                    {% for form in forms %}
-                    <option value="{{ form }}">{{ form.capitalize() }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Next</button>
-        </form>
-    </div>
+<h1>Select Design Type</h1>
+<form method="post">
+    <select name="type">
+        {% for t in types %}
+        <option value="{{ t }}">{{ t.capitalize() }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Next</button>
+</form>
 </body>
 </html>

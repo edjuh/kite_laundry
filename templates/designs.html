@@ -1,34 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Existing Designs</title>
-    <link href="/static/css/style.css" rel="stylesheet">
-</head>
+<html>
+<head><title>Output</title></head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Existing Designs</h1>
-            <p>Browse through your available designs</p>
-        </header>
-        <main>
-            {% if designs %}
-                <div class="designs-grid">
-                    {% for design in designs %}
-                    <div class="design-card">
-                        <h3>{{ design.name }}</h3>
-                        <p>Complexity: {{ design.complexity }}</p>
-                        <a href="/configure" class="btn">Generate Plan</a>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="no-designs">
-                    <p>No designs found. Please add YAML files to the projects directory.</p>
-                    <a href="/configure" class="btn">Generate from Available</a>
-                </div>
-            {% endif %}
-        </main>
-    </div>
+<h1>Design Output: {{ name }}</h1>
+<p>Type: {{ type }}</p>
+<p>Dimensions: {{ dimensions }} ({{ unit_label }})</p>
+<p>Colors: {{ colors }}</p>
+<p>Rod: {{ rod }}</p>
+<p>Created: {{ date }}</p>
+<p>Text Description: {{ text_output }}</p>
+<h2>SVG Preview</h2>
+<img src="{{ svg_url }}" alt="SVG Design">
+<a href="{{ pdf_url }}">Download PDF</a>
+<a href="{{ yaml_url }}">Download YAML</a>
+<a href="/designs">View All Designs</a>
+<a href="/help">Help</a>
 </body>
 </html>
