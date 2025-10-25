@@ -223,15 +223,15 @@ def get_svg():
 
 def generate_svg(design_type, dimensions, colors):
     gore = dimensions.get('gore', 8 if design_type == 'spinner' else 6)
-    max_length = dimensions.get('length', 100) * 4  # Increased scale
-    max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 4
-    frame_width = max(max_length * 1.3, 800)  # Larger frame
-    frame_height = max(max_width * 1.3, 800)
+    max_length = dimensions.get('length', 100) * 5  # Larger scale
+    max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 5
+    frame_width = max(max_length * 1.5, 1000)  # Larger frame
+    frame_height = max(max_width * 1.5, 1000)
     dwg = svgwrite.Drawing(size=(f'{frame_width}px', f'{frame_height}px'))
     primary = colors[0] if colors else 'red'
     secondary = colors[1] if len(colors) > 1 else 'black'
     tertiary = colors[2] if len(colors) > 2 else secondary
-    scale = min(600 / max_length, 600 / max_width)  # Larger rendering
+    scale = min(800 / max_length, 800 / max_width)  # Larger rendering
     if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -256,7 +256,7 @@ def generate_svg(design_type, dimensions, colors):
             end_height = entry_dia - (entry_dia * (i + 1) / gore)
             color = colors[i % len(colors)]
             dwg.add(dwg.polygon(points=[(start_x, 10 + (entry_dia - start_height)/2), (end_x, 10 + (entry_dia - end_height)/2), (end_x, 10 + (entry_dia + end_height)/2), (start_x, 10 + (entry_dia + start_height)/2)], fill=color, stroke=secondary))
-        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary, stroke_width=4))
+        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary, stroke_width=5))
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -373,7 +373,7 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
             path.close()
             c.drawPath(path, fill=1, stroke=1)
         c.setStrokeColor(secondary)
-        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1, stroke_width=3)
+        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1, stroke_width=5)
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
