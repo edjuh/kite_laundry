@@ -23,7 +23,6 @@ app.jinja_env.filters['from_json'] = json.loads
 def init_db():
     conn = sqlite3.connect('designs.db')
     c = conn.cursor()
-    # Create table with unit_label if not exists
     c.execute('''CREATE TABLE IF NOT EXISTS designs
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   name TEXT NOT NULL,
@@ -33,15 +32,12 @@ def init_db():
                   rod TEXT,
                   creation_date TEXT NOT NULL,
                   unit_label TEXT DEFAULT 'cm')''')
-    # Add unit_label column if missing
     c.execute('''PRAGMA table_info(designs)''')
     columns = [info[1] for info in c.fetchall()]
     if 'unit_label' not in columns:
         c.execute('''ALTER TABLE designs ADD COLUMN unit_label TEXT DEFAULT 'cm' ''')
-    # Update existing rows with unit_label
     c.execute('''UPDATE designs SET unit_label = 'cm' WHERE unit_label IS NULL''')
     conn.commit()
-    # Import YAMLs
     resource_dir = 'projects/resources'
     if os.path.exists(resource_dir):
         for yaml_file in os.listdir(resource_dir):
@@ -227,15 +223,15 @@ def get_svg():
 
 def generate_svg(design_type, dimensions, colors):
     gore = dimensions.get('gore', 8 if design_type == 'spinner' else 6)
-    max_length = dimensions.get('length', 100) * 2
-    max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 2
-    frame_width = max(max_length * 1.2, 500)
-    frame_height = max(max_width * 1.2, 500)
+    max_length = dimensions.get('length', 100) * 4  # Increased scale
+    max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 4
+    frame_width = max(max_length * 1.3, 800)  # Larger frame
+    frame_height = max(max_width * 1.3, 800)
     dwg = svgwrite.Drawing(size=(f'{frame_width}px', f'{frame_height}px'))
     primary = colors[0] if colors else 'red'
     secondary = colors[1] if len(colors) > 1 else 'black'
     tertiary = colors[2] if len(colors) > 2 else secondary
-    scale = min(400 / max_length, 400 / max_width)
+    scale = min(600 / max_length, 600 / max_width)  # Larger rendering
     if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -260,7 +256,7 @@ def generate_svg(design_type, dimensions, colors):
             end_height = entry_dia - (entry_dia * (i + 1) / gore)
             color = colors[i % len(colors)]
             dwg.add(dwg.polygon(points=[(start_x, 10 + (entry_dia - start_height)/2), (end_x, 10 + (entry_dia - end_height)/2), (end_x, 10 + (entry_dia + end_height)/2), (start_x, 10 + (entry_dia + start_height)/2)], fill=color, stroke=secondary))
-        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary, stroke_width=3))
+        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary, stroke_width=4))
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -376,9 +372,8 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
             path.lineTo(start_x, y_start + (entry_dia + start_height)/2)
             path.close()
             c.drawPath(path, fill=1, stroke=1)
-        c.setFillColor('none')
         c.setStrokeColor(secondary)
-        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1, strokeWidth=3)
+        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1, stroke_width=3)
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
