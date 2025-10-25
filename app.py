@@ -17,6 +17,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 app = Flask(__name__)
 app.secret_key = 'super_secret_key'
 
+# Custom filter for JSON parsing in templates
+app.jinja_env.filters['from_json'] = json.loads
+
 def init_db():
     conn = sqlite3.connect('designs.db')
     c = conn.cursor()
@@ -27,7 +30,8 @@ def init_db():
                   dimensions TEXT NOT NULL,
                   colors TEXT NOT NULL,
                   rod TEXT,
-                  creation_date TEXT NOT NULL)''')
+                  creation_date TEXT NOT NULL,
+                  unit_label TEXT DEFAULT 'cm')''')
     conn.commit()
     resource_dir = 'projects/resources'
     if os.path.exists(resource_dir):
@@ -36,8 +40,8 @@ def init_db():
                 with open(os.path.join(resource_dir, yaml_file), 'r') as f:
                     data = yaml.safe_load(f)
                     if data and 'name' in data and 'type' in data:
-                        c.execute('INSERT OR IGNORE INTO designs (name, type, dimensions, colors, rod, creation_date) VALUES (?, ?, ?, ?, ?, ?)',
-                                  (data['name'], data['type'], json.dumps(data.get('dimensions', {})), json.dumps(data.get('colors', [])), data.get('rod', 'none'), data.get('creation_date', datetime.now().isoformat())))
+                        c.execute('INSERT OR IGNORE INTO designs (name, type, dimensions, colors, rod, creation_date, unit_label) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                                  (data['name'], data['type'], json.dumps(data.get('dimensions', {})), json.dumps(data.get('colors', [])), data.get('rod', 'none'), data.get('creation_date', datetime.now().isoformat()), 'cm'))
                     conn.commit()
     conn.close()
 
@@ -149,8 +153,8 @@ def configure():
                 flash(f'Suggestion: Optimal {ratio_desc} ratio ~{suggested_ratio}:1. Yours is {ratio:.1f}:1.')
             conn = sqlite3.connect('designs.db')
             c = conn.cursor()
-            c.execute('INSERT INTO designs (name, type, dimensions, colors, rod, creation_date) VALUES (?, ?, ?, ?, ?, ?)',
-                      (name, design_type, json.dumps(dimensions), json.dumps(colors), rod, datetime.now().isoformat()))
+            c.execute('INSERT INTO designs (name, type, dimensions, colors, rod, creation_date, unit_label) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                      (name, design_type, json.dumps(dimensions), json.dumps(colors), rod, datetime.now().isoformat(), unit_label))
             conn.commit()
             conn.close()
             logging.info(f'Saved design: {name}')
@@ -179,7 +183,7 @@ def output():
         flash('Design not found.')
         return redirect(url_for('start'))
 
-    id, name, design_type, dims_json, colors_json, rod, date = design
+    id, name, design_type, dims_json, colors_json, rod, date, unit_label = design
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
 
@@ -245,7 +249,7 @@ def generate_svg(design_type, dimensions, colors):
             end_height = entry_dia - (entry_dia * (i + 1) / gore)
             color = colors[i % len(colors)]
             dwg.add(dwg.polygon(points=[(start_x, 10 + (entry_dia - start_height)/2), (end_x, 10 + (entry_dia - end_height)/2), (end_x, 10 + (entry_dia + end_height)/2), (start_x, 10 + (entry_dia + start_height)/2)], fill=color, stroke=secondary))
-        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary, stroke_width=2))
+        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary, stroke_width=3))
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -278,7 +282,7 @@ def get_pdf():
     if not design:
         return 'Not found', 404
 
-    id, name, design_type, dims_json, colors_json, rod, date = design
+    id, name, design_type, dims_json, colors_json, rod, date, unit_label = design
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
 
@@ -363,7 +367,7 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
             c.drawPath(path, fill=1, stroke=1)
         c.setFillColor('none')
         c.setStrokeColor(secondary)
-        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1)
+        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1, strokeWidth=3)
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -396,7 +400,7 @@ def get_yaml():
     conn.close()
     if not design:
         return 'Not found', 404
-    id, name, design_type, dims_json, colors_json, rod, date = design
+    id, name, design_type, dims_json, colors_json, rod, date, unit_label = design
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
     data = {'name': name, 'type': design_type, 'dimensions': dimensions, 'colors': colors, 'material': 'Icarex Ripstop', 'rod': rod, 'creation_date': date}
