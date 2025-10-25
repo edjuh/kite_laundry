@@ -198,7 +198,9 @@ def output():
         if dim not in ['gore']:
             dimensions[dim] = round(convert_to_imperial(dimensions[dim], is_imperial), 0) if is_imperial else round(dimensions[dim], 0)
 
-    text_output = f"{name} ({design_type}): Dimensions {', '.join([f'{k}: {v} {unit_label}' for k, v in dimensions.items()])}, Colors {', '.join(colors)} (Icarex Ripstop), Rod: {rod}"
+    # Adjust dimensions string to exclude units for 'gore'
+    dims_str = ', '.join([f'{k}: {v} {unit_label}' if k != 'gore' else f'{k}: {v}' for k, v in dimensions.items()])
+    text_output = f"{name} ({design_type}): Dimensions {dims_str}, Colors {', '.join(colors)} (Icarex Ripstop), Rod: {rod}"
 
     return render_template('output.html', name=name, type=design_type, dimensions=dimensions,
                            colors=colors, rod=rod, date=date, text_output=text_output, svg_url='/svg?name=' + name,
@@ -223,15 +225,15 @@ def get_svg():
 
 def generate_svg(design_type, dimensions, colors):
     gore = dimensions.get('gore', 8 if design_type == 'spinner' else 6)
-    max_length = dimensions.get('length', 100) * 5  # Larger scale
-    max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 5
-    frame_width = max(max_length * 1.5, 1000)  # Larger frame
-    frame_height = max(max_width * 1.5, 1000)
+    max_length = dimensions.get('length', 100) * 8  # Even larger scale
+    max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 8
+    frame_width = max(max_length * 1.5, 1500)  # Larger frame
+    frame_height = max(max_width * 1.5, 1500)
     dwg = svgwrite.Drawing(size=(f'{frame_width}px', f'{frame_height}px'))
     primary = colors[0] if colors else 'red'
     secondary = colors[1] if len(colors) > 1 else 'black'
     tertiary = colors[2] if len(colors) > 2 else secondary
-    scale = min(800 / max_length, 800 / max_width)  # Larger rendering
+    scale = min(1200 / max_length, 1200 / max_width)  # Larger rendering
     if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -311,7 +313,7 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     y = height - 80
     c.drawString(100, y, f"Type: {design_type.capitalize()}")
     y -= 20
-    dims_str = ', '.join([f"{k}: {v} {unit_label}" for k, v in dimensions.items()])
+    dims_str = ', '.join([f"{k}: {v} {unit_label}" if k != 'gore' else f"{k}: {v}" for k, v in dimensions.items()])
     c.drawString(100, y, f"Dimensions: {dims_str}")
     y -= 20
     colors_str = ', '.join(colors)
@@ -373,7 +375,7 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
             path.close()
             c.drawPath(path, fill=1, stroke=1)
         c.setStrokeColor(secondary)
-        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1, stroke_width=5)
+        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1, strokeWidth=5)
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
