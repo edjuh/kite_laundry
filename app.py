@@ -187,7 +187,7 @@ def output():
         if dim not in ['gore']:
             dimensions[dim] = round(convert_to_imperial(dimensions[dim], is_imperial), 0) if is_imperial else round(dimensions[dim], 0)
 
-    text_output = f"{name} ({design_type}): Dimensions {dimensions} {unit_label}, Colors {colors} (Icarex Ripstop), Rod: {rod}"
+    text_output = f"{name} ({design_type}): Dimensions {', '.join([f'{k}: {v} {unit_label}' for k, v in dimensions.items()])}, Colors {', '.join(colors)} (Icarex Ripstop), Rod: {rod}"
 
     return render_template('output.html', name=name, type=design_type, dimensions=dimensions,
                            colors=colors, rod=rod, date=date, text_output=text_output, svg_url='/svg?name=' + name,
@@ -198,12 +198,12 @@ def get_svg():
     name = request.args.get('name')
     conn = sqlite3.connect('designs.db')
     c = conn.cursor()
-    c.execute('SELECT type, dimensions, colors FROM designs WHERE name = ? ORDER BY id DESC LIMIT 1', (name,))
+    c.execute('SELECT * FROM designs WHERE name = ? ORDER BY id DESC LIMIT 1', (name,))
     design = c.fetchone()
     conn.close()
     if not design:
         return 'Not found', 404
-    design_type, dims_json, colors_json = design
+    design_type, dims_json, colors_json = design[2], design[3], design[4]
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
     svg_io = generate_svg(design_type, dimensions, colors)
@@ -416,7 +416,58 @@ def designs():
 
 @app.route('/help')
 def help():
-    return render_template('help.html')
+    return render_template('help.html', helix_instructions=helix_instructions)
+
+helix_instructions = """
+## Helix Spinner Instructions
+### Materials Required
+- Ripstop nylon: ~0.60 m² (add 20% for waste)
+- Thread: high-strength polyester, matching colors
+- Seam tape or binding (optional for edges)
+- Lightweight ring or swivel for attachment (diameter 50-100mm)
+- Webbing or cord for bridle (1m, breaking strength 50kg+)
+- Sewing machine with walking foot recommended
+- Pins, scissors, ruler, marking tool
+
+### Preparation
+1. Print this instruction sheet
+2. Wash and iron fabric to pre-shrink
+3. Plan color layout for gores (alternating colors for visual effect)
+4. Prepare work space for large pieces
+5. Test stitch on scrap fabric
+
+### Cutting
+Cut 8 gore panels from ripstop. Each gore is a curved triangle/trapezoid:
+- Base: 11.8 cm (+ 1.0 cm seam on sides)
+- Height: 100.0 cm (+ 1.0 cm seam on top/bottom)
+- Tip: 0.0 cm (pointed tip, + 1.0 cm seam)
+- Sides: Curved to form cone when sewn
+
+### Sewing Gores
+1. Pin two gores right sides together along one curved side
+2. Sew with 1.0 cm seam allowance
+3. Press seam to one side
+4. Topstitch if desired for strength
+5. Repeat for all gores, forming a tube
+6. Sew the last seam to close the cone
+
+### Finishing Edges
+1. Hem the base opening with double fold for strength
+2. Reinforce the pointed tip with extra stitching
+
+### Attachment
+1. Attach ring to base with strong webbing
+2. Sew webbing in a loop around the ring
+3. Attach bridle cord to ring for kite line connection
+
+### Quality Check
+- Check for even gore sizes
+- Ensure no puckers or twists
+- Test inflation by blowing into base
+- Check seams for strength
+
+Happy flying from the Netherlands! 🪁
+"""
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

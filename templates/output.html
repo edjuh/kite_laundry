@@ -12,8 +12,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <p class="mb-2"><strong>Type:</strong> {{ type }}</p>
-                    <p class="mb-2"><strong>Dimensions:</strong> {{ dimensions }} ({{ unit_label }})</p>
-                    <p class="mb-2"><strong>Colors:</strong> {{ colors }} (Icarex Ripstop)</p>
+                    <p class="mb-2"><strong>Dimensions:</strong> {% for key, value in dimensions.items() %}{{ key }}: {{ value }} {{ unit_label }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+                    <p class="mb-2"><strong>Colors:</strong> {{ colors | join(', ') }} (Icarex Ripstop)</p>
                     <p class="mb-2"><strong>Rod:</strong> {{ rod }}</p>
                     <p class="mb-2"><strong>Created:</strong> {{ date }}</p>
                     <p class="mb-4"><strong>Text Description:</strong> {{ text_output }}</p>
