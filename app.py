@@ -23,6 +23,7 @@ app.jinja_env.filters['from_json'] = json.loads
 def init_db():
     conn = sqlite3.connect('designs.db')
     c = conn.cursor()
+    # Create table with unit_label if not exists
     c.execute('''CREATE TABLE IF NOT EXISTS designs
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   name TEXT NOT NULL,
@@ -32,7 +33,15 @@ def init_db():
                   rod TEXT,
                   creation_date TEXT NOT NULL,
                   unit_label TEXT DEFAULT 'cm')''')
+    # Add unit_label column if missing
+    c.execute('''PRAGMA table_info(designs)''')
+    columns = [info[1] for info in c.fetchall()]
+    if 'unit_label' not in columns:
+        c.execute('''ALTER TABLE designs ADD COLUMN unit_label TEXT DEFAULT 'cm' ''')
+    # Update existing rows with unit_label
+    c.execute('''UPDATE designs SET unit_label = 'cm' WHERE unit_label IS NULL''')
     conn.commit()
+    # Import YAMLs
     resource_dir = 'projects/resources'
     if os.path.exists(resource_dir):
         for yaml_file in os.listdir(resource_dir):
@@ -88,7 +97,8 @@ design_principles = {
         'ratio_field': ('length', 'entry_diameter'),
         'ratio_desc': 'length to entry diameter',
         'has_gore': True,
-        'has_outlet': False
+        'has_outlet': False,
+        'default_values': {'length': 1000, 'entry_diameter': 40, 'gore': 8}
     }
 }
 
@@ -127,6 +137,7 @@ def configure():
     ratio_desc = design_principles[design_type]['ratio_desc']
     has_gore = design_principles[design_type]['has_gore']
     has_outlet = design_principles[design_type]['has_outlet']
+    default_values = design_principles[design_type].get('default_values', {})
 
     if request.method == 'POST':
         name = request.form['name']
@@ -136,12 +147,12 @@ def configure():
         dimensions = {}
         try:
             for dim in dims:
-                val = float(request.form[dim])
+                val = float(request.form.get(dim, default_values.get(dim, 0)))
                 if val <= 0:
                     raise ValueError
                 dimensions[dim] = round(convert_to_metric(val, is_imperial), 0)
             if has_gore:
-                dimensions['gore'] = int(request.form.get('gore', 8 if design_type == 'spinner' else 6))
+                dimensions['gore'] = int(request.form.get('gore', default_values.get('gore', 8 if design_type == 'spinner' else 6)))
             if has_outlet:
                 entry_dia = float(request.form['entry_diameter'])
                 val = float(request.form.get('outlet_diameter', entry_dia / 4))
@@ -164,7 +175,7 @@ def configure():
 
     return render_template('configure.html', units=units, unit_label=unit_label, type=design_type,
                            dims=dims, colors_list=['red', 'blue', 'green', 'yellow', 'black', 'white'], rod_types=rod_types, principle=principle,
-                           suggested_ratio=suggested_ratio, ratio_desc=ratio_desc, has_gore=has_gore, has_outlet=has_outlet)
+                           suggested_ratio=suggested_ratio, ratio_desc=ratio_desc, has_gore=has_gore, has_outlet=has_outlet, default_values=default_values)
 
 @app.route('/output')
 def output():

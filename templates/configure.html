@@ -15,11 +15,11 @@
             <input type="text" name="name" required class="w-full p-2 mb-4 border rounded">
             {% for dim in dims %}
             <label class="block mb-2 font-semibold">{{ dim.capitalize() }} ({{ unit_label }}):</label>
-            <input type="number" step="0.01" name="{{ dim }}" required class="w-full p-2 mb-4 border rounded">
+            <input type="number" step="0.01" name="{{ dim }}" value="{{ default_values.get(dim, '') }}" required class="w-full p-2 mb-4 border rounded">
             {% endfor %}
             {% if has_gore %}
-            <label class="block mb-2 font-semibold">Gore Number (default 6):</label>
-            <input type="number" name="gore" value="6" min="3" class="w-full p-2 mb-4 border rounded">
+            <label class="block mb-2 font-semibold">Gore Number (default {{ default_values.get('gore', 8 if type == 'spinner' else 6) }}):</label>
+            <input type="number" name="gore" value="{{ default_values.get('gore', 8 if type == 'spinner' else 6) }}" min="3" class="w-full p-2 mb-4 border rounded">
             {% endif %}
             <label class="block mb-2 font-semibold">Colors (Icarex Ripstop, up to 3):</label>
             <select name="color1" class="w-full p-2 mb-2 border rounded">
