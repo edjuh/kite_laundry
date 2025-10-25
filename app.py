@@ -10,6 +10,7 @@ from reportlab.lib import colors as rl_colors
 from reportlab.pdfgen import canvas
 import yaml
 import math
+import os
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -28,6 +29,16 @@ def init_db():
                   rod TEXT,
                   creation_date TEXT NOT NULL)''')
     conn.commit()
+    resource_dir = 'projects/resources'
+    if os.path.exists(resource_dir):
+        for yaml_file in os.listdir(resource_dir):
+            if yaml_file.endswith('.yaml'):
+                with open(os.path.join(resource_dir, yaml_file), 'r') as f:
+                    data = yaml.safe_load(f)
+                    if data and 'name' in data and 'type' in data:
+                        c.execute('INSERT OR IGNORE INTO designs (name, type, dimensions, colors, rod, creation_date) VALUES (?, ?, ?, ?, ?, ?)',
+                                  (data['name'], data['type'], json.dumps(data.get('dimensions', {})), json.dumps(data.get('colors', [])), data.get('rod', 'none'), data.get('creation_date', datetime.now().isoformat())))
+                    conn.commit()
     conn.close()
 
 init_db()
@@ -226,13 +237,15 @@ def generate_svg(design_type, dimensions, colors):
     elif design_type == 'spinner':
         entry_dia = dimensions['entry_diameter'] * scale
         length = dimensions['length'] * scale
-        outlet_dia = 0  # Pointed tip for Helix Spinner
-        dwg.add(dwg.polygon(points=[(10, 10), (10 + length, 10 + entry_dia/2), (10 + length, 10 + entry_dia/2), (10, 10 + entry_dia)], fill=primary, stroke=secondary))
-        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary))  # Hoop at entry
-        for i in range(1, gore):
-            gore_x = 10 + i * (length / gore)
-            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - 10) / length
-            dwg.add(dwg.line(start=(gore_x, 10 + (entry_dia - gore_height) / 2), end=(gore_x, 10 + (entry_dia - gore_height) / 2 + gore_height), stroke='black', stroke_width=1))
+        outlet_dia = 0
+        for i in range(gore):
+            start_x = 10 + i * (length / gore)
+            end_x = 10 + (i + 1) * (length / gore)
+            start_height = entry_dia - (entry_dia * i / gore)
+            end_height = entry_dia - (entry_dia * (i + 1) / gore)
+            color = colors[i % len(colors)]
+            dwg.add(dwg.polygon(points=[(start_x, 10 + (entry_dia - start_height)/2), (end_x, 10 + (entry_dia - end_height)/2), (end_x, 10 + (entry_dia + end_height)/2), (start_x, 10 + (entry_dia + start_height)/2)], fill=color, stroke=secondary))
+        dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary, stroke_width=2))
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -332,22 +345,25 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     elif design_type == 'spinner':
         entry_dia = dimensions['entry_diameter'] * scale
         length = dimensions['length'] * scale
-        outlet_dia = 0  # Pointed tip
-        c.setFillColor(primary)
-        c.setStrokeColor(secondary)
-        points = [(x_start, y_start), (x_start + length, y_start + entry_dia/2), (x_start + length, y_start + entry_dia/2), (x_start, y_start + entry_dia)]
-        path = c.beginPath()
-        path.moveTo(*points[0])
-        for p in points[1:]:
-            path.lineTo(*p)
-        path.close()
-        c.drawPath(path, fill=1, stroke=1)
-        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1)
         gore = dimensions.get('gore', 8)
-        for i in range(1, gore):
-            gore_x = x_start + i * (length / gore)
-            gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - x_start) / length
-            c.line(gore_x, y_start + (entry_dia - gore_height) / 2, gore_x, y_start + (entry_dia - gore_height) / 2 + gore_height)
+        for i in range(gore):
+            start_x = x_start + i * (length / gore)
+            end_x = x_start + (i + 1) * (length / gore)
+            start_height = entry_dia - (entry_dia * i / gore)
+            end_height = entry_dia - (entry_dia * (i + 1) / gore)
+            color = colors[i % len(colors)]
+            c.setFillColor(color)
+            c.setStrokeColor(secondary)
+            path = c.beginPath()
+            path.moveTo(start_x, y_start + (entry_dia - start_height)/2)
+            path.lineTo(end_x, y_start + (entry_dia - end_height)/2)
+            path.lineTo(end_x, y_start + (entry_dia + end_height)/2)
+            path.lineTo(start_x, y_start + (entry_dia + start_height)/2)
+            path.close()
+            c.drawPath(path, fill=1, stroke=1)
+        c.setFillColor('none')
+        c.setStrokeColor(secondary)
+        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1)
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
