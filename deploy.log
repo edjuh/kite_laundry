@@ -1,0 +1,66 @@
+oversight_notes.txt not found, skipping move
+app.py not found, skipping move
+models.py not found, skipping move
+Creating virtual environment...
+Activating and testing...
+Installing dependencies...
+Collecting flask==3.0.3 (from -r requirements.txt (line 1))
+  Using cached flask-3.0.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting flask-sqlalchemy==3.1.1 (from -r requirements.txt (line 2))
+  Using cached flask_sqlalchemy-3.1.1-py3-none-any.whl.metadata (3.4 kB)
+Collecting pydantic==2.8.2 (from -r requirements.txt (line 3))
+  Using cached pydantic-2.8.2-py3-none-any.whl.metadata (125 kB)
+Collecting pyyaml==6.0.2 (from -r requirements.txt (line 4))
+  Using cached PyYAML-6.0.2-cp313-cp313-macosx_11_0_arm64.whl.metadata (2.1 kB)
+Collecting svgwrite==1.4.3 (from -r requirements.txt (line 5))
+  Using cached svgwrite-1.4.3-py3-none-any.whl.metadata (8.8 kB)
+Collecting reportlab==4.2.2 (from -r requirements.txt (line 6))
+  Using cached reportlab-4.2.2-py3-none-any.whl.metadata (1.4 kB)
+Collecting pillow==10.3.0 (from -r requirements.txt (line 7))
+  Using cached pillow-10.3.0.tar.gz (46.6 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'error'
+  error: subprocess-exited-with-error
+  
+  × Getting requirements to build wheel did not run successfully.
+  │ exit code: 1
+  ╰─> [21 lines of output]
+      Traceback (most recent call last):
+        File "/Users/ed/kite_laundry/venv/lib/python3.13/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 389, in <module>
+          main()
+          ~~~~^^
+        File "/Users/ed/kite_laundry/venv/lib/python3.13/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 373, in main
+          json_out["return_val"] = hook(**hook_input["kwargs"])
+                                   ~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/Users/ed/kite_laundry/venv/lib/python3.13/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 143, in get_requires_for_build_wheel
+          return hook(config_settings)
+        File "/private/var/folders/8r/ft21g0qj2mgg9sl8g6snw7xr0000gn/T/pip-build-env-k966w7un/overlay/lib/python3.13/site-packages/setuptools/build_meta.py", line 331, in get_requires_for_build_wheel
+          return self._get_build_requires(config_settings, requirements=[])
+                 ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/private/var/folders/8r/ft21g0qj2mgg9sl8g6snw7xr0000gn/T/pip-build-env-k966w7un/overlay/lib/python3.13/site-packages/setuptools/build_meta.py", line 301, in _get_build_requires
+          self.run_setup()
+          ~~~~~~~~~~~~~~^^
+        File "/private/var/folders/8r/ft21g0qj2mgg9sl8g6snw7xr0000gn/T/pip-build-env-k966w7un/overlay/lib/python3.13/site-packages/setuptools/build_meta.py", line 317, in run_setup
+          exec(code, locals())
+          ~~~~^^^^^^^^^^^^^^^^
+        File "<string>", line 33, in <module>
+        File "<string>", line 27, in get_version
+      KeyError: '__version__'
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+error: subprocess-exited-with-error
+
+× Getting requirements to build wheel did not run successfully.
+│ exit code: 1
+╰─> See above for output.
+
+note: This error originates from a subprocess, and is likely not a problem with pip.
+Running application...
+Traceback (most recent call last):
+  File "/Users/ed/kite_laundry/app/app.py", line 5, in <module>
+    from flask import Flask, render_template, request, redirect, url_for, flash, send_file
+ModuleNotFoundError: No module named 'flask'
+Test completed. Check deploy.log for results.
