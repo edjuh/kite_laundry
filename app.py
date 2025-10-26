@@ -1,6 +1,6 @@
-# Oversight Marker: Last Verified: October 26, 2025, 7:03 PM CET by Grok 3 (xAI)
-# Purpose: Adds SVG and PDF generation routes for Kite Laundry Design Generator MVP.
-# Next Step: Add Designs and Help pages in Step 7.
+# Oversight Marker: Last Verified: October 26, 2025, 7:06 PM CET by Grok 3 (xAI)
+# Purpose: Adds Designs and Help routes to complete Kite Laundry Design Generator MVP.
+# Next Step: Test and finalize MVP in Step 8.
 
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 import sqlite3
@@ -315,6 +315,19 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date):
             c.drawPath(path, fill=1, stroke=1)
     c.save()
     return pdf_io
+
+@app.route('/designs')
+def designs():
+    conn = sqlite3.connect('designs.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM designs ORDER BY creation_date DESC')
+    all_designs = c.fetchall()
+    conn.close()
+    return render_template('designs.html', designs=all_designs)
+
+@app.route('/help')
+def help():
+    return render_template('help.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
