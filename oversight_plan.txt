@@ -1,0 +1,86 @@
+# Oversight Plan and Code Verification Methods for Kite Laundry Design Generator
+# Created: October 26, 2025, 5:14 PM CET by Grok 3 (xAI)
+# Purpose: To ensure planning and verification of code delivery for the Kite Laundry Design Generator, aligning with user intent and future scalability.
+# Maintained by: User (ed) via Git commits, reviewed by Grok 3.
+
+## Project Description and Intent
+- **Purpose**: A web-based tool for kite enthusiasts to design custom laundry components (tails, drogues, windsocks, streamers), inspired by kite magazine covers. It educates beginners on design principles (e.g., aerodynamics, ratios) and supports personal project tracking.
+- **Intended Use**: 
+  - Kite builders/hobbyists for efficient design of stabilizing/decorative elements.
+  - Educational tool for design basics.
+  - Personal design management with save/revisit functionality.
+- **Audience**: Beginners with basic computer skills, prioritizing simplicity and accessibility.
+- **Future Direction**: Enhance with material cost calculations, SVG/PDF/DXF export, user authentication, Docker deployment, REST API, design sharing, and 3D modeling (Q1 2026).
+
+## Module Descriptions
+- **Main Module**: Handles Start and Select pages, unit selection (metric/imperial), and design type choice (tail, drogue, graded_tail, spinner).
+- **Design Module**: Manages Configure and Output pages, input validation, SVG/PDF generation, and YAML export based on user inputs.
+- **API Module**: Provides REST endpoints for design submission, supporting community input.
+- **Upload Module**: Processes OCR/PDF uploads for design extraction, integrating Tesseract and future AI model analysis.
+- **Render Module**: Generates SVG/PDF previews, extensible for 3D (e.g., Open3D).
+- **DB Module**: Manages SQLite storage, evolving to support complex objects (e.g., 3D coordinates).
+
+## Object Model Build-Up Over Time
+- **Initial Model (MVP)**:
+  - Table: `designs`
+  - Fields: `id` (int, PK), `name` (str), `type` (str), `dimensions` (json), `colors` (json), `rod` (str), `creation_date` (str)
+  - Purpose: Store basic design data (e.g., length, width) as JSON for flexibility.
+- **Phase 1 (1-2 Weeks)**:
+  - Add: `unit_label` (str, default 'cm') for unit tracking.
+  - Enhance: Validate dimensions with Pydantic schemas.
+- **Phase 2 (1 Month)**:
+  - Add: `material_cost` (float), `file_path` (str) for exported files.
+  - Support: SVG/PDF/DXF generation metadata.
+- **Phase 3 (Q1 2026)**:
+  - Add: `3d_model` (json) for Open3D coordinates, `user_id` (int) for authentication.
+  - Support: 3D rendering, user-specific designs.
+
+## Planning Methodology
+- **Step-by-Step Execution**: One command per response, committed to Git.
+- **Context Retention**: Track user requirements (MVP + future) and adjust per feedback.
+- **Requirement Reasoning**:
+  - Step 1: Directory for HTML templates and DB (MVP workflow).
+  - Step 2: Dependencies for rendering and DB (MVP + future OCR/API).
+  - Step 3: Config for security and DB (MVP stability).
+  - Step 4: App structure for routes (MVP core).
+  - Step 5: Design logic for configuration (MVP functionality).
+  - Step 6: Rendering for output (MVP deliverable).
+  - Step 7: Designs/Help pages (MVP completeness).
+  - Step 8: Test and finalize MVP.
+  - Future: Add OCR, API, 3D hooks.
+- **Timeline**: MVP by end of session, refinements weekly.
+
+## Code Verification Methods
+- **Pre-Submission Check**:
+  - Simulate in Python 3.x (macOS) virtual env.
+  - Validate file paths (`ls -la`), content (`cat`), and syntax.
+  - Test with mock inputs (e.g., spinner: length=1000, entry_diameter=40).
+- **Post-Submission Validation**:
+  - Review Git diffs for accuracy.
+  - Cross-check with user outputs (e.g., `tree_output.txt`).
+  - Log in oversight comments (e.g., "Verified: October 26, 2025").
+- **Error Handling**:
+  - Use try-except in code.
+  - Log terminal feedback.
+  - Flag issues (e.g., missing `python3`).
+
+## Oversight Triggers
+- **File Markers**: Embed in each file (e.g., "Oversight Marker: Last Verified...").
+- **User Review**: Commit each step for validation.
+- **Reset Points**: Revert to [f567abe96c9727e14d5bb6d59fed31091856d4ac] if needed.
+
+## Current Plan
+- **Step 1**: Initialized directory (completed).
+- **Step 2**: Set requirements (completed with correction).
+- **Step 3**: Config setup (completed with oversight).
+- **Step 4**: App structure and main routes.
+- **Step 5**: Design configuration and output.
+- **Step 6**: SVG/PDF generation.
+- **Step 7**: Designs and help pages.
+- **Step 8**: Test and commit MVP.
+
+## Verification Log
+- Initial Verification: October 26, 2025, 5:14 PM CET - Structure and requirements aligned.
+- Next Verification: After Step 4 commit.
+
+# Note: User to maintain this file via Git commits. Grok 3 will update suggestions based on user input and verification.
