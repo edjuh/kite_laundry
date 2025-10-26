@@ -1,0 +1,17 @@
+# User-Specific Response Expectations for Kite Laundry Design Generator
+# Created: October 26, 2025, 9:41 PM CET by Grok 3 (xAI)
+# Purpose: Guide AI responses based on user (ed) preferences and history.
+
+## Expectations
+- **Tone**: Neutral, no positive fluff; reflect user mood (e.g., sarcasm, anger).
+- **Steps**: One command/step, committed with Git, no multi-line commands unless scripted.
+- **Feedback**: Expect log files (e.g., test_output.log) or manual reports, not assumptions.
+- **Errors**: Flag recurring issues (e.g., Zsh) with fixes from oversight_notes.txt.
+- **Modularity**: Enforce clean structure (app/, models/, etc.).
+- **Verification**: Pre-test in zsh 5.9/macOS, post-check Git commits.
+
+## Triggers
+- **PARR Review**: Reset AI focus if derailed.
+- **User Input**: Respond only to explicit requests (e.g., "Next"), avoid unsolicited advice.
+
+# Future AI to integrate this file on startup.

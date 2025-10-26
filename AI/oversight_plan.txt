@@ -1,0 +1,53 @@
+# Oversight Plan for Kite Laundry Design Generator
+# Created: October 26, 2025, 9:41 PM CET by Grok 3 (xAI)
+# Purpose: Guide PARR (Plan-Act-Review-Repeat) from user request to MVP, with issue prevention.
+# Maintained by: User (ed) via Git commits.
+
+## Project Overview
+- Purpose: Web tool for kite laundry design (tails, drogues), education, tracking.
+- Use: Hobbyists, education, personal management; beginners, simple UI.
+- Core: Start (units), Select (type), Configure (inputs), Output (SVG/text), Designs (list).
+- DB: SQLite (name, type, dimensions, colors, rod, creation_date).
+- Future: Costs, PDF/DXF, API, 3D (Q1 2026).
+
+## Modules
+- Main: Start/Select.
+- Design: Configure/Output.
+- DB: SQLite.
+- Render: SVG/PDF.
+
+## Model Evolution
+- MVP: JSON dict (dimensions, colors).
+- Phase 1: Add unit_label, validation.
+- Phase 2: Add material_cost, exports.
+- Phase 3: Add 3D, user_id.
+
+## Planning (PARR)
+- Plan: One step/response, reasoned (e.g., Step 1: Directory).
+- Act: Execute, commit.
+- Review: User validates, AI checks Git.
+- Repeat: Next step per feedback.
+- Steps: 1. Directory (done), 2. Requirements (done), 3. Config (done), 4. App structure (done), 5. Design routes (done), 6. Rendering (done), 7. Pages (done), 8. Test (in progress).
+
+## Verification
+- Pre: Simulate in Python 3.x, validate files.
+- Post: Git review, user logs.
+- Errors: Try-except, logging.
+
+## Issues to Avoid
+- **Zsh Parse Errors**: Repeated due to unquoted `[ ]` in conditionals. Fix: Use escaped `\[ \]` or `if` statements, test in zsh 5.9.
+- **File Truncation**: README.md cut off (e.g., smiley issues). Fix: Validate full text before commit.
+- **Step Numbering**: Inconsistencies (e.g., skipped 6). Fix: Align with plan, double-check sequence.
+- **Positive Language**: Overuse despite requests to avoid. Fix: Use neutral tone, reflect user mood.
+- **Modularity**: Monolithic root. Fix: Enforce `app/`, `models/`, etc.
+
+## Triggers
+- Markers: "Oversight Marker:..." in files.
+- Review: User commits trigger PARR.
+- Reset: Revert to [0f1ab6b], call "PARR Review".
+
+## Log
+- Verified: October 26, 2025, 9:41 PM CET.
+- Next: After Step 8 commit.
+
+# User maintains via Git. Call "PARR Review" to reset.
