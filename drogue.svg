@@ -1,8 +1,0 @@
-<svg width="100px" height="100px" xmlns="http://www.w3.org/2000/svg">
-  <polygon points="0,10 90,35 90,65 0,90" fill="orange" stroke="black" />
-  <line x1="15" y1="15" x2="15" y2="85" stroke="black" stroke-width="1" />
-  <line x1="30" y1="20" x2="30" y2="80" stroke="black" stroke-width="1" />
-  <line x1="45" y1="25" x2="45" y2="75" stroke="black" stroke-width="1" />
-  <line x1="60" y1="30" x2="60" y2="70" stroke="black" stroke-width="1" />
-  <line x1="75" y1="32.5" x2="75" y2="67.5" stroke="black" stroke-width="1" />
-</svg>

@@ -1,3 +1,6 @@
+# Navigate to project directory and replace src/render.py
+cd /Users/ed/kite_laundry
+cat << 'EOF' > src/render.py
 import io
 import svgwrite
 from reportlab.lib.pagesizes import letter
@@ -6,16 +9,21 @@ from reportlab.pdfgen import canvas
 import math
 
 def generate_svg(design_type, dimensions, colors):
+    """
+    Generate SVG for kite laundry design with scalable viewBox.
+    Args: design_type (str), dimensions (dict), colors (list)
+    Returns: io.BytesIO with SVG content
+    """
     gore = dimensions.get('gore', 8 if design_type == 'spinner' else 6)
-    max_length = dimensions.get('length', 100) * 10  # Massive scale
-    max_width = dimensions.get('width', dimensions.get('entry_diameter', 10)) * 10
-    frame_width = max(max_length * 1.5, 2000)  # Huge frame
-    frame_height = max(max_width * 1.5, 2000)
-    dwg = svgwrite.Drawing(size=(f'{frame_width}px', f'{frame_height}px'))
+    base_length = dimensions.get('length', 100)
+    base_width = dimensions.get('width', dimensions.get('entry_diameter', 10))
+    scale = 20  # Increased multiplier for large, visible designs
+    viewbox_width = base_length * scale
+    viewbox_height = base_width * scale
+    dwg = svgwrite.Drawing(size=('100%', '100%'), viewBox=(0, 0, viewbox_width, viewbox_height))
     primary = colors[0] if colors else 'red'
     secondary = colors[1] if len(colors) > 1 else 'black'
     tertiary = colors[2] if len(colors) > 2 else secondary
-    scale = min(1500 / max_length, 1500 / max_width)  # Max rendering
     if design_type == 'tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
@@ -58,6 +66,11 @@ def generate_svg(design_type, dimensions, colors):
     return svg_io
 
 def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
+    """
+    Generate PDF for kite laundry design using ReportLab.
+    Args: name (str), design_type (str), dimensions (dict), colors (list), rod (str), date (str), unit_label (str)
+    Returns: io.BytesIO with PDF content
+    """
     pdf_io = io.BytesIO()
     c = canvas.Canvas(pdf_io, pagesize=letter)
     width, height = letter
@@ -70,7 +83,7 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
     dims_str = ', '.join([f"{k}: {v} {unit_label}" if k != 'gore' else f"{k}: {v}" for k, v in dimensions.items()])
     c.drawString(100, y, f"Dimensions: {dims_str}")
     y -= 20
-    colors_str = ', '.join(colors)
+    colors_str = ', '.join(colors)  # Match colors list structure
     c.drawString(100, y, f"Colors: {colors_str} (Icarex Ripstop)")
     y -= 20
     c.drawString(100, y, f"Rod: {rod.capitalize()}")
@@ -129,7 +142,8 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date, unit_label):
             path.close()
             c.drawPath(path, fill=1, stroke=1)
         c.setStrokeColor(secondary)
-        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1, strokeWidth=5)
+        c.setStrokeWidth(5)  # Set stroke width before drawing circle
+        c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1)
     elif design_type == 'graded_tail':
         length = dimensions['length'] * scale
         width = dimensions['width'] * scale
