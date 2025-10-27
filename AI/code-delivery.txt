@@ -1,0 +1,62 @@
+# Code Delivery Method for Kite Laundry Project
+
+## Overview
+This document outlines the precise method for delivering code updates, file creations, or modifications in the Kite Laundry Design Generator project. The goal is to provide executable bash snippets that the user can copy-paste directly into a terminal for seamless application without manual edits, search/replace, or diff handling. Each delivery must be self-contained, complete, and structured as a single, runnable bash command block.
+
+## Key Principles
+- **Bash-Only Delivery**: All code must be delivered as bash commands. No HTML, Markdown code blocks, or other formats. The user pastes the entire block into the terminal and executes it.
+- **Single Block per Step**: Deliver one logical step (e.g., creating/updating one file or a related set) as a single bash block. Chain commands with && if needed, but keep it concise.
+- **No Assumptions**: Never assume file paths, contents, or states beyond what's explicitly stated. If in doubt, ask questions before delivering.
+- **Complete Files**: When creating or updating a file, provide the full content. Do not provide partial diffs or snippets.
+- **Git Integration**: Always include git add, commit, and push at the end of the block for version control.
+- **Error Handling**: Use safe practices (e.g., mkdir -p, cat << 'EOF' to avoid variable expansion).
+- **Response Style**: Responses are neutral, concise, structured. Deliver one step at a time. Use PARR (Plan-Act-Review-Repeat) if needed for complex tasks.
+- **Commit Messages**: Include date (e.g., "October 27, 2025") and descriptive text.
+
+## Delivery Format
+Use this exact structure for every code delivery:
+
+cd /Users/ed/kite_laundry
+cat << 'EOF' > [file_path]
+[full file content here]
+EOF
+[additional commands if needed, e.g., chmod +x [file], sqlite3 designs.db < [sql_file]]
+git add [file_or_dir]
+git commit -m "[Descriptive commit message] - [Date]"
+git push origin [branch, e.g., attempt-6]
+
+## Explanation of Components
+- cd /Users/ed/kite_laundry: Ensures the working directory is correct.
+- cat << 'EOF' > $file: Heredoc to write the full file content safely (use single quotes to prevent shell expansion).
+- Additional Commands: For executables (chmod +x), DB operations (sqlite3), or dir creation (mkdir -p).
+- git add/commit/push: Tracks changes. Use current branch (e.g., attempt-6 or main).
+
+## Examples
+### Creating a New File
+cd /Users/ed/kite_laundry
+cat << 'EOF' > example.py
+print("Hello, World!")
+EOF
+git add example.py
+git commit -m "Added example.py - October 27, 2025"
+git push origin attempt-6
+
+### Updating a Database
+cd /Users/ed/kite_laundry
+cat << 'EOF' > insert.sql
+INSERT INTO table (col) VALUES ('value');
+EOF
+sqlite3 db.db < insert.sql
+rm insert.sql
+git add db.db
+git commit -m "Inserted data into db.db - October 27, 2025"
+git push origin attempt-6
+
+## Common Pitfalls to Avoid
+- Do not use Markdown or code fences (e.g., ```bash).
+- Do not deliver multiple unrelated files in one block—split into separate responses if needed.
+- Always verify repo state via questions or tools if uncertain.
+- Handle special characters in content (e.g., use \ for escapes if needed, but heredoc with 'EOF' minimizes this).
+- For large content, ensure it's complete and testable.
+
+This method ensures modularity, traceability, and ease of use for the project owner.
