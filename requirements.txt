@@ -4,7 +4,7 @@ pydantic==2.8.2
 pyyaml==6.0.2
 svgwrite==1.4.3
 reportlab==4.2.2
-pillow==10.3.0  # Fixed version for Python 3.13 compatibility
+pillow==11.0.0  # Permanent fix for Python 3.13 build error
 pytesseract==0.3.10
 opencv-python==4.10.0.84
 flask-restful==0.3.10
