@@ -1,5 +1,5 @@
 # Oversight Marker: Last Verified: October 27, 2025, 1:21 PM CET by Grok 3 (xAI)
-# Purpose: Adds Designs and Help routes to complete Kite Laundry Design Generator MVP.
+# Purpose: Full app.py with gore unit fix and larger preview scale for Kite Laundry Design Generator MVP.
 # Next Step: Test and finalize in Step 8.
 
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
