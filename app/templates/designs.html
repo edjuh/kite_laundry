@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Saved Designs</h1>
+{% if designs_with_svg %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Dimensions</th>
+            <th>Colors</th>
+            <th>Rod</th>
+            <th>Creation Date</th>
+            <th>Unit</th>
+            <th>Preview</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for design, svg in designs_with_svg %}
+        <tr>
+            <td>{{ design.id }}</td>
+            <td>{{ design.name }}</td>
+            <td>{{ design.type }}</td>
+            <td>{{ design.dimensions }}</td>
+            <td>{{ design.colors }}</td>
+            <td>{{ design.rod }}</td>
+            <td>{{ design.creation_date }}</td>
+            <td>{{ design.unit_label }}</td>
+            <td><img src="{{ svg }}" alt="Preview" style="max-width: 200px;"></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No designs saved yet.</p>
+{% endif %}
+{% endblock %}
