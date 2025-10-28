@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Output</h1>
-<p>Design details here.</p>
-<p>SVG preview here.</p>
-<a href="/designs">Save and View Designs</a>
+<h1>Output for { { design.name } }</h1>
+<p>Type: {{ design.type }}</p>
+<p>Dimensions: {{ design.dimensions }}</p>
+<p>Colors: {{ design.colors }}</p>
+<p>Rod: {{ design.rod or 'None' }}</p>
+<p>Unit: {{ design.unit_label }}</p>
+<img src="{{ svg }}" alt="Preview" style="max-width: 400px;">
+<a href="/designs">View All Designs</a>
+<a href="/download_pdf/{{ design.id }}">Download PDF</a>
 {% endblock %}
