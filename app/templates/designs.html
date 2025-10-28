@@ -15,6 +15,7 @@
             <th>Creation Date</th>
             <th>Unit</th>
             <th>Preview</th>
+            <th>Download</th>
         </tr>
     </thead>
     <tbody>
@@ -29,6 +30,7 @@
             <td>{{ design.creation_date }}</td>
             <td>{{ design.unit_label }}</td>
             <td><img src="{{ svg }}" alt="Preview" style="max-width: 200px;"></td>
+            <td><a href="/download_pdf/{{ design.id }}">PDF</a></td>
         </tr>
         {% endfor %}
     </tbody>
