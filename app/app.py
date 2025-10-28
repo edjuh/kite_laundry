@@ -1,6 +1,6 @@
-# Oversight Marker: Last Verified: October 26, 2025, 7:06 PM CET by Grok 3 (xAI)
-# Purpose: Adds Designs and Help routes to complete Kite Laundry Design Generator MVP.
-# Next Step: Test and finalize MVP in Step 8.
+# Oversight Marker: Last Verified: October 27, 2025, 09:20 AM CET by Grok 3 (xAI)
+# Purpose: Adds Designs and Help routes with fixed rendering (gore unit, preview scale).
+# Next Step: Test and finalize in Step 8.
 
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 import sqlite3
@@ -147,18 +147,18 @@ def get_svg():
     design_type, dims_json, colors_json = design
     dimensions = json.loads(dims_json)
     colors = json.loads(colors_json)
-    scale = 2
-    dwg = svgwrite.Drawing(size=('500px', '500px'))
+    scale = 10  # Increased for better visibility
+    dwg = svgwrite.Drawing(size=('100%', '100%'), viewBox=(0, 0, dimensions['length'] * scale / 100, dimensions['width'] * scale / 100))
     primary = colors[0] if colors else 'red'
     secondary = colors[1] if len(colors) > 1 else 'black'
     if design_type == 'tail':
-        length = dimensions['length'] * scale
-        width = dimensions['width'] * scale
+        length = dimensions['length'] * scale / 100
+        width = dimensions['width'] * scale / 100
         dwg.add(dwg.rect(insert=(10, 10), size=(length, width), rx=width/2, ry=width/2, fill=primary, stroke=secondary))
     elif design_type == 'drogue':
-        entry_dia = dimensions['entry_diameter'] * scale
-        outlet_dia = dimensions['outlet_diameter'] * scale
-        length = dimensions['length'] * scale
+        entry_dia = dimensions['entry_diameter'] * scale / 100
+        outlet_dia = dimensions.get('outlet_diameter', entry_dia / 4) * scale / 100
+        length = dimensions['length'] * scale / 100
         dwg.add(dwg.polygon(points=[(10, 10), (10 + length, 10 + (entry_dia - outlet_dia)/2), (10 + length, 10 + (entry_dia + outlet_dia)/2), (10, 10 + entry_dia)], fill=primary, stroke=secondary))
         gore = dimensions.get('gore', 6)
         for i in range(1, gore):
@@ -166,8 +166,8 @@ def get_svg():
             gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - 10) / length
             dwg.add(dwg.line(start=(gore_x, 10 + (entry_dia - gore_height) / 2), end=(gore_x, 10 + (entry_dia - gore_height) / 2 + gore_height), stroke='black', stroke_width=1))
     elif design_type == 'spinner':
-        entry_dia = dimensions['entry_diameter'] * scale
-        length = dimensions['length'] * scale
+        entry_dia = dimensions['entry_diameter'] * scale / 100
+        length = dimensions['length'] * scale / 100
         gore = dimensions.get('gore', 8)
         for i in range(gore):
             start_x = 10 + i * (length / gore)
@@ -178,8 +178,8 @@ def get_svg():
             dwg.add(dwg.polygon(points=[(start_x, 10 + (entry_dia - start_height)/2), (end_x, 10 + (entry_dia - end_height)/2), (end_x, 10 + (entry_dia + end_height)/2), (start_x, 10 + (entry_dia + start_height)/2)], fill=color, stroke=secondary))
         dwg.add(dwg.circle(center=(10, 10 + entry_dia/2), r=entry_dia/2, fill='none', stroke=secondary, stroke_width=5))
     elif design_type == 'graded_tail':
-        length = dimensions['length'] * scale
-        width = dimensions['width'] * scale
+        length = dimensions['length'] * scale / 100
+        width = dimensions['width'] * scale / 100
         gore = dimensions.get('gore', 6)
         for i in range(gore):
             start_x = 10 + i * (length / gore)
@@ -249,15 +249,15 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date):
     x_start = 100
     y_start = y
     if design_type == 'tail':
-        length = dimensions['length'] * scale
-        width = dimensions['width'] * scale
+        length = dimensions['length'] * scale / 100
+        width = dimensions['width'] * scale / 100
         c.setFillColor(primary)
         c.setStrokeColor(secondary)
         c.rect(x_start, y_start, length, width, fill=1)
     elif design_type == 'drogue':
-        entry_dia = dimensions['entry_diameter'] * scale
-        outlet_dia = dimensions['outlet_diameter'] * scale
-        length = dimensions['length'] * scale
+        entry_dia = dimensions['entry_diameter'] * scale / 100
+        outlet_dia = dimensions.get('outlet_diameter', entry_dia / 4) * scale / 100
+        length = dimensions['length'] * scale / 100
         c.setFillColor(primary)
         c.setStrokeColor(secondary)
         points = [(x_start, y_start), (x_start + length, y_start + (entry_dia - outlet_dia)/2), (x_start + length, y_start + (entry_dia + outlet_dia)/2), (x_start, y_start + entry_dia)]
@@ -273,8 +273,8 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date):
             gore_height = entry_dia - (entry_dia - outlet_dia) * (gore_x - x_start) / length
             c.line(gore_x, y_start + (entry_dia - gore_height) / 2, gore_x, y_start + (entry_dia - gore_height) / 2 + gore_height)
     elif design_type == 'spinner':
-        entry_dia = dimensions['entry_diameter'] * scale
-        length = dimensions['length'] * scale
+        entry_dia = dimensions['entry_diameter'] * scale / 100
+        length = dimensions['length'] * scale / 100
         gore = dimensions.get('gore', 8)
         for i in range(gore):
             start_x = x_start + i * (length / gore)
@@ -295,8 +295,8 @@ def generate_pdf(name, design_type, dimensions, colors, rod, date):
         c.setStrokeWidth(5)
         c.circle(x_start, y_start + entry_dia/2, entry_dia/2, fill=0, stroke=1)
     elif design_type == 'graded_tail':
-        length = dimensions['length'] * scale
-        width = dimensions['width'] * scale
+        length = dimensions['length'] * scale / 100
+        width = dimensions['width'] * scale / 100
         gore = dimensions.get('gore', 6)
         for i in range(gore):
             start_x = x_start + i * (length / gore)
