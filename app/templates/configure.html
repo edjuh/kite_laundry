@@ -2,11 +2,21 @@
 
 {% block content %}
 <h1>Configure Design</h1>
-<form>
-  <label>Name: <input type="text"></label>
-  <label>Dimensions: <input type="text"></label>
-  <label>Colors: <input type="text"></label>
-  <label>Rod: <input type="text"></label>
+<form method="POST">
+  <label>Name: <input type="text" name="name" required></label>
+  <label>Type: <select name="type" required>
+    <option value="tail">Tail</option>
+    <option value="drogue">Drogue</option>
+    <option value="windsock">Windsock</option>
+    <option value="streamer">Streamer</option>
+  </select></label>
+  <label>Dimensions (e.g., length:500,width:50,num_gores:6): <input type="text" name="dimensions" required></label>
+  <label>Colors (comma-separated): <input type="text" name="colors"></label>
+  <label>Rod: <input type="text" name="rod"></label>
+  <label>Unit: <select name="unit_label">
+    <option>cm</option>
+    <option>inch</option>
+  </select></label>
   <button type="submit">Generate</button>
 </form>
 {% endblock %}
