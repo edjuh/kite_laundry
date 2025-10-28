@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, make_response
 from app.models import Design
 from app.utils.svg_generator import generate_svg
+from weasyprint import HTML
 
 main = Blueprint('main', __name__, template_folder='../templates')
 
@@ -30,3 +31,26 @@ def designs():
 @main.route('/help')
 def help():
     return render_template('help.html')
+
+@main.route('/download_pdf/<int:design_id>')
+def download_pdf(design_id):
+    design = Design.query.get_or_404(design_id)
+    svg = generate_svg(design)
+    html_content = f"""
+    <html>
+    <body>
+    <h1>{design.name}</h1>
+    <p>Type: {design.type}</p>
+    <p>Dimensions: {design.dimensions}</p>
+    <p>Colors: {design.colors}</p>
+    <p>Rod: {design.rod or 'None'}</p>
+    <p>Unit: {design.unit_label}</p>
+    <img src="{svg}" alt="Preview">
+    </body>
+    </html>
+    """
+    pdf = HTML(string=html_content).write_pdf()
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename={design.name}.pdf'
+    return response
