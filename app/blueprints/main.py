@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template, make_response
+from flask import Blueprint, render_template, request, redirect, url_for
 from app.models import Design
 from app.utils.svg_generator import generate_svg
 from weasyprint import HTML
+from app import db
+from flask import make_response
+import json
 
 main = Blueprint('main', __name__, template_folder='../templates')
 
@@ -14,13 +17,36 @@ def start():
 def select():
     return render_template('select.html')
 
-@main.route('/configure')
+@main.route('/configure', methods=['GET', 'POST'])
 def configure():
+    if request.method == 'POST':
+        name = request.form['name']
+        type_ = request.form['type']
+        dimensions_str = request.form['dimensions']  # e.g., 'length:500,width:50,num_gores:6'
+        # Parse dimensions to JSON, store num_gores as int without units
+        dims = {}
+        for pair in dimensions_str.split(','):
+            key, value = pair.split(':')
+            if key == 'num_gores':
+                dims[key] = int(value)
+            else
+                dims[key] = float(value)
+        dimensions = json.dumps(dims)
+        colors = request.form['colors']
+        rod = request.form['rod']
+        unit_label = request.form['unit_label']
+
+        design = Design(name=name, type=type_, dimensions=dimensions, colors=colors, rod=rod, unit_label=unit_label)
+        db.session.add(design)
+        db.session.commit()
+        return redirect(url_for('main.output', design_id=design.id))
     return render_template('configure.html')
 
-@main.route('/output')
+@main.route('/output/<int:design_id>')
 def output():
-    return render_template('output.html')
+    design = Design.query.get_or_404(design_id)
+    svg = generate_svg(design)
+    return render_template('output.html', design=design, svg=svg)
 
 @main.route('/designs')
 def designs():
