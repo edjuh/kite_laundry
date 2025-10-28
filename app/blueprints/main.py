@@ -29,7 +29,7 @@ def configure():
             key, value = pair.split(':')
             if key == 'num_gores':
                 dims[key] = int(value)
-            else
+            else:
                 dims[key] = float(value)
         dimensions = json.dumps(dims)
         colors = request.form['colors']
